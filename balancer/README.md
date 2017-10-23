@@ -39,7 +39,7 @@ Add a deferred call to a balancer.
  - **args**: `any[]`
  - **options**: `TaskOptions`
    - **key**: `TaskUniqueKey`
-   - **flags**: `number` — a bitmask, available flags: `F_IMPORTANT`
+   - **flags**: `number` — [a bitmask](#bits)
 
 ```ts
 import {call} from '@perf-tools/balancer';
@@ -60,7 +60,7 @@ Created a debounced function
  - **args**: `any[]`
  - **options**: `TaskOptions`
    - **key**: `TaskUniqueKey`
-   - **flags**: `number` — a bitmask, available flags: `F_IMPORTANT`
+   - **flags**: `number` — [a bitmask](#bits)
 
 
 ```ts
