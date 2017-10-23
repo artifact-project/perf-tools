@@ -26,7 +26,7 @@ moves them to [idle-process](https://developer.mozilla.org/en-US/docs/Web/API/Wi
  - [debounce](#debounce) — created a debounced function
  - [cancel](#cancel) — cancel a deferred call
  - [uniqueKey](#uniqueKey) — a factory of unique keys to replacing a deferred call, with the same key
- - [F_IMPORTANT](#bits) — advanced knowledge
+ - [Bits](#bits) — advanced knowledge
 
 ---
 
@@ -121,6 +121,7 @@ call(function () { console.log('Two'); }, null, [], {key});
 <a name="bits"></a>
 #### Bits
 
+ - `F_NO_ARGS` — ignore arguments for boost performance a debounced function
  - `F_IMPORTANT` — even if the task is too heavy, it will not be moved to the idle-mode and will continue to run per frame
 
 ---

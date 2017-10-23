@@ -1,4 +1,4 @@
-import {call, cancel, uniqueKey, debounce, F_IMPORTANT, perf, requestFrame, requestIdle} from './balancer';
+import {call, cancel, uniqueKey, debounce, F_IMPORTANT, perf, requestFrame, requestIdle, F_NO_ARGS} from './balancer';
 
 async function frame(idle = false) {
 	return new Promise(resolve => {
@@ -114,7 +114,7 @@ it('cancel', async () => {
 	expect(log).toEqual([]);
 });
 
-it('important', async () => {
+it('F_IMPORTANT', async () => {
 	const log = [];
 	const fn = function (val) {
 		log.push(val);
@@ -130,6 +130,22 @@ it('important', async () => {
 	call(fn, null, [2], {flags: F_IMPORTANT});
 	await frame();
 	expect(log).toEqual([1, 2]);
+});
+
+it('F_NO_ARGS', async () => {
+	const log = [];
+	const fn = debounce(
+		function (...args) { log.push(args); },
+		null,
+		['initial'],
+		{flags: F_NO_ARGS},
+	);
+
+	fn(1, 2, 3);
+
+	expect(log).toEqual([]);
+	await frame();
+	expect(log).toEqual([['initial']]);
 });
 
 describe('debounce', () => {

@@ -63,6 +63,7 @@ const F_CANCELED = 1 << 4;
 const F_HEAVY = 1 << 5;
 const F_DEBOUNCED = 1 << 6;
 const F_IMPORTANT = 1 << 7;
+const F_NO_ARGS = 1 << 8;
 
 const stack: Task[] = [];
 const idleStack: Task[] = [];
@@ -151,16 +152,21 @@ function debounce(fn: Function, ctx?: object, initialArgs: any[] = EMPTY_ARGS, o
 	const hasInitialArgs = initialArgs.length > 0;
 	const debounced: DebouncedFunction  = function () {
 		let flags = task.flags;
-		let argsLen = arguments.length;
 
-		if (argsLen) {
-			task.args = initialArgs.slice(0);
+		if ((flags & F_NO_ARGS) === 0) {
+			let argsLen = arguments.length;
 
-			for (let i = 0; i < argsLen; i++) {
-				task.args.push(arguments[i]);
+			if (argsLen) {
+				task.args = initialArgs.slice(0);
+
+				for (let i = 0; i < argsLen; i++) {
+					task.args.push(arguments[i]);
+				}
+			} else {
+				task.args = initialArgs;
 			}
-		} else {
-			task.args = initialArgs;
+
+			flags = (hasInitialArgs || argsLen) ? (flags | F_ARGS) : (flags & ~F_ARGS);
 		}
 
 		if (freeCtx) {
@@ -168,7 +174,6 @@ function debounce(fn: Function, ctx?: object, initialArgs: any[] = EMPTY_ARGS, o
 		}
 
 		flags = task.ctx == null ? (flags & ~F_CTX) : (flags | F_CTX);
-		flags = (hasInitialArgs || argsLen) ? (flags | F_ARGS) : (flags & ~F_ARGS);
 
 		task.flags = flags;
 
@@ -285,7 +290,7 @@ function idleNext() {
 
 // API
 export {
-	F_HEAVY,
+	F_NO_ARGS,
 	F_IMPORTANT,
 
 	perf,
