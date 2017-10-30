@@ -1,6 +1,6 @@
 @perf-tools
 -----------
-A set of tools from improving performance your application.
+A set of tools for improving performance your application.
 
 
 ### Tools
