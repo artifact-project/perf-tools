@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/balancer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A tool for load balancing within the limit of a single frame and not only",
   "keywords": ["perf-tools", "balancer", "performance", "fps", "idle"],
   "author": "RubaXa <ibnRubaXa@gmail.com",

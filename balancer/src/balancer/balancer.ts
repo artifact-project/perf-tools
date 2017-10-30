@@ -148,8 +148,8 @@ function call(fn: Function, ctx?: object, args?: any[], options?: TaskOptions): 
 
 function debounce(fn: Function, ctx?: object, initialArgs: any[] = EMPTY_ARGS, options?: TaskOptions): DebouncedFunction {
 	const task = createTask(fn, ctx, initialArgs, options);
-	const freeCtx = ctx == null;
-	const hasInitialArgs = initialArgs.length > 0;
+	const freeCtx = (task.flags & F_CTX) === 0;
+	const hasInitialArgs = (task.flags & F_ARGS) !== 0;
 	const debounced: DebouncedFunction  = function () {
 		let flags = task.flags;
 
@@ -193,8 +193,16 @@ function debounce(fn: Function, ctx?: object, initialArgs: any[] = EMPTY_ARGS, o
 	return debounced;
 }
 
-function cancel(task: Task) {
-	task.flags |= F_CANCELED;
+function isKey(val: Task | TaskUniqueKey): val is TaskUniqueKey {
+	return val.hasOwnProperty('task');
+}
+
+function cancel(taskOrKey: Task | TaskUniqueKey) {
+	if (isKey(taskOrKey)) {
+		cancel(taskOrKey.task);
+	} else {
+		taskOrKey.flags |= F_CANCELED;
+	}
 }
 
 function uniqueKey(name): TaskUniqueKey {
