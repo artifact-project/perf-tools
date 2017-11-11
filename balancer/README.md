@@ -52,7 +52,7 @@ call(function () {
 ---
 
 <a name="debounce"></a>
-#### debounce(fn, ctx?, args?, options?): `DebouncedFunction`
+#### debounce<T>(fn, ctx?, args?, options?): `T & {cancel(): void}`
 Created a debounced function
 
  - **fn**: `Function`

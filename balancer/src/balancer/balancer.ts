@@ -1,4 +1,4 @@
-export type DebouncedFunction = Function & {cancel?(): void};
+export type Cancelable = {cancel(): void};
 
 export type Task = {
 	fn: Function;
@@ -67,7 +67,6 @@ const F_NO_ARGS = 1 << 8;
 
 const stack: Task[] = [];
 const idleStack: Task[] = [];
-const labeledTasks: {[cid: number]: Task} = {};
 const stats = {
 	time: 0,
 	total: 0,
@@ -146,11 +145,17 @@ function call(fn: Function, ctx?: object, args?: any[], options?: TaskOptions): 
 	return (task.flags & F_STACKED) ? task : add(task);
 }
 
-function debounce(fn: Function, ctx?: object, initialArgs: any[] = EMPTY_ARGS, options?: TaskOptions): DebouncedFunction {
+function debounce<T extends (...args: any[]) => any>(
+	fn: T,
+	ctx?: object,
+	initialArgs: any[] = EMPTY_ARGS,
+	options?: TaskOptions,
+): T & Cancelable {
 	const task = createTask(fn, ctx, initialArgs, options);
 	const freeCtx = (task.flags & F_CTX) === 0;
 	const hasInitialArgs = (task.flags & F_ARGS) !== 0;
-	const debounced: DebouncedFunction  = function () {
+
+	const debounced: (T & Cancelable) = <any>function debounced() {
 		let flags = task.flags;
 
 		if ((flags & F_NO_ARGS) === 0) {
