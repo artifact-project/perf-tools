@@ -122,7 +122,7 @@ call(function () { console.log('Two'); }, null, [], {key});
 #### Bits
 
  - `F_NO_ARGS` — ignore arguments for boost performance a debounced function
- - `F_IMPORTANT` — even if the task is too heavy, it will not be moved to the idle-mode and will continue to run per frame
+ - `F_IMPORTANT` — even if the task is too heavy, it will not be moved to the [idle-process](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) and will continue to run per frame
 
 ---
 
