@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "declaration": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise",
+      "es2015.symbol",
+      "es2016.array.include"
+    ]
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "@perf-tools/performance",
+  "version": "1.0.0",
+  "description": "User Timing polyfill",
+  "keywords": ["perf-tools", "performance", "polyfill"],
+  "author": "RubaXa <ibnRubaXa@gmail.com",
+  "license": "MIT",
+  "repository": "git@github.com:artifact-project/perf-tools.git",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "ts-build": "tsc",
+    "git-clean": "git clean -f",
+    "prepublish": "npm run test && npm run ts-build",
+    "postpublish": "npm run git-clean"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "src/*/*.js",
+    "src/*/*.d.ts"
+  ],
+  "devDependencies": {
+    "@types/jest": "^19.2.3",
+    "jest": "^20.0.3",
+    "ts-jest": "^20.0.4",
+    "typescript": "2.6.2"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testEnvironment": "node",
+    "testRegex": "\\.tests\\.ts$",
+    "transformIgnorePatterns": [],
+    "setupTestFrameworkScriptFile": "<rootDir>/__jest__/extensions.ts",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
+  }
+}
