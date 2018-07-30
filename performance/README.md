@@ -6,6 +6,19 @@ User Timing polyfill
 npm i --save @perf-tools/performance
 ```
 
+### Usage
+
+```ts
+// Polyfill
+import from '@perf-tools/performance';
+
+// As module
+import { performance } from '@perf-tools/performance';
+```
+
+---
+
+
 ### Supported
 
 - Browser, Worker and NodeJS
@@ -23,9 +36,10 @@ npm i --save @perf-tools/performance
 
 #### Not Supported
 
-  - [clearResourceTimings](https://developer.mozilla.org/docs/Web/API/Performance/clearResourceTimings)
+ - [clearResourceTimings](https://developer.mozilla.org/docs/Web/API/Performance/clearResourceTimings)
 
 
+---
 
 
 ### Development
