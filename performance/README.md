@@ -23,7 +23,7 @@ npm i --save @perf-tools/performance
 
 #### Not Supported
 
-  - [clearResourceTimings](https://developer.mozilla.org/docs/Web/API/Performance/clearResourceTimings) - no
+  - [clearResourceTimings](https://developer.mozilla.org/docs/Web/API/Performance/clearResourceTimings)
 
 
 
