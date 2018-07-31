@@ -124,6 +124,7 @@ call(function () { console.log('Two'); }, null, [], {key});
 <a name="bits"></a>
 #### Bits
 
+ - `F_CTX` — use free a context
  - `F_NO_ARGS` — ignore arguments for boost performance a debounced function
  - `F_IMPORTANT` — even if the task is too heavy, it will not be moved to the [idle-process](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) and will continue to run per frame
 
