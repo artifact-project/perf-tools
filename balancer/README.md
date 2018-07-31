@@ -70,6 +70,9 @@ const handleScroll = debounce(function () {
 	// some code
 });
 
+// Or boosted (without arguments)
+// const handleScroll = debounce(function () {}, null, null, {flags: F_NO_ARGS});
+
 document.addEventListener('scroll', handleScroll, true);
 
 // Anywhere else
