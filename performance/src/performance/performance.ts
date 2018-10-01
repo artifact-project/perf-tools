@@ -1,8 +1,22 @@
-type Entry = {
+interface EntryProps {
 	name: string;
 	entryType: 'mark' | 'measure';
 	startTime: number;
 	duration: number;
+}
+
+class Entry implements EntryProps {
+	name = this.props.name;
+	entryType = this.props.entryType;
+	startTime = this.props.startTime;
+	duration = this.props.duration;
+
+	constructor(private props: EntryProps) {
+	}
+
+	toJSON() {
+		return this.props;
+	}
 }
 
 type VendorPerf = Performance & {
@@ -73,7 +87,7 @@ export function polyfill<T extends object>(global: T) {
 		}
 	}
 
-	function isNotSupport(perf: PerformanceAPI, method: keyof Performance): perf is VendorPerf {
+	function isNotSupport(perf: object, method: keyof Performance): perf is VendorPerf {
 		return !perf[method];
 	}
 
@@ -85,12 +99,12 @@ export function polyfill<T extends object>(global: T) {
 
 	if (isNotSupport(performance, 'mark')) {
 		performance.mark = performance.webkitMark || function mark(name){
-			const mark: Entry = {
+			const mark = new Entry({
 				name: name,
 				entryType: 'mark',
 				startTime: performance.now(),
 				duration: 0,
-			};
+			});
 
 			_entries.push(mark);
 			_marksIndex[name] = mark;
@@ -102,12 +116,12 @@ export function polyfill<T extends object>(global: T) {
 			const start = _marksIndex[startMark].startTime;
 			const end = _marksIndex[endMark].startTime;
 
-			_entries.push({
+			_entries.push(new Entry({
 				name,
 				entryType: 'measure',
 				startTime: start,
 				duration: end - start,
-			});
+			}));
 		};
 	}
 
@@ -150,7 +164,9 @@ export function polyfill<T extends object>(global: T) {
 
 	// Polyfilling
 	global['performance'] = performance;
-	return global as T & {performance: PerformanceAPI};
+	return global as T & {
+		performance: PerformanceAPI;
+	};
 }
 
 const global = polyfill(new Function('return this'));
