@@ -1,0 +1,56 @@
+{
+  "name": "@perf-tools/performance",
+  "version": "1.0.0-rc.1",
+  "description": "Time profiling helper",
+  "keywords": [
+    "perf-tools",
+    "performance",
+    "polyfill",
+    "timekeeper"
+  ],
+  "author": "RubaXa <ibnRubaXa@gmail.com",
+  "license": "MIT",
+  "repository": "git@github.com:artifact-project/perf-tools.git",
+  "homepage": "https://github.com/artifact-project/perf-tools/",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "ts-build": "tsc",
+    "build": "NODE_ENV=production rollup --config",
+    "git-clean": "git clean -f",
+    "prepublish": "npm run test && npm run ts-build && npm run build",
+    "postpublish": "npm run git-clean"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "src/*/*.js",
+    "src/*/*.d.ts"
+  ],
+  "devDependencies": {
+    "@types/jest": "^19.2.3",
+    "jest": "^20.0.3",
+    "rollup": "^0.66.2",
+    "rollup-plugin-license": "^0.7.0",
+    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-typescript2": "^0.17.0",
+    "rollup-plugin-uglify": "^6.0.0",
+    "ts-jest": "^20.0.4",
+    "typescript": "^3.1.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testEnvironment": "node",
+    "testRegex": "\\.tests\\.ts$",
+    "transformIgnorePatterns": [],
+    "setupTestFrameworkScriptFile": "<rootDir>/__jest__/extensions.ts",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
+  }
+}
