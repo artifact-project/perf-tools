@@ -103,7 +103,7 @@ npm i --save @perf-tools/timekeeper
 
 ---
 
-#### User Timings aka Timeline
+#### User Timing aka Timeline
 
 ![DevTools / Timelime](./__docs__/timeline.png)
 
