@@ -9,7 +9,7 @@ export default {
 	input: 'index.ts',
 	output: {
 		file: 'timekeeper.js',
-		format: 'umd',
+		format: 'iife',
 		name: 'timekeeper',
 	},
 	plugins: [].concat(

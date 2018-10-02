@@ -12,7 +12,7 @@ describe('time', () => {
 		},
 	});
 	const expected = {
-		mark: '[tk] label-1-mark',
+		mark: 'label-1-mark',
 		name: 'label',
 		active: 0,
 		start: 1,
@@ -198,13 +198,13 @@ it('print', async () => {
 	expect(warn.length).toBe(0);
 	expect(log.length).toBeGreaterThan(0);
 	expect(log).toEqual([
-		'[tk] inline: 1.000ms',
-		'group:[tk] app: %c9.000ms',
-		'group:[tk] head: %c5.000ms',
-		'[tk] css: 3.000ms',
-		'[tk] js: 1.000ms',
+		'inline: 1.000ms',
+		'group:app: %c9.000ms',
+		'group:head: %c5.000ms',
+		'css: 3.000ms',
+		'js: 1.000ms',
 		'groupEnd',
-		'[tk] body: 1.000ms',
+		'body: 1.000ms',
 		'groupEnd',
 	]);
 });
@@ -281,4 +281,29 @@ describe('perf', () => {
 			'clearMeasures:root',
 		]);
 	});
+});
+
+it('silent', () => {
+	const keeper = create({
+		silent: true,
+		print: true,
+		timeline: true,
+		console: {},
+		perf: {
+			now: () => 0,
+			mark: () => ({}),
+			measure: () => ({}),
+			clearMarks: () => ({}),
+			clearMeasures: () => ({}),
+		},
+	});
+
+	keeper.group('root');
+	keeper.wrap(() => {
+		keeper.time('foo');
+		keeper.timeEnd('bar');
+	})();
+	keeper.groupEnd();
+
+	expect(keeper.entries.length).toBe(0);
 });

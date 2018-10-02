@@ -1,4 +1,4 @@
-type Entry = {
+export type Entry = {
 	mark: string;
 	name: string;
 	parent: Entry;
@@ -6,7 +6,6 @@ type Entry = {
 	active: number;
 	start: number;
 	end: number;
-
 }
 
 const nil = null;
@@ -21,6 +20,10 @@ const nativePerf = (global.performance || {}) as Performance & {
 	mozNow(): number;
 	msNow(): number;
 };
+const s_mark = 'mark';
+const s_measure = 'measure';
+const s_clearMarks = 'clearMarks';
+const s_clearMeasures = 'clearMeasures';
 
 // Polyfill
 nativePerf.now = nativePerf.now
@@ -31,6 +34,7 @@ nativePerf.now = nativePerf.now
 ;
 
 export type KeeperOptions = {
+	silent: boolean;
 	print: boolean;
 	prefix: string;
 	perf: Partial<Performance>;
@@ -49,64 +53,82 @@ function color(ms: any): string {
 	);
 }
 
-export function create(options: Partial<KeeperOptions>) {
-	function opt<N extends keyof KeeperOptions>(name: N, def: KeeperOptions[N]): KeeperOptions[N] {
-		return options[name] == nil ? def : options[name];
-	}
+function has<T extends object>(target: T, key: keyof T): boolean {
+	return target.hasOwnProperty(key)
+}
 
-	const perf = opt('perf', nativePerf);
-	const prefix = opt('prefix', '[tk] ');
-	const console = opt('console', nativeConsole);
+export function create(options: Partial<KeeperOptions>) {
+	const perf = options.perf || nativePerf;
+	const prefix = options.prefix || '';
+	const silent = options.silent === true;
+	const console = options.console || nativeConsole;
 
 	// Private
-	const perfSupported = !!(perf.mark && perf.measure && perf.clearMarks && perf.clearMeasures) && options.timeline;
+	const perfSupported = !!(
+		perf[s_mark]
+		&& perf[s_measure]
+		&& perf[s_clearMarks]
+		&& perf[s_clearMeasures]
+	) && options.timeline;
 	const entries: Entry[] = [];
 	const entriesIndex: {[name:string]: Entry[]} = {};
 
 	let cid = 0;
 	let activeEntry: Entry = nil;
 	let lock = false;
+	let label: string;
+	let mark;
 
 	function measure(entry: Entry) {
-		const label = `${prefix}${entry.name}`;
+		mark = entry[s_mark];
+		label = `${prefix}${entry.name}`;
 
-		perf.measure(label, entry.mark);
-		perf.clearMarks(entry.mark);
-		perf.clearMeasures(label);
+		perf[s_measure](label, mark);
+		perf[s_clearMarks](mark);
+		perf[s_clearMeasures](label);
 	}
 
 	function __print__(entries: Entry[]) {
+		let i = 0;
 		let total = 0;
+		let entry: Entry;
+		let duration: number;
+		let selfDuration: number;
+		let logMsg: string;
+		let nextEntries: Entry[];
+		let nextLength: number;
 
-		for (let i = 0; i < entries.length; i++) {
-			const entry = entries[i];
+		for (; i < entries.length; i++) {
+			entry = entries[i];
 
 			if (entry.end && !entry.active) {
-				const duration = (entry.end - entry.start);
-				const msg = `${prefix}${entry.name}: %c${duration.toFixed(3)}ms`;
+				duration = entry.end - entry.start;
+				logMsg = `${prefix}${entry.name}: %c${duration.toFixed(3)}ms`;
+				nextEntries = entry.entries;
+				nextLength = nextEntries ? nextEntries.length : 0
 
-				if (entry.entries === nil || entry.entries.length < 1) {
+				if (nextLength < 1) {
 					console.log(
-						msg,
+						logMsg,
 						`${BOLD};${color(duration)}`,
 					);
 
 					total += duration;
 				} else {
 					console[
-						console.groupCollapsed && entry.entries.length < 2
+						console.groupCollapsed && nextLength < 2
 							? 'groupCollapsed'
 							: 'group'
 					](
-						msg,
+						logMsg,
 						color(duration),
 					);
-					const selfDur = duration - __print__(entry.entries);
+					selfDuration = duration - __print__(nextEntries);
 
-					if (selfDur > 3) {
+					if (selfDuration > 3) {
 						console.log(
-							`${prefix}[[self]]: %c${selfDur.toFixed(3)}ms`,
-							`${BOLD};${color(selfDur)}`,
+							`${prefix}[[self]]: %c${selfDuration.toFixed(3)}ms`,
+							`${BOLD};${color(selfDuration)}`,
 						);
 					}
 
@@ -137,7 +159,12 @@ export function create(options: Partial<KeeperOptions>) {
 	}
 
 	function createEntry(name, isGroup: boolean) {
-		const label = `${prefix}${name}-${++cid}`;
+		if (silent) {
+			return {} as Entry;
+		}
+
+		label = `${prefix}${name}-${++cid}`;
+
 		const entry = {
 			mark: `${label}-mark`,
 			name,
@@ -159,14 +186,14 @@ export function create(options: Partial<KeeperOptions>) {
 			entry.entries = [];
 			activeEntry = entry;
 		} else {
-			if (!entriesIndex.hasOwnProperty(name)) {
+			if (!has(entriesIndex, name)) {
 				entriesIndex[name] = [];
 			}
 
 			entriesIndex[name].push(entry);
 		}
 
-		perfSupported && perf.mark(entry.mark);
+		perfSupported && perf[s_mark](entry[s_mark]);
 
 		return entry;
 	}
@@ -194,12 +221,17 @@ export function create(options: Partial<KeeperOptions>) {
 		},
 
 		timeEnd(name: string) {
-			if (entriesIndex.hasOwnProperty(name)) {
+			if (silent) {
+				return;
+			}
+
+			if (has(entriesIndex, name)) {
 				const entries = entriesIndex[name];
 				let idx = entries.length;
+				let entry: Entry;
 
 				while (idx--) {
-					const entry = entries[idx];
+					entry = entries[idx];
 
 					if (entry.end === 0) {
 						entry.end = perf.now();
@@ -220,23 +252,26 @@ export function create(options: Partial<KeeperOptions>) {
 		},
 
 		groupEnd(name?: string) {
-			const entry = activeEntry;
-
-			if (entry === nil) {
-				console.warn(`[timekeeper] No active groups`);
+			if (silent || activeEntry === nil) {
+				!silent && console.warn(`[timekeeper] No active groups`);
 				return;
 			}
 
-			if (name != nil && entry.name !== name) {
-				console.warn(`[timekeeper] Wrong group "${name}" (actual: "${entry.name}")`);
+			if (name != nil && activeEntry.name !== name) {
+				console.warn(`[timekeeper] Wrong group "${name}" (actual: "${activeEntry.name}")`);
 			}
 
-			closeGroup(entry);
-			activeEntry = entry.parent;
+			closeGroup(activeEntry);
+			activeEntry = activeEntry.parent;
 		},
 
 		wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R {
+			if (silent) {
+				return fn;
+			}
+
 			const group = activeEntry;
+			let retVal: R;
 
 			group.active++;
 
@@ -244,8 +279,7 @@ export function create(options: Partial<KeeperOptions>) {
 				const _activeEntry = activeEntry;
 
 				activeEntry = group;
-
-				const retVal = fn.apply(this, arguments);
+				retVal = fn.apply(this, arguments);
 				closeGroup(group);
 				activeEntry = _activeEntry;
 				return retVal;
