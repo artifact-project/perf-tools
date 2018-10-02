@@ -55,17 +55,14 @@ npm i --save @perf-tools/timekeeper
 		keeper.timeEnd('javascript');
 
 		keeper.group('app');
-		keeper.wrap(function () {
-			keeper.time('require');
+		keeper.time('require');
+		require(['app/bootstrap'], keeper.wrap(function (bootstrap) {
+			keeper.timeEnd('require');
 
-			require(['app/bootstrap'], keeper.wrap(function (bootstrap) {
-				keeper.timeEnd('require');
-
-				keeper.time('boot');
-				bootstrap(document)
-				keeper.timeEnd('boot');
-			}));
-		})();
+			keeper.time('boot');
+			bootstrap(document)
+			keeper.timeEnd('boot');
+		}));
 		keeper.groupEnd('app');
 	</script>
 	<!-- ... -->
