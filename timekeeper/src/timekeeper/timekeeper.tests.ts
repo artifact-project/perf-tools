@@ -12,8 +12,7 @@ describe('time', () => {
 		},
 	});
 	const expected = {
-		mark: '[tk] label 0',
-		measure: '[tk] label',
+		mark: '[tk] label-1-mark',
 		name: 'label',
 		active: 0,
 		start: 1,
@@ -129,19 +128,19 @@ describe('group', () => {
 			expect(keeper.entries[0].end).toBe(ts);
 		});
 
-		it('grouped', async () => {
-			await keeper.group('app', async (grouped) => {
+		it('wrap', async () => {
+			keeper.group('app');
+			await keeper.wrap(async ()  => {
 				keeper.time('timeout');
 
-				await new Promise(resolve => {
-					grouped(() => {
-						keeper.timeEnd('timeout');
-						keeper.time('any');
-						keeper.timeEnd('any');
-						resolve();
-					});
-				});
-			});
+				await new Promise(keeper.wrap(resolve => {
+					keeper.timeEnd('timeout');
+					keeper.time('any');
+					keeper.timeEnd('any');
+					resolve();
+				}));
+			})();
+			keeper.groupEnd('app');
 
 			keeper.group('footer');
 			keeper.time('metricts');
@@ -200,13 +199,86 @@ it('print', async () => {
 	expect(log.length).toBeGreaterThan(0);
 	expect(log).toEqual([
 		'[tk] inline: 1.000ms',
-		'group:[tk] app: 10.000ms',
-		'group:[tk] head: 5.000ms',
+		'group:[tk] app: %c9.000ms',
+		'group:[tk] head: %c5.000ms',
 		'[tk] css: 3.000ms',
-		'group:[tk] js: 1.000ms',
-		'groupEnd',
+		'[tk] js: 1.000ms',
 		'groupEnd',
 		'[tk] body: 1.000ms',
 		'groupEnd',
 	]);
+});
+
+describe('perf', () => {
+	let ts = 0;
+	const perf = [];
+	const keeper = create({
+		timeline: true,
+		prefix: '',
+		perf: {
+			now: () => ++ts,
+			mark: (name) => perf.push(name),
+			measure: (name, mark) => perf.push(`${name}:${mark}`),
+			clearMarks: (name) => perf.push(`clearMarks:${name}`),
+			clearMeasures: (name) => perf.push(`clearMeasures:${name}`),
+		},
+	});
+
+	beforeEach(() => {
+		ts = 0;
+		perf.length = 0;
+		keeper.entries.length = 0;
+	});
+
+	it('empty', () => {
+		keeper.group('root');
+		keeper.groupEnd('root');
+
+		expect(perf).toEqual([
+			'root-1-mark',
+			'root:root-1-mark',
+			'clearMarks:root-1-mark',
+			'clearMeasures:root',
+		]);
+	});
+
+	it('sync', () => {
+		keeper.group('root');
+		keeper.time('inner');
+		keeper.timeEnd('inner');
+		keeper.groupEnd('root');
+
+		expect(perf).toEqual([
+			'root-2-mark',
+
+			'inner-3-mark',
+			'inner:inner-3-mark',
+			'clearMarks:inner-3-mark',
+			'clearMeasures:inner',
+
+			'root:root-2-mark',
+			'clearMarks:root-2-mark',
+			'clearMeasures:root',
+		]);
+	});
+
+	it('async', () => {
+		keeper.group('root');
+		keeper.time('inner');
+		keeper.groupEnd('root');
+		keeper.timeEnd('inner');
+
+		expect(perf).toEqual([
+			'root-4-mark',
+
+			'inner-5-mark',
+			'inner:inner-5-mark',
+			'clearMarks:inner-5-mark',
+			'clearMeasures:inner',
+
+			'root:root-4-mark',
+			'clearMarks:root-4-mark',
+			'clearMeasures:root',
+		]);
+	});
 });

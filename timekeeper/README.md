@@ -13,10 +13,14 @@ npm i --save @perf-tools/timekeeper
 <head>
 	<script>
 		/**
-		 * Copy and past code from file:
+		 * Replace this comment on the code from this file:
 		 * https://github.com/artifact-project/perf-tools/blob/master/timekeeper/timekeeper.js
 		 */
-		var keeper = timekeeper.create({print: true});
+		var keeper = timekeeper.create({
+			print: true,    // DevTools -> Console
+			timeline: true, // DevTools -> Performance
+			prefix: '⏱',
+		});
 		keeper.group('head');
 	</script>
 
@@ -48,17 +52,21 @@ npm i --save @perf-tools/timekeeper
 	<script src="./boot/loader"></script>
 	<!-- etc -->
 	<script>
-		keeper.group('app', function (grouped) {
+		keeper.timeEnd('javascript');
+
+		keeper.group('app');
+		keeper.wrap(function () {
 			keeper.time('require');
 
-			require(['app/bootstrap'], grouped(function (bootstrap) {
+			require(['app/bootstrap'], keeper.wrap(function (bootstrap) {
 				keeper.timeEnd('require');
 
 				keeper.time('boot');
 				bootstrap(document)
 				keeper.timeEnd('boot');
 			}));
-		});
+		})();
+		keeper.groupEnd('app');
 	</script>
 	<!-- ... -->
 	<script>
@@ -72,9 +80,29 @@ npm i --save @perf-tools/timekeeper
 
 ### API
 
+- **create**(options: `KeeperOptions`): `Keeper`
+  - **options**
+    - **print**: `boolean`
+	- **perf**: `Partial<Performance>`
+	- **console**: `Partial<Console>`
+	- **timeline**: `boolean`
+  - **Keeper**
+    - **time**(name: `string`)
+    - **timeEnd**(name: `string`)
+    - **group**(name: `string`)
+    - **groupEnd**(name?: `string`)
+    - **wrap**`<R>`(fn: `(...args: A) => R`): `(...args: A) => R`
 
 ---
 
+### Examples
+
+#### Console
+
+![DevTools / Console](./__docs__/console.png)
+![DevTools / Timelime](./__docs__/timeline.png)
+
+---
 
 ### Development
 

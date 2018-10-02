@@ -1,6 +1,5 @@
 type Entry = {
 	mark: string;
-	measure: string;
 	name: string;
 	parent: Entry;
 	entries: Entry[];
@@ -10,9 +9,12 @@ type Entry = {
 
 }
 
+const nil = null;
+const BOLD = 'font-weight: bold';
+const global = Function('return this')() as Window & {Date: DateConstructor};
+const Date = global.Date;
 const dateNow = Date.now || (() => new Date().getTime());
 const startOffset = dateNow();
-const global = Function('return this')() as Window;
 const nativeConsole = global.console;
 const nativePerf = (global.performance || {}) as Performance & {
 	webkitNow(): number;
@@ -21,7 +23,12 @@ const nativePerf = (global.performance || {}) as Performance & {
 };
 
 // Polyfill
-nativePerf.now = nativePerf.now || nativePerf.webkitNow || nativePerf.mozNow || nativePerf.msNow || (() => (dateNow() - startOffset));
+nativePerf.now = nativePerf.now
+	|| nativePerf.webkitNow
+	|| nativePerf.mozNow
+	|| nativePerf.msNow
+	|| (() => (dateNow() - startOffset))
+;
 
 export type KeeperOptions = {
 	print: boolean;
@@ -31,9 +38,25 @@ export type KeeperOptions = {
 	timeline: boolean;
 }
 
+function color(ms: any): string {
+	return 'color: #' + (
+		ms < 2 ? 'ccc' :
+		ms < 5 ? '666' :
+		ms < 10 ? '333' :
+		ms < 30 ? 'f90' :
+		ms < 60 ? 'f60' :
+		'f00'
+	);
+}
+
 export function create(options: Partial<KeeperOptions>) {
-	const perf = options.perf == null ? nativePerf : options.perf;
-	const console = options.console == null ? nativeConsole : options.console;
+	function opt<N extends keyof KeeperOptions>(name: N, def: KeeperOptions[N]): KeeperOptions[N] {
+		return options[name] == nil ? def : options[name];
+	}
+
+	const perf = opt('perf', nativePerf);
+	const prefix = opt('prefix', '[tk] ');
+	const console = opt('console', nativeConsole);
 
 	// Private
 	const perfSupported = !!(perf.mark && perf.measure && perf.clearMarks && perf.clearMeasures) && options.timeline;
@@ -41,28 +64,57 @@ export function create(options: Partial<KeeperOptions>) {
 	const entriesIndex: {[name:string]: Entry[]} = {};
 
 	let cid = 0;
-	let activeEntry: Entry = null;
+	let activeEntry: Entry = nil;
 	let lock = false;
 
+	function measure(entry: Entry) {
+		const label = `${prefix}${entry.name}`;
+
+		perf.measure(label, entry.mark);
+		perf.clearMarks(entry.mark);
+		perf.clearMeasures(label);
+	}
+
 	function __print__(entries: Entry[]) {
+		let total = 0;
+
 		for (let i = 0; i < entries.length; i++) {
 			const entry = entries[i];
-			const duration = (entry.end - entry.start).toFixed(3);
 
-			if (entry.end) {
-				if (entry.entries === null) {
+			if (entry.end && !entry.active) {
+				const duration = (entry.end - entry.start);
+				const msg = `${prefix}${entry.name}: %c${duration.toFixed(3)}ms`;
+
+				if (entry.entries === nil || entry.entries.length < 1) {
 					console.log(
-						`%c${entry.measure}: %c${duration}ms`,
-						'font-weight: bold',
-						'color: #060',
+						msg,
+						`${BOLD};${color(duration)}`,
 					);
+
+					total += duration;
 				} else {
-					console.group(`${entry.measure}: ${duration}ms`);
-					__print__(entry.entries);
+					console[
+						console.groupCollapsed && entry.entries.length < 2
+							? 'groupCollapsed'
+							: 'group'
+					](
+						msg,
+						color(duration),
+					);
+					const selfDur = duration - __print__(entry.entries);
+
+					if (selfDur > 3) {
+						console.log(
+							`${prefix}[[self]]: %c${selfDur.toFixed(3)}ms`,
+							`${BOLD};${color(selfDur)}`,
+						);
+					}
+
+					total += duration;
 					console.groupEnd();
 				}
 
-				if (entry.parent === null) {
+				if (entry.parent === nil) {
 					entries.splice(i, 1);
 					i--;
 				}
@@ -70,6 +122,7 @@ export function create(options: Partial<KeeperOptions>) {
 		}
 
 		lock = false;
+		return total;
 	}
 
 	function printDefered() {
@@ -84,18 +137,18 @@ export function create(options: Partial<KeeperOptions>) {
 	}
 
 	function createEntry(name, isGroup: boolean) {
+		const label = `${prefix}${name}-${++cid}`;
 		const entry = {
-			mark: `[tk] ${name} ${cid}`,
-			measure: `[tk] ${name}`,
+			mark: `${label}-mark`,
 			name,
 			parent: activeEntry,
-			entries:  null,
+			entries:  nil,
 			active: 0,
 			start: perf.now(),
 			end: 0,
 		};
 
-		if (activeEntry !== null) {
+		if (activeEntry !== nil) {
 			activeEntry.active++;
 			activeEntry.entries.push(entry);
 		} else {
@@ -118,25 +171,17 @@ export function create(options: Partial<KeeperOptions>) {
 		return entry;
 	}
 
-	function closeGroup(entry: Entry, dec: boolean) {
+	function closeGroup(entry: Entry) {
 		options.print && print();
 
-		if (entry === null) {
+		if (entry === nil) {
 			//
 		} else if (entry.active > 0) {
-			if (dec && --entry.active === 0) {
-				closeGroup(entry, false);
-			}
+			(--entry.active === 0) && closeGroup(entry);
 		} else {
 			entry.end = perf.now();
-
-			if (perfSupported) {
-				perf.measure(entry.measure, entry.mark);
-				perf.clearMarks(entry.mark);
-				perf.clearMeasures(entry.measure);
-			}
-
-			closeGroup(entry.parent, true);
+			perfSupported && measure(entry);
+			closeGroup(entry.parent);
 		}
 	}
 
@@ -158,7 +203,9 @@ export function create(options: Partial<KeeperOptions>) {
 
 					if (entry.end === 0) {
 						entry.end = perf.now();
-						closeGroup(entry.parent, true);
+
+						perfSupported && measure(entry);
+						closeGroup(entry.parent);
 
 						return;
 					}
@@ -168,40 +215,41 @@ export function create(options: Partial<KeeperOptions>) {
 			console.warn(`[timekeeper] Timer "${name}" doesn't exist`);
 		},
 
-		group<R>(name: string, executer?: (grouper: <GR>(callback: () => GR) => GR) => R) {
-			const entry = createEntry(name, true);
-
-			if (executer != null) {
-				entry.active = 1;
-
-				const retVal = executer((callback) => {
-					const _activeEntry = activeEntry;
-					activeEntry = entry;
-					const retVal = callback();
-					closeGroup(entry, true);
-					activeEntry = _activeEntry;
-					return retVal;
-				});
-
-				activeEntry = entry.parent;
-				return retVal
-			}
+		group(name: string) {
+			createEntry(name, true).active = 1;
 		},
 
 		groupEnd(name?: string) {
 			const entry = activeEntry;
 
-			if (entry === null) {
+			if (entry === nil) {
 				console.warn(`[timekeeper] No active groups`);
 				return;
 			}
 
-			if (name != null && entry.name !== name) {
+			if (name != nil && entry.name !== name) {
 				console.warn(`[timekeeper] Wrong group "${name}" (actual: "${entry.name}")`);
 			}
 
-			closeGroup(entry, false);
+			closeGroup(entry);
 			activeEntry = entry.parent;
-		}
+		},
+
+		wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R {
+			const group = activeEntry;
+
+			group.active++;
+
+			return function () {
+				const _activeEntry = activeEntry;
+
+				activeEntry = group;
+
+				const retVal = fn.apply(this, arguments);
+				closeGroup(group);
+				activeEntry = _activeEntry;
+				return retVal;
+			};
+		},
 	};
 }

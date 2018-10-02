@@ -10,6 +10,7 @@
       "es5",
       "es2015.promise",
       "es2015.symbol",
+      "es2015.collection",
       "es2016.array.include"
     ]
   },

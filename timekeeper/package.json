@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/performance",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "description": "Time profiling helper",
   "keywords": [
     "perf-tools",
@@ -16,7 +16,7 @@
   "scripts": {
     "test": "jest --coverage",
     "ts-build": "tsc",
-    "build": "NODE_ENV=production rollup --config",
+    "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo ''",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build && npm run build",
     "postpublish": "npm run git-clean"
@@ -52,5 +52,6 @@
       "js",
       "json"
     ]
-  }
+  },
+  "dependencies": {}
 }
