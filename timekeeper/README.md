@@ -100,6 +100,11 @@ npm i --save @perf-tools/timekeeper
 #### Console
 
 ![DevTools / Console](./__docs__/console.png)
+
+---
+
+#### User Timings aka Timelime
+
 ![DevTools / Timelime](./__docs__/timeline.png)
 
 ---
