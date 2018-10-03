@@ -20,6 +20,8 @@ const nativePerf = (global.performance || {}) as Performance & {
 	mozNow(): number;
 	msNow(): number;
 };
+const s_group = 'group';
+const s_groupCollapsed = 'groupCollapsed';
 const s_mark = 'mark';
 const s_measure = 'measure';
 const s_clearMarks = 'clearMarks';
@@ -118,9 +120,9 @@ export function create(options: Partial<KeeperOptions>) {
 					total += duration;
 				} else {
 					console[
-						console.groupCollapsed && nextLength < 2
-							? 'groupCollapsed'
-							: 'group'
+						console[s_groupCollapsed] && nextLength < 2
+							? s_groupCollapsed
+							: s_group
 					](
 						logMsg,
 						color(duration),
@@ -188,10 +190,7 @@ export function create(options: Partial<KeeperOptions>) {
 			entry.entries = [];
 			activeEntry = entry;
 		} else {
-			if (!has(entriesIndex, name)) {
-				entriesIndex[name] = [];
-			}
-
+			!has(entriesIndex, name) && (entriesIndex[name] = []);
 			entriesIndex[name].push(entry);
 		}
 
@@ -203,14 +202,14 @@ export function create(options: Partial<KeeperOptions>) {
 	function closeGroup(entry: Entry) {
 		options.print && print();
 
-		if (entry === nil) {
-			//
-		} else if (entry.active > 0) {
-			(--entry.active === 0) && closeGroup(entry);
-		} else {
-			entry.end = perf.now();
-			perfSupported && measure(entry);
-			closeGroup(entry.parent);
+		if (entry !== nil) {
+			if (entry.active > 0) {
+				(--entry.active === 0) && closeGroup(entry);
+			} else {
+				entry.end = perf.now();
+				perfSupported && measure(entry);
+				closeGroup(entry.parent);
+			}
 		}
 	}
 
@@ -223,30 +222,28 @@ export function create(options: Partial<KeeperOptions>) {
 		},
 
 		timeEnd(name: string) {
-			if (silent) {
-				return;
-			}
+			if (!silent) {
+				if (has(entriesIndex, name)) {
+					const entries = entriesIndex[name];
+					let idx = entries.length;
+					let entry: Entry;
 
-			if (has(entriesIndex, name)) {
-				const entries = entriesIndex[name];
-				let idx = entries.length;
-				let entry: Entry;
+					while (idx--) {
+						entry = entries[idx];
 
-				while (idx--) {
-					entry = entries[idx];
+						if (entry.end === 0) {
+							entry.end = perf.now();
 
-					if (entry.end === 0) {
-						entry.end = perf.now();
+							perfSupported && measure(entry);
+							closeGroup(entry.parent);
 
-						perfSupported && measure(entry);
-						closeGroup(entry.parent);
-
-						return;
+							return;
+						}
 					}
 				}
-			}
 
-			warn && warn(`[timekeeper] Timer "${name}" doesn't exist`);
+				warn && warn(`[timekeeper] Timer "${name}" doesn't exist`);
+			}
 		},
 
 		group(name: string) {
@@ -268,24 +265,25 @@ export function create(options: Partial<KeeperOptions>) {
 		},
 
 		wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R {
-			if (silent) {
-				return fn;
-			}
-
 			const group = activeEntry;
 			let retVal: R;
+			let wrapped = fn;
 
-			group.active++;
+			if (!silent) {
+				group.active++;
 
-			return function () {
-				const _activeEntry = activeEntry;
+				wrapped = function () {
+					const _activeEntry = activeEntry;
 
-				activeEntry = group;
-				retVal = fn.apply(this, arguments);
-				closeGroup(group);
-				activeEntry = _activeEntry;
-				return retVal;
-			};
+					activeEntry = group;
+					retVal = fn.apply(this, arguments);
+					closeGroup(group);
+					activeEntry = _activeEntry;
+					return retVal;
+				};
+			}
+
+			return wrapped;
 		},
 	};
 }
