@@ -40,6 +40,7 @@ export type KeeperOptions = {
 	perf: Partial<Performance>;
 	console: Partial<Console>;
 	timeline: boolean;
+	warn: (msg: string) => void;
 }
 
 function color(ms: any): string {
@@ -62,6 +63,7 @@ export function create(options: Partial<KeeperOptions>) {
 	const prefix = options.prefix || '';
 	const silent = options.silent === true;
 	const console = options.console || nativeConsole;
+	const warn = options.warn || console.warn && console.warn.bind(console);
 
 	// Private
 	const perfSupported = !!(
@@ -244,7 +246,7 @@ export function create(options: Partial<KeeperOptions>) {
 				}
 			}
 
-			console.warn(`[timekeeper] Timer "${name}" doesn't exist`);
+			warn && warn(`[timekeeper] Timer "${name}" doesn't exist`);
 		},
 
 		group(name: string) {
@@ -253,12 +255,12 @@ export function create(options: Partial<KeeperOptions>) {
 
 		groupEnd(name?: string) {
 			if (silent || activeEntry === nil) {
-				!silent && console.warn(`[timekeeper] No active groups`);
+				!silent && warn && warn(`[timekeeper] No active groups`);
 				return;
 			}
 
 			if (name != nil && activeEntry.name !== name) {
-				console.warn(`[timekeeper] Wrong group "${name}" (actual: "${activeEntry.name}")`);
+				warn && warn(`[timekeeper] Wrong group "${name}" (actual: "${activeEntry.name}")`);
 			}
 
 			closeGroup(activeEntry);

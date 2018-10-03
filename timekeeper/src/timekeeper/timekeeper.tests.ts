@@ -307,3 +307,21 @@ it('silent', () => {
 
 	expect(keeper.entries.length).toBe(0);
 });
+
+it('warn', () => {
+	const warn = [];
+	const keeper = create({
+		warn: (m) => warn.push(m),
+	});
+
+	keeper.timeEnd('inner');
+	keeper.groupEnd('root');
+	keeper.group('root');
+	keeper.groupEnd('inner');
+
+	expect(warn).toEqual([
+		"[timekeeper] Timer \"inner\" doesn't exist",
+		"[timekeeper] No active groups",
+		"[timekeeper] Wrong group \"inner\" (actual: \"root\")",
+	]);
+});

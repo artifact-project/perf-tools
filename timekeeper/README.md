@@ -83,6 +83,7 @@ npm i --save @perf-tools/timekeeper
 	- **perf**: `Partial<Performance>`
 	- **console**: `Partial<Console>`
 	- **timeline**: `boolean`
+	- **warn**: `(msg: string) => void`
   - **Keeper**
     - **time**(name: `string`)
     - **timeEnd**(name: `string`)
