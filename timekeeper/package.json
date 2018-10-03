@@ -1,5 +1,5 @@
 {
-  "name": "@perf-tools/performance",
+  "name": "@perf-tools/timekeeper",
   "version": "1.0.0-rc.3",
   "description": "Time profiling helper",
   "keywords": [
