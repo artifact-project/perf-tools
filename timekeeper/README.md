@@ -1,6 +1,6 @@
 @perf-tools/timekeeper
 ----------------------
-Time profiling helper
+TimeKeeper — It's a time profiling helper and good replacement for `console.time`.
 
 ```
 npm i --save @perf-tools/timekeeper
