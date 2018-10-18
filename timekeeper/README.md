@@ -6,6 +6,14 @@ Time profiling helper
 npm i --save @perf-tools/timekeeper
 ```
 
+### Support
+
+ - Groups!
+ - UserTiming -> DevTools / Performance
+ - Output -> DevTools / Console or custom output
+ 
+ ---
+
 ### Usage
 
 ```html
