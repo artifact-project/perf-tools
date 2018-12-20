@@ -162,20 +162,25 @@ export function polyfill<T extends object>(global: T) {
 		performance.clearResourceTimings = function clearResourceTimings() {};
 	}
 
-	// Polyfilling
-	global['performance'] = performance;
+	try {
+		if (!global['performance']) {
+			// Polyfilling
+			global['performance'] = performance;
+		}
+	} catch (_) {}
+
 	return global as T & {
 		performance: PerformanceAPI;
 	};
 }
 
-const global = polyfill(new Function('return this'));
+const globalThis = polyfill(new Function('return this'));
 
-if (typeof self !== 'undefined' && (self as any) !== global) {
+if (typeof self !== 'undefined' && (self as any) !== globalThis) {
 	polyfill(self);
 }
 
-export const performance = global.performance;
+export const performance = globalThis.performance;
 export const now = function () {
 	return performance.now();
 };
