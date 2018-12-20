@@ -12,14 +12,18 @@ const nil = null;
 const BOLD = 'font-weight: bold';
 const global = Function('return this')() as Window & {Date: DateConstructor};
 const Date = global.Date;
-const dateNow = Date.now || (() => new Date().getTime());
-const startOffset = dateNow();
+
+export const dateNow = Date.now || (() => new Date().getTime());
+export const startOffset = dateNow();
+
 const nativeConsole = global.console;
 const nativePerf = (global.performance || {}) as Performance & {
 	webkitNow(): number;
 	mozNow(): number;
 	msNow(): number;
 };
+export const perfNow = nativePerf.now;
+
 const s_group = 'group';
 const s_groupCollapsed = 'groupCollapsed';
 const s_mark = 'mark';
@@ -45,7 +49,7 @@ export type KeeperOptions = {
 	warn: (msg: string) => void;
 }
 
-function color(ms: any): string {
+export function color(ms: any): string {
 	return 'color: #' + (
 		ms < 2 ? 'ccc' :
 		ms < 5 ? '666' :
@@ -57,10 +61,20 @@ function color(ms: any): string {
 }
 
 function has<T extends object>(target: T, key: keyof T): boolean {
-	return target.hasOwnProperty(key)
+	return target.hasOwnProperty(key);
 }
 
-export function create(options: Partial<KeeperOptions>) {
+export type TimeKeeper = {
+	readonly entries: Entry[];
+
+	time(name: string): void;
+	timeEnd(name: string): void;
+	group(name: string): void;
+	groupEnd(name?: string): void;
+	wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R;
+}
+
+export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	const perf = options.perf || nativePerf;
 	const prefix = options.prefix || '';
 	const silent = options.silent === true;
@@ -286,4 +300,4 @@ export function create(options: Partial<KeeperOptions>) {
 			return wrapped;
 		},
 	};
-}
+};

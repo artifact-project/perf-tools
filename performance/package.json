@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/performance",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "User Timing polyfill",
   "keywords": [
     "perf-tools",

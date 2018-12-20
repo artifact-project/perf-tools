@@ -11,7 +11,9 @@ npm i --save @perf-tools/timekeeper
  - Groups!
  - UserTiming -> DevTools / Performance
  - Output -> DevTools / Console or custom output
- 
+ - Plugins
+   - [Navigation Timings](./plugin/net)
+
  ---
 
 ### Usage

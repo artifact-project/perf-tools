@@ -2,7 +2,7 @@ const STATE_PENDING = 1;
 const STATE_RESOLVED = 2;
 const STATE_REJECTED = 3;
 
-const FINALLY_SUPPROTED = typeof Promise.prototype.finally === 'function';
+const FINALLY_SUPPROTED = typeof Promise.prototype['finally'] === 'function';
 
 function LazyPromiseConstructor<T>(
 	executor: (
@@ -81,21 +81,21 @@ LazyPromiseConstructor.prototype.finally = function (onfinally) {
 	}
 };
 
-LazyPromiseConstructor.all = function (values) {
+LazyPromiseConstructor['all'] = function (values) {
 	return Promise.all(values);
 };
 
-LazyPromiseConstructor.race = function (values) {
+LazyPromiseConstructor['race'] = function (values) {
 	return Promise.race(values);
 };
 
-LazyPromiseConstructor.resolve = function (value) {
+LazyPromiseConstructor['resolve'] = function (value) {
 	return new LazyPromiseConstructor(resolve => {
 		resolve(value);
 	});
 };
 
-LazyPromiseConstructor.reject = function (value) {
+LazyPromiseConstructor['reject'] = function (value) {
 	return new LazyPromiseConstructor((_, reject) => {
 		reject(value);
 	});
