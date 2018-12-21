@@ -1,0 +1,1 @@
+var timekeeperPaint=function(t){"use strict";return t.paintTimings=function(e){window.addEventListener("DOMContentLoaded",function t(){try{var n=performance.getEntriesByType("paint");1<n.length?(e.group("tk-paint"),n.forEach(function(t){e.add(t.name,t.startTime,t.startTime+t.duration)}),e.groupEnd()):setTimeout(t,250)}catch(t){}})},t}({});

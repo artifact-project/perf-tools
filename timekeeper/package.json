@@ -5,7 +5,10 @@
   "keywords": [
     "perf-tools",
     "performance",
-    "polyfill",
+    "profiling",
+    "navigation",
+    "paint",
+    "timings",
     "timekeeper"
   ],
   "author": "RubaXa <ibnRubaXa@gmail.com",
@@ -16,7 +19,8 @@
   "scripts": {
     "test": "jest --coverage",
     "ts-build": "tsc",
-    "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo ''",
+    "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo '' && npm run build-example",
+    "build-example": "cd __example__ && node ./build.js",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build && npm run build",
     "postpublish": "npm run git-clean"
@@ -25,7 +29,9 @@
     "*.js",
     "*.d.ts",
     "src/*/*.js",
-    "src/*/*.d.ts"
+    "src/*/*.d.ts",
+    "timings/*/*.ts",
+    "timings/*/*.d.ts"
   ],
   "devDependencies": {
     "@types/jest": "^19.2.3",

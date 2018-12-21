@@ -58,6 +58,7 @@ package-lock.json
 # dotenv environment variables file
 .env
 .rpt2_cache
+.DS_Store
 
 # NMPy
 .npmyrc

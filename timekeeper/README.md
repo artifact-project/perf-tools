@@ -95,7 +95,7 @@ npm i --save @perf-tools/timekeeper
 	- **timeline**: `boolean`
 	- **warn**: `(msg: string) => void`
   - **Keeper**
-    - **time**(name: `string`)
+    - **time**(name: `string`): `Entry`
     - **timeEnd**(name: `string`)
     - **group**(name: `string`)
     - **groupEnd**(name?: `string`)

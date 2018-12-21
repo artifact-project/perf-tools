@@ -1,28 +1,22 @@
-export type Entry = {
-	mark: string;
-	name: string;
-	parent: Entry;
-	entries: Entry[];
-	active: number;
-	start: number;
-	end: number;
-}
-
 const nil = null;
-const BOLD = 'font-weight: bold';
-const global = Function('return this')() as Window & {Date: DateConstructor};
-const Date = global.Date;
+const BOLD = 'font-weight: bold;';
+const globalThis = Function('return this')() as Window & {
+	Date: DateConstructor;
+	timekeeper?: {
+		system: TimeKeeper;
+	};
+};
+const Date = globalThis.Date;
 
-export const dateNow = Date.now || (() => new Date().getTime());
-export const startOffset = dateNow();
+const dateNow = Date.now || (() => new Date().getTime());
+const startOffset = dateNow();
 
-const nativeConsole = global.console;
-const nativePerf = (global.performance || {}) as Performance & {
+const nativeConsole = globalThis.console;
+const nativePerf = (globalThis.performance || {}) as Performance & {
 	webkitNow(): number;
 	mozNow(): number;
 	msNow(): number;
 };
-export const perfNow = nativePerf.now;
 
 const s_group = 'group';
 const s_groupCollapsed = 'groupCollapsed';
@@ -39,13 +33,26 @@ nativePerf.now = nativePerf.now
 	|| (() => (dateNow() - startOffset))
 ;
 
+export type Entry = {
+	mark: string;
+	name: string;
+	parent: Entry;
+	entries: Entry[];
+	active: number;
+	start: number;
+	end: number;
+	close: (end?: number) => void;
+}
+
 export type KeeperOptions = {
-	silent: boolean;
+	disabled: boolean;
 	print: boolean;
 	prefix: string;
 	perf: Partial<Performance>;
 	console: Partial<Console>;
 	timeline: boolean;
+	maxEntries: number;
+	listener: (entry: Entry) => void;
 	warn: (msg: string) => void;
 }
 
@@ -67,35 +74,67 @@ function has<T extends object>(target: T, key: keyof T): boolean {
 export type TimeKeeper = {
 	readonly entries: Entry[];
 
-	time(name: string): void;
+	print(): void;
+	listen(fn: (entry: Entry) => void): void;
+	disabled(state: boolean): void;
+
+	add(name: string, start: number, end: number): void;
+	time(name: string): Entry;
 	timeEnd(name: string): void;
-	group(name: string): void;
-	groupEnd(name?: string): void;
+
+	group(name: string, start?: number): void;
+	groupEnd(name?: string, end?: number): void;
+
 	wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R;
 }
 
 export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	const perf = options.perf || nativePerf;
 	const prefix = options.prefix || '';
-	const silent = options.silent === true;
 	const console = options.console || nativeConsole;
+	const maxEntries = options.maxEntries == null ? 1e3 : options.maxEntries;
 	const warn = options.warn || console.warn && console.warn.bind(console);
+	let disabled = options.disabled;
+	let listener = options.listener;
 
 	// Private
 	const perfSupported = !!(
-		perf[s_mark]
+		options.timeline
+		&& perf[s_mark]
 		&& perf[s_measure]
 		&& perf[s_clearMarks]
 		&& perf[s_clearMeasures]
-	) && options.timeline;
+	);
 	const entries: Entry[] = [];
+	const emitEntries: Entry[] = [];
 	const entriesIndex: {[name:string]: Entry[]} = {};
 
 	let cid = 0;
 	let activeEntry: Entry = nil;
 	let lock = false;
 	let label: string;
-	let mark;
+	let mark: string;
+
+	function emit(entry: Entry) {
+		if (listener) {
+			listener(entry);
+		} else {
+			emitEntries.unshift(entry);
+			if (emitEntries.length > maxEntries) {
+				emitEntries.length = maxEntries;
+			}
+		}
+	}
+
+	function closeEntry(this: Entry, end?: number) {
+		if (this.end === 0) {
+			this.end = end >= 0 ? end : perf.now();
+
+			perfSupported && measure(this);
+			emit(this);
+			closeGroup(this.parent, end);
+		}
+	}
 
 	function measure(entry: Entry) {
 		mark = entry[s_mark];
@@ -120,15 +159,21 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			entry = entries[i];
 
 			if (entry.end && !entry.active) {
+				nextEntries = entry.entries;
+				nextLength = nextEntries ? nextEntries.length : 0;
+
+				if (entry.start === -1) {
+					entry.start = nextEntries[0].start;
+					entry.end = nextEntries[nextLength -1].end;
+				}
+
 				duration = entry.end - entry.start;
 				logMsg = `${prefix}${entry.name}: %c${duration.toFixed(3)}ms`;
-				nextEntries = entry.entries;
-				nextLength = nextEntries ? nextEntries.length : 0
 
 				if (nextLength < 1) {
 					console.log(
 						logMsg,
-						`${BOLD};${color(duration)}`,
+						`${BOLD}${color(duration)}`,
 					);
 
 					total += duration;
@@ -146,7 +191,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 					if (selfDuration > 3) {
 						console.log(
 							`${prefix}[[self]]: %c${selfDuration.toFixed(3)}ms`,
-							`${BOLD};${color(selfDuration)}`,
+							`${BOLD}${color(selfDuration)}`,
 						);
 					}
 
@@ -172,12 +217,12 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	function print() {
 		if (lock === false) {
 			lock = true;
-			(global.requestAnimationFrame || setTimeout)(printDefered);
+			(globalThis.requestAnimationFrame || setTimeout)(printDefered);
 		}
 	}
 
-	function createEntry(name, isGroup: boolean) {
-		if (silent) {
+	function createEntry(name: string, isGroup: boolean, start?: number) {
+		if (disabled) {
 			return {} as Entry;
 		}
 
@@ -189,8 +234,9 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			parent: activeEntry,
 			entries:  nil,
 			active: 0,
-			start: perf.now(),
+			start: start >= 0 ? start : perf.now(),
 			end: 0,
+			close: closeEntry,
 		};
 
 		if (activeEntry !== nil) {
@@ -213,16 +259,17 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		return entry;
 	}
 
-	function closeGroup(entry: Entry) {
+	function closeGroup(entry: Entry, end?: number) {
 		options.print && print();
 
 		if (entry !== nil) {
 			if (entry.active > 0) {
-				(--entry.active === 0) && closeGroup(entry);
+				(--entry.active === 0) && closeGroup(entry, end);
 			} else {
-				entry.end = perf.now();
+				entry.end = end >= 0 ? end : perf.now();
 				perfSupported && measure(entry);
-				closeGroup(entry.parent);
+				emit(this);
+				closeGroup(entry.parent, end);
 			}
 		}
 	}
@@ -230,13 +277,34 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	// Public
 	return {
 		entries,
+		print,
+
+		disabled(state: boolean) {
+			disabled = state;
+		},
+
+		listen(fn: (entry: Entry) => void) {
+			listener = fn;
+
+			let idx = emitEntries.length;
+			while (idx--) {
+				fn(emitEntries[idx]);
+			}
+			emitEntries.length = 0;
+		},
+
+		add(this: TimeKeeper, name: string, start: number, end: number) {
+			if (start > 0 && start <= end) {
+				createEntry(name, false, start).close(end);
+			}
+		},
 
 		time(name: string) {
-			createEntry(name, false);
+			return createEntry(name, false);
 		},
 
 		timeEnd(name: string) {
-			if (!silent) {
+			if (!disabled) {
 				if (has(entriesIndex, name)) {
 					const entries = entriesIndex[name];
 					let idx = entries.length;
@@ -246,11 +314,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 						entry = entries[idx];
 
 						if (entry.end === 0) {
-							entry.end = perf.now();
-
-							perfSupported && measure(entry);
-							closeGroup(entry.parent);
-
+							entry.close();
 							return;
 						}
 					}
@@ -260,13 +324,13 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			}
 		},
 
-		group(name: string) {
-			createEntry(name, true).active = 1;
+		group(name: string, start?: number) {
+			createEntry(name, true, start).active = 1;
 		},
 
-		groupEnd(name?: string) {
-			if (silent || activeEntry === nil) {
-				!silent && warn && warn(`[timekeeper] No active groups`);
+		groupEnd(name?: string, end?: number) {
+			if (disabled || activeEntry === nil) {
+				!disabled && warn && warn(`[timekeeper] No active groups`);
 				return;
 			}
 
@@ -274,7 +338,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 				warn && warn(`[timekeeper] Wrong group "${name}" (actual: "${activeEntry.name}")`);
 			}
 
-			closeGroup(activeEntry);
+			closeGroup(activeEntry, end);
 			activeEntry = activeEntry.parent;
 		},
 
@@ -283,7 +347,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			let retVal: R;
 			let wrapped = fn;
 
-			if (!silent) {
+			if (!disabled) {
 				group.active++;
 
 				wrapped = function () {
@@ -301,3 +365,9 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		},
 	};
 };
+
+export const system = globalThis.timekeeper ? globalThis.timekeeper.system : create({
+	print: /^(file:|localhost)/.test(globalThis.location + ''),
+	timeline: true,
+	prefix: '⚡️',
+});

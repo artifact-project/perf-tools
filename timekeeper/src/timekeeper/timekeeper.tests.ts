@@ -19,12 +19,14 @@ describe('time', () => {
 		end: 0,
 		parent: null,
 		entries: null,
+		close: null,
 	};
 
 	it('normal', () => {
 		expect(keeper.entries).toEqual([]);
 
 		keeper.time('label');
+		expected.close = keeper.entries[0].close;
 		expect(keeper.entries).toEqual([expected]);
 
 		keeper.timeEnd('label');
@@ -33,13 +35,21 @@ describe('time', () => {
 			end: 2,
 		}]);
 
-		expect(warn.length).toBe(0);
+		expect(warn).toEqual([]);
 	});
 
 	it('timeEnd: warn', () => {
 		expect(warn.length).toBe(0);
 		keeper.timeEnd('labelxxx');
 		expect(warn.length).toBe(1);
+	});
+
+	it('close', () => {
+		const length = keeper.entries.length;
+		const timeLabel = keeper.time('label');
+
+		timeLabel.close();
+		expect(keeper.entries.length).toBe(length + 1);
 	});
 });
 
