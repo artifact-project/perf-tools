@@ -98,7 +98,8 @@ export function polyfill<T extends object>(global: T) {
 		};
 	}
 
-	if (isNotSupport(performance, 'mark')) {
+	if (isNotSupport(performance, 'mark') || isNotSupport(performance, 'measure')) {
+		// mark
 		performance.mark = performance.webkitMark || function mark(name){
 			const mark = new Entry({
 				name: name,
@@ -110,9 +111,8 @@ export function polyfill<T extends object>(global: T) {
 			_entries.push(mark);
 			_marksIndex[name] = mark;
 		};
-	}
 
-	if (isNotSupport(performance, 'measure')) {
+		// measure
 		performance.measure = performance.webkitMeasure || function measure(name, startMark, endMark) {
 			const argLen = arguments.length;
 			let errMark: string;
@@ -142,43 +142,37 @@ export function polyfill<T extends object>(global: T) {
 
 			return entry;
 		};
-	}
 
-	if (isNotSupport(performance, 'getEntries')) {
+		// getEntries
 		performance.getEntries = performance.webkitGetEntries || function getEntries(filter?: Pick<Entry, 'name' | 'entryType'>) {
 			if (filter != null) {
 				return _entries.filter((entry) => entry.name === filter.name && entry.entryType === filter.entryType);
 			}
 			return _entries;
 		};
-	}
 
-	if (isNotSupport(performance, 'getEntriesByType')) {
+		// getEntriesByType
 		performance.getEntriesByType = performance.webkitGetEntriesByType || function getEntriesByType(type: Entry['entryType']) {
 			return _filterEntries('entryType', type);
 		};
-	}
 
-	if (isNotSupport(performance, 'getEntriesByName')) {
+		// getEntriesByName
 		performance.getEntriesByName = performance.webkitGetEntriesByName || function getEntriesByName(name) {
 			return _filterEntries('name', name);
 		};
-	}
 
-	if (isNotSupport(performance, 'clearMarks')) {
+		// clearMarks
 		performance.clearMarks = performance.webkitClearMarks || function clearMarks(name){
 			_clearEntries('mark', name);
 			delete _marksIndex[name];
 		};
-	}
 
-	if (isNotSupport(performance, 'clearMeasures')) {
+		// clearMeasures
 		performance.clearMeasures = performance.webkitClearMeasures || function clearMeasures(name){
 			_clearEntries('measure', name);
 		};
-	}
 
-	if (isNotSupport(performance, 'clearResourceTimings')) {
+		// clearResourceTimings
 		performance.clearResourceTimings = function clearResourceTimings() {};
 	}
 
