@@ -41,7 +41,7 @@ export type Entry = {
 	active: number;
 	start: number;
 	end: number;
-	close: (end?: number) => void;
+	stop: (end?: number) => void;
 }
 
 export type KeeperOptions = {
@@ -127,7 +127,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		}
 	}
 
-	function closeEntry(this: Entry, end?: number) {
+	function stopEntry(this: Entry, end?: number) {
 		if (this.end === 0) {
 			this.end = end >= 0 ? end : perf.now();
 
@@ -236,10 +236,10 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			name,
 			parent: activeEntry,
 			entries:  nil,
-			active: 0,
+			active: +isGroup,
 			start: start >= 0 ? start : perf.now(),
 			end: 0,
-			close: closeEntry,
+			stop: stopEntry,
 		};
 
 		if (activeEntry !== nil) {
@@ -257,7 +257,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			entriesIndex[name].push(entry);
 		}
 
-		perfSupported && perf[s_mark](entry[s_mark]);
+		(start == nil) && perfSupported && perf[s_mark](entry[s_mark]);
 
 		return entry;
 	}
@@ -270,7 +270,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 				(--entry.active === 0) && closeGroup(entry, end);
 			} else {
 				entry.end = end >= 0 ? end : perf.now();
-				perfSupported && measure(entry);
+				(end == nil) && perfSupported && measure(entry);
 				emit(this);
 				closeGroup(entry.parent, end);
 			}
@@ -298,7 +298,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 		add(this: TimeKeeper, name: string, start: number, end: number) {
 			if (start >= 0 && start <= end) {
-				createEntry(name, false, start).close(end);
+				createEntry(name, false, start).stop(end);
 			}
 		},
 
@@ -317,7 +317,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 						entry = entries[idx];
 
 						if (entry.end === 0) {
-							entry.close();
+							entry.stop();
 							return;
 						}
 					}
@@ -328,7 +328,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		},
 
 		group(name: string, start?: number) {
-			createEntry(name, true, start).active = 1;
+			createEntry(name, true, start);
 		},
 
 		groupEnd(name?: string, end?: number) {
@@ -351,11 +351,10 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			let wrapped = fn;
 
 			if (!disabled) {
-				group.active++;
-
 				wrapped = function () {
 					const _activeEntry = activeEntry;
 
+					group.active++;
 					activeEntry = group;
 					retVal = fn.apply(this, arguments);
 					closeGroup(group);

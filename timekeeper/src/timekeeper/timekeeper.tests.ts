@@ -1,4 +1,5 @@
 import { create } from './timekeeper';
+import { performance } from '@perf-tools/performance';
 
 describe('time', () => {
 	let ts = 0;
@@ -6,6 +7,7 @@ describe('time', () => {
 	const keeper = create({
 		timeline: true,
 		perf: {
+			...performance,
 			now: () => ++ts,
 		},
 		console: {
@@ -20,14 +22,14 @@ describe('time', () => {
 		end: 0,
 		parent: null,
 		entries: null,
-		close: null,
+		stop: null,
 	};
 
 	it('normal', () => {
 		expect(keeper.entries).toEqual([]);
 
 		keeper.time('label');
-		expected.close = keeper.entries[0].close;
+		expected.stop = keeper.entries[0].stop;
 		expect(keeper.entries).toEqual([expected]);
 
 		keeper.timeEnd('label');
@@ -49,7 +51,7 @@ describe('time', () => {
 		const length = keeper.entries.length;
 		const timeLabel = keeper.time('label');
 
-		timeLabel.close();
+		timeLabel.stop();
 		expect(keeper.entries.length).toBe(length + 1);
 	});
 });
@@ -60,6 +62,7 @@ describe('group', () => {
 	const keeper = create({
 		timeline: true,
 		perf: {
+			...performance,
 			now: () => ++ts,
 		},
 		console: {
@@ -171,6 +174,33 @@ describe('group', () => {
 			]);
 			expect(keeper.entries[1].entries.map(e => e.name)).toEqual([
 				'metricts',
+			]);
+		});
+
+		it('wrap2', async () => {
+			keeper.group('root');
+			let timer = keeper.time('primise');
+
+			const ret = new Promise(keeper.wrap((resolve)  => {
+				setTimeout(keeper.wrap(() => {
+					timer.stop();
+					timer = keeper.time('end');
+
+					setTimeout(keeper.wrap(() => {
+						keeper.timeEnd('end');
+						resolve();
+					}), 10);
+				}), 10);
+			}));
+			keeper.groupEnd();
+			await ret;
+
+			expect(keeper.entries.map(e => e.name)).toEqual([
+				'root',
+			]);
+			expect(keeper.entries[0].entries.map(e => e.name)).toEqual([
+				'primise',
+				'end',
 			]);
 		});
 	});
