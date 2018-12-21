@@ -293,9 +293,9 @@ describe('perf', () => {
 	});
 });
 
-it('silent', () => {
+it('disabled', () => {
 	const keeper = create({
-		silent: true,
+		disabled: true,
 		print: true,
 		timeline: true,
 		console: {},
