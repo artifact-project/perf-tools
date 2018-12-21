@@ -4,6 +4,7 @@ describe('time', () => {
 	let ts = 0;
 	const warn = [];
 	const keeper = create({
+		timeline: true,
 		perf: {
 			now: () => ++ts,
 		},
@@ -57,6 +58,7 @@ describe('group', () => {
 	let ts = 0;
 	const warn = [];
 	const keeper = create({
+		timeline: true,
 		perf: {
 			now: () => ++ts,
 		},
@@ -67,7 +69,7 @@ describe('group', () => {
 
 	beforeEach(() => {
 		ts = 0;
-		keeper.entries.splice(0, 1e9);
+		keeper.entries.length = 0;
 	});
 
 	it('failed', () => {
@@ -140,17 +142,19 @@ describe('group', () => {
 
 		it('wrap', async () => {
 			keeper.group('app');
-			await keeper.wrap(async ()  => {
+			const ret = keeper.wrap(async ()  => {
 				keeper.time('timeout');
-
 				await new Promise(keeper.wrap(resolve => {
 					keeper.timeEnd('timeout');
 					keeper.time('any');
-					keeper.timeEnd('any');
-					resolve();
+					setTimeout(() => {
+						keeper.timeEnd('any');
+						resolve();
+					}, 10);
 				}));
 			})();
 			keeper.groupEnd('app');
+			await ret;
 
 			keeper.group('footer');
 			keeper.time('metricts');

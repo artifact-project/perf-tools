@@ -92,8 +92,9 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	const perf = options.perf || nativePerf;
 	const prefix = options.prefix || '';
 	const console = options.console || nativeConsole;
-	const maxEntries = options.maxEntries == null ? 1e3 : options.maxEntries;
+	const maxEntries = options.maxEntries == nil ? 1e3 : options.maxEntries;
 	const warn = options.warn || console.warn && console.warn.bind(console);
+	let needPrint = options.print;
 	let disabled = options.disabled;
 	let listener = options.listener;
 
@@ -214,8 +215,10 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		__print__(entries);
 	}
 
-	function print() {
-		if (lock === false) {
+	function print(state?: boolean) {
+		if (state != nil) {
+			needPrint = state;
+		} else if (lock === false) {
 			lock = true;
 			(globalThis.requestAnimationFrame || setTimeout)(printDefered);
 		}
@@ -260,7 +263,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	}
 
 	function closeGroup(entry: Entry, end?: number) {
-		options.print && print();
+		needPrint && print();
 
 		if (entry !== nil) {
 			if (entry.active > 0) {
@@ -367,7 +370,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 };
 
 export const system = globalThis.timekeeper ? globalThis.timekeeper.system : create({
-	print: /^(file:|localhost)/.test(globalThis.location + ''),
+	print: /^(file:|https?:\/\/localhost)/.test(globalThis.location + ''),
 	timeline: true,
 	prefix: '⚡️',
 });

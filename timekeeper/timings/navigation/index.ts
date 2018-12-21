@@ -1,6 +1,6 @@
 import { TimeKeeper } from '../../src/timekeeper/timekeeper';
 
-export function navigationTimings(kepper: TimeKeeper) {
+export function navigationTimings(keeper: TimeKeeper) {
 	try {
 		const {
 			navigationStart,
@@ -13,14 +13,14 @@ export function navigationTimings(kepper: TimeKeeper) {
 			responseEnd,
 		} = performance.timing;
 
-		kepper.group('tk-navigation-net', navigationStart);
-		kepper.add('redirect', redirectStart, redirectEnd);
-		kepper.add('app-cache', redirectEnd, domainLookupStart);
-		kepper.add('dns', domainLookupStart, domainLookupEnd);
-		kepper.add('tcp', domainLookupEnd, requestStart);
-		kepper.add('request', requestStart, responseStart);
-		kepper.add('response', requestStart, responseEnd);
-		kepper.groupEnd('tk-navigation-net', responseEnd);
+		keeper.group('tk-navigation-net', navigationStart);
+		keeper.add('redirect', redirectStart, redirectEnd);
+		keeper.add('app-cache', redirectEnd, domainLookupStart);
+		keeper.add('dns', domainLookupStart, domainLookupEnd);
+		keeper.add('tcp', domainLookupEnd, requestStart);
+		keeper.add('request', requestStart, responseStart);
+		keeper.add('response', requestStart, responseEnd);
+		keeper.groupEnd('tk-navigation-net', responseEnd);
 	} catch (_) {}
 
 	window.addEventListener('DOMContentLoaded', function check() {
@@ -37,11 +37,11 @@ export function navigationTimings(kepper: TimeKeeper) {
 				return;
 			}
 
-			kepper.group('tk-navigation-dom', responseEnd);
-			kepper.add('interactive', responseEnd, domInteractive);
-			kepper.add('content-loaded', domInteractive, domContentLoadedEventEnd);
-			kepper.add('complete', domContentLoadedEventEnd, domComplete);
-			kepper.groupEnd('tk-navigation-dom', domComplete);
+			keeper.group('tk-navigation-dom', responseEnd);
+			keeper.add('interactive', responseEnd, domInteractive);
+			keeper.add('content-loaded', domInteractive, domContentLoadedEventEnd);
+			keeper.add('complete', domContentLoadedEventEnd, domComplete);
+			keeper.groupEnd('tk-navigation-dom', domComplete);
 		} catch (_) {}
 	});
 }

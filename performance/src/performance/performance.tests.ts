@@ -49,10 +49,41 @@ describe('performance: mark and measure', () => {
 	});
 });
 
+describe('measure partial args', () => {
+	it('only name', () => {
+		const name = `_${Math.random()}`;
+		const ts = perf.now();
+		perf.measure(name);
+		expect(perf.getEntriesByName(name)[0].startTime).toEqual(ts);
+	});
+
+	it('only start', async () => {
+		const name = `_${Math.random()}`;
+		const start = `_${Math.random()}`;
+		const ts = perf.now();
+		perf.mark(start);
+		await pause(10);
+		perf.measure(name, start);
+		expect(perf.getEntriesByName(name)[0].startTime).toEqual(ts);
+		expect(perf.getEntriesByName(name)[0].duration).toBeGreaterThanOrEqual(10);
+	});
+});
+
 describe('errors', () => {
 	function errMsg(val) {
 		return `Failed to execute 'measure' on 'Performance': The mark '${val}' does not exist.`
 	}
+
+	it('measure: name', () => {
+		let err: Error = new Error('ok');
+		try {
+			(perf as any).measure();
+		} catch (val) {
+			err = val;
+		}
+
+		expect(err.message).toBe(`Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.`);
+	});
 
 	it('measure: first', () => {
 		const first = `_${Math.random()}`;

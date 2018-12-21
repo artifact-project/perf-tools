@@ -114,11 +114,14 @@ export function polyfill<T extends object>(global: T) {
 
 	if (isNotSupport(performance, 'measure')) {
 		performance.measure = performance.webkitMeasure || function measure(name, startMark, endMark) {
+			const argLen = arguments.length;
 			let errMark: string;
 
-			if (!_marksIndex.hasOwnProperty(startMark)) {
+			if (name == null) {
+				throw new TypeError(`Failed to execute 'measure' on 'Performance': 1 argument required, but only 0 present.`);
+			} else if (_marksIndex[startMark] == null) {
 				errMark = startMark;
-			} else if (!_marksIndex.hasOwnProperty(endMark)) {
+			} else if (_marksIndex[endMark] == null) {
 				errMark = endMark;
 			}
 
@@ -126,15 +129,18 @@ export function polyfill<T extends object>(global: T) {
 				throw new Exception(`Failed to execute 'measure' on 'Performance': The mark '${errMark}' does not exist.`);
 			}
 
-			const start = _marksIndex[startMark].startTime;
-			const end = _marksIndex[endMark].startTime;
-
-			_entries.push(new Entry({
+			const start = argLen > 1 ? _marksIndex[startMark].startTime : performance.now();
+			const end = argLen > 2 ? _marksIndex[endMark].startTime : performance.now();
+			const entry = new Entry({
 				name,
 				entryType: 'measure',
 				startTime: start,
 				duration: end - start,
-			}));
+			});
+
+			_entries.push(entry);
+
+			return entry;
 		};
 	}
 

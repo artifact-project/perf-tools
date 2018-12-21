@@ -17,7 +17,7 @@
   "homepage": "https://github.com/artifact-project/perf-tools/",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest",
     "ts-build": "tsc",
     "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo '' && npm run build-example",
     "build-example": "cd __example__ && node ./build.js",
