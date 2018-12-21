@@ -1,18 +1,28 @@
 import { TimeKeeper } from '../../src/timekeeper/timekeeper';
 
-export function paintTimings(kepper: TimeKeeper) {
+type PaintTuple = [string, number, number];
+
+export function paintTimings(keeper: TimeKeeper) {
 	window.addEventListener('DOMContentLoaded', function check() {
 		try {
 			const entries = performance.getEntriesByType('paint');
 
 			if (entries.length > 1) {
-				kepper.group('tk-paint');
+				let end = 0;
+				const values= entries
+					.sort((a, b) => a.startTime - b.startTime)
+					.map(entry => {
+						const tuple = [entry.name, end, entry.startTime] as PaintTuple;
+						end = entry.startTime;
+						return tuple;
+					})
+				;
 
-				entries.forEach(entry => {
-					kepper.add(entry.name, entry.startTime, entry.startTime + entry.duration);
+				keeper.group('tk-paint', 0);
+				values.forEach(v => {
+					keeper.add(v[0], v[1], v[2]);
 				});
-
-				kepper.groupEnd();
+				keeper.groupEnd('tk-paint', end);
 			} else {
 				setTimeout(check, 250);
 			}

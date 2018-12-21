@@ -294,7 +294,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		},
 
 		add(this: TimeKeeper, name: string, start: number, end: number) {
-			if (start > 0 && start <= end) {
+			if (start >= 0 && start <= end) {
 				createEntry(name, false, start).close(end);
 			}
 		},
