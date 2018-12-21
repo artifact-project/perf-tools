@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/promise",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lazy Promise",
   "keywords": [
     "perf-tools",

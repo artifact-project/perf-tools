@@ -9,6 +9,25 @@ it('instanceOf LazyPromise', () => {
 	expect(new LazyPromise(noop)).toBeInstanceOf(LazyPromise);
 });
 
+it('catch', async () => {
+	const val = await new LazyPromise((_, reject) => {
+		reject('REJECTED');
+	}).catch(val => `${val} and RESOLVED`);
+
+	expect(val).toBe('REJECTED and RESOLVED');
+});
+
+it('finally', async () => {
+	let val = '';
+	await new LazyPromise((resolve) => {
+		resolve('OK');
+	}).finally(() => {
+		val = `finally`;
+	});
+
+	expect(val).toEqual('finally');
+});
+
 describe('sync', () => {
 	it('resolve', async () => {
 		expect(await new LazyPromise((resolve) => {

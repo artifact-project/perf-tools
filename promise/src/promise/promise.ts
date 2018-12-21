@@ -66,11 +66,11 @@ LazyPromiseConstructor.prototype.then = function (onfulfilled, onrejected) {
 };
 
 LazyPromiseConstructor.prototype.catch = function (onfulfilled) {
-	return this.getPromise().catch(onfulfilled);
+	return this._getPromise().catch(onfulfilled);
 };
 
 LazyPromiseConstructor.prototype.finally = function (onfinally) {
-	const promise = this.getPromise();
+	const promise = this._getPromise();
 	if (FINALLY_SUPPROTED) {
 		return promise.finally(onfinally);
 	} else {
@@ -101,4 +101,6 @@ LazyPromiseConstructor['reject'] = function (value) {
 	});
 };
 
-export const LazyPromise: PromiseConstructor = LazyPromiseConstructor as any;
+export const LazyPromise: PromiseConstructor & {
+	finally: <T>() => Promise<T>;
+} = LazyPromiseConstructor as any;
