@@ -49,6 +49,52 @@ describe('performance: mark and measure', () => {
 	});
 });
 
+describe('errors', () => {
+	function errMsg(val) {
+		return `Failed to execute 'measure' on 'Performance': The mark '${val}' does not exist.`
+	}
+
+	it('measure: first', () => {
+		const first = `_${Math.random()}`;
+		let err: Error = new Error('ok');
+		try {
+			perf.measure('test', first);
+		} catch (val) {
+			err = val;
+		}
+
+		expect(err.message).toBe(errMsg(first));
+	});
+
+	it('measure: second', () => {
+		const first = `_${Math.random()}`;
+		const second = `_${Math.random()}`;
+		let err: Error = new Error('ok');
+		try {
+			perf.mark(first);
+			perf.measure('test', first, second);
+		} catch (val) {
+			err = val;
+		}
+
+		expect(err.message).toBe(errMsg(second));
+	});
+
+	it('measure: clear', () => {
+		const first = `_${Math.random()}`;
+		let err: Error = new Error('ok');
+		try {
+			perf.mark(first);
+			perf.clearMarks(first);
+			perf.measure('test', first, first);
+		} catch (val) {
+			err = val;
+		}
+
+		expect(err.message).toBe(errMsg(first));
+	});
+});
+
 function pause(ms: number) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms)

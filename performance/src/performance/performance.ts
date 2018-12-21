@@ -53,6 +53,7 @@ const dateNow = Date.now || function () {
 }
 
 const startOffset = dateNow();
+const Exception = typeof DOMException !== 'undefined' ? DOMException : Error;
 
 
 export function polyfill<T extends object>(global: T) {
@@ -113,6 +114,18 @@ export function polyfill<T extends object>(global: T) {
 
 	if (isNotSupport(performance, 'measure')) {
 		performance.measure = performance.webkitMeasure || function measure(name, startMark, endMark) {
+			let errMark: string;
+
+			if (!_marksIndex.hasOwnProperty(startMark)) {
+				errMark = startMark;
+			} else if (!_marksIndex.hasOwnProperty(endMark)) {
+				errMark = endMark;
+			}
+
+			if (errMark) {
+				throw new Exception(`Failed to execute 'measure' on 'Performance': The mark '${errMark}' does not exist.`);
+			}
+
 			const start = _marksIndex[startMark].startTime;
 			const end = _marksIndex[endMark].startTime;
 
@@ -149,6 +162,7 @@ export function polyfill<T extends object>(global: T) {
 	if (isNotSupport(performance, 'clearMarks')) {
 		performance.clearMarks = performance.webkitClearMarks || function clearMarks(name){
 			_clearEntries('mark', name);
+			delete _marksIndex[name];
 		};
 	}
 
