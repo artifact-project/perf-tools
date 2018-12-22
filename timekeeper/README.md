@@ -95,8 +95,12 @@ npm i --save @perf-tools/timekeeper
 	- **perf**: `Partial<Performance>`
 	- **console**: `Partial<Console>`
 	- **timeline**: `boolean`
+	- **listener**: `(entry: Entry) => void`
 	- **warn**: `(msg: string) => void`
   - **Keeper**
+    - **print**: `(enable?: boolean) => void`
+    - **disabled**: `(state: boolean) => void`
+    - **listen**: `(fn: (entry: Entry) => void) => void`
     - **time**(name: `string`): `Entry`
     - **timeEnd**(name: `string`)
     - **group**(name: `string`)
