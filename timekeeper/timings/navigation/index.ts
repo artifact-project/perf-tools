@@ -14,14 +14,14 @@ export function navigationTimings(keeper: TimeKeeper) {
 			responseEnd,
 		} = performance.timing;
 
-		keeper.group('tk-navigation-net', navigationStart);
-		keeper.add('redirect', redirectStart, redirectEnd);
-		keeper.add('app-cache', fetchStart, domainLookupStart);
-		keeper.add('dns', domainLookupStart, domainLookupEnd);
-		keeper.add('tcp', domainLookupEnd, requestStart);
-		keeper.add('request', requestStart, responseStart);
-		keeper.add('response', requestStart, responseEnd);
-		keeper.groupEnd('tk-navigation-net', responseEnd);
+		const gnet = keeper.group('tk-navigation-net', navigationStart, true);
+		gnet.add('redirect', redirectStart, redirectEnd);
+		gnet.add('app-cache', fetchStart, domainLookupStart);
+		gnet.add('dns', domainLookupStart, domainLookupEnd);
+		gnet.add('tcp', domainLookupEnd, requestStart);
+		gnet.add('request', requestStart, responseStart);
+		gnet.add('response', requestStart, responseEnd);
+		gnet.stop(responseEnd);
 	} catch (_) {}
 
 	window.addEventListener('DOMContentLoaded', function check() {
@@ -38,11 +38,11 @@ export function navigationTimings(keeper: TimeKeeper) {
 				return;
 			}
 
-			keeper.group('tk-navigation-dom', responseEnd);
-			keeper.add('interactive', responseEnd, domInteractive);
-			keeper.add('content-loaded', domInteractive, domContentLoadedEventEnd);
-			keeper.add('complete', domContentLoadedEventEnd, domComplete);
-			keeper.groupEnd('tk-navigation-dom', domComplete);
+			const gdom = keeper.group('tk-navigation-dom', responseEnd, true);
+			gdom.add('interactive', responseEnd, domInteractive);
+			gdom.add('content-loaded', domInteractive, domContentLoadedEventEnd);
+			gdom.add('complete', domContentLoadedEventEnd, domComplete);
+			gdom.stop(domComplete);
 		} catch (_) {}
 	});
 }

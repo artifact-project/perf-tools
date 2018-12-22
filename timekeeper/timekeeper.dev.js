@@ -51,8 +51,6 @@ var timekeeper = (function (exports) {
 	    var api;
 	    var cid = 0;
 	    var lock = false;
-	    var label;
-	    var mark;
 	    function disable(state) {
 	        disabled = state;
 	    }
@@ -76,10 +74,10 @@ var timekeeper = (function (exports) {
 	        }
 	    }
 	    function measure(entry) {
-	        mark = entry[s_mark];
-	        label = "" + prefix + entry.name;
-	        perf[s_measure](label, mark);
-	        perf[s_clearMarks](mark);
+	        var id = entry.id;
+	        var label = "" + prefix + entry.name;
+	        perf[s_measure](label, id);
+	        perf[s_clearMarks](id);
 	        perf[s_clearMeasures](label);
 	    }
 	    function __print__(entries) {
@@ -94,7 +92,7 @@ var timekeeper = (function (exports) {
 	        var nextLength;
 	        for (; i < entries.length; i++) {
 	            entry = entries[i];
-	            if (entry.end && !entry.active) {
+	            if (entry.end !== nil && !entry.active) {
 	                nextEntries = entry.entries;
 	                nextLength = nextEntries ? nextEntries.length : 0;
 	                start = entry.start;
@@ -137,26 +135,26 @@ var timekeeper = (function (exports) {
 	            (globalThis.requestAnimationFrame || setTimeout)(printDefered);
 	        }
 	    }
-	    function createEntry(name, parent, isGroup, start, end) {
-	        label = "" + prefix + name + "-" + ++cid;
-	        mark = label + "-mark";
+	    function createEntry(name, parent, isGroup, start, end, isolate) {
+	        var label = "" + prefix + name + "-" + ++cid;
+	        var id = label + "-mark";
 	        if (parent === api) {
 	            parent = activeGroups[0] || nil;
 	        }
 	        var entry = {
-	            mark: mark,
+	            id: id,
 	            name: name,
 	            parent: parent,
 	            entries: isGroup ? [] : nil,
 	            active: +isGroup,
-	            start: start >= 0 ? start : perf.now(),
-	            end: end >= 0 ? end : 0,
+	            start: start != nil ? start : perf.now(),
+	            end: end != nil ? end : nil,
 	            stop: isGroup ? stopGroup : stopEntry,
 	        };
 	        if (parent === nil) {
 	            !disabled && entries.push(entry);
 	        }
-	        else if (parent.end !== 0 && end == nil) {
+	        else if (parent.end !== nil && end == nil) {
 	            warn("[timekeeper] Group \"" + parent.name + "\" is stopped");
 	        }
 	        else if (!disabled) {
@@ -167,24 +165,28 @@ var timekeeper = (function (exports) {
 	            entry.add = add;
 	            entry.time = time;
 	            entry.group = group;
-	            !disabled && activeGroups.unshift(entry);
+	            entry.mark = groupMark;
+	            !disabled && !isolate && activeGroups.unshift(entry);
 	        }
 	        else {
 	            !disabled && activeEntries.push(entry);
 	        }
-	        !disabled && (start == nil) && perfSupported && perf[s_mark](mark);
+	        !disabled && (start == nil) && perfSupported && perf[s_mark](id);
 	        return entry;
 	    }
 	    function stopEntry(end) {
-	        if (this.end === 0) {
+	        if (this.end === nil) {
 	            this.end = end >= 0 ? end : perf.now();
 	            (end == nil) && perfSupported && measure(this);
 	            emit(this);
 	            closeGroup(this.parent, end);
 	        }
+	        return this;
 	    }
 	    function stopGroup(end) {
+	        groupStopAll(this);
 	        closeGroup(this, end);
+	        return this;
 	    }
 	    function closeGroup(entry, end) {
 	        needPrint && print();
@@ -192,7 +194,7 @@ var timekeeper = (function (exports) {
 	            if (entry.active > 0) {
 	                (--entry.active === 0) && closeGroup(entry, end);
 	            }
-	            else if (entry.end === 0) {
+	            else if (entry.end === nil) {
 	                var idx = activeGroups.indexOf(entry);
 	                (idx > -1) && activeGroups.splice(idx, 1);
 	                entry.end = end >= 0 ? end : perf.now();
@@ -225,13 +227,28 @@ var timekeeper = (function (exports) {
 	            warn && warn("[timekeeper] Timer \"" + name + "\" doesn't exist");
 	        }
 	    }
-	    function group(name, start) {
-	        return createEntry(name, this, true, start);
+	    function groupStopAll(group) {
+	        var entries = group.entries;
+	        var idx = entries.length;
+	        while (idx--) {
+	            entries[idx].stop();
+	        }
+	    }
+	    function groupMark(name) {
+	        groupStopAll(this);
+	        this.time(name);
+	    }
+	    function group(name, start, isolate) {
+	        if (start === true) {
+	            isolate = start;
+	            start = nil;
+	        }
+	        return createEntry(name, isolate ? nil : this, true, start, nil, isolate);
 	    }
 	    function groupEnd(name, end) {
-	        for (var idx = 0; idx < activeGroups.length; idx++) {
-	            if (name == nil || activeGroups[idx].name === name) {
-	                activeGroups[idx].stop(end);
+	        for (var i = 0; i < activeGroups.length; i++) {
+	            if (name == nil || activeGroups[i].name === name) {
+	                activeGroups[i].stop(end);
 	                return;
 	            }
 	        }

@@ -54,8 +54,6 @@
 	    var api;
 	    var cid = 0;
 	    var lock = false;
-	    var label;
-	    var mark;
 	    function disable(state) {
 	        disabled = state;
 	    }
@@ -79,10 +77,10 @@
 	        }
 	    }
 	    function measure(entry) {
-	        mark = entry[s_mark];
-	        label = "" + prefix + entry.name;
-	        perf[s_measure](label, mark);
-	        perf[s_clearMarks](mark);
+	        var id = entry.id;
+	        var label = "" + prefix + entry.name;
+	        perf[s_measure](label, id);
+	        perf[s_clearMarks](id);
 	        perf[s_clearMeasures](label);
 	    }
 	    function __print__(entries) {
@@ -97,7 +95,7 @@
 	        var nextLength;
 	        for (; i < entries.length; i++) {
 	            entry = entries[i];
-	            if (entry.end && !entry.active) {
+	            if (entry.end !== nil && !entry.active) {
 	                nextEntries = entry.entries;
 	                nextLength = nextEntries ? nextEntries.length : 0;
 	                start = entry.start;
@@ -140,26 +138,26 @@
 	            (globalThis.requestAnimationFrame || setTimeout)(printDefered);
 	        }
 	    }
-	    function createEntry(name, parent, isGroup, start, end) {
-	        label = "" + prefix + name + "-" + ++cid;
-	        mark = label + "-mark";
+	    function createEntry(name, parent, isGroup, start, end, isolate) {
+	        var label = "" + prefix + name + "-" + ++cid;
+	        var id = label + "-mark";
 	        if (parent === api) {
 	            parent = activeGroups[0] || nil;
 	        }
 	        var entry = {
-	            mark: mark,
+	            id: id,
 	            name: name,
 	            parent: parent,
 	            entries: isGroup ? [] : nil,
 	            active: +isGroup,
-	            start: start >= 0 ? start : perf.now(),
-	            end: end >= 0 ? end : 0,
+	            start: start != nil ? start : perf.now(),
+	            end: end != nil ? end : nil,
 	            stop: isGroup ? stopGroup : stopEntry,
 	        };
 	        if (parent === nil) {
 	            !disabled && entries.push(entry);
 	        }
-	        else if (parent.end !== 0 && end == nil) {
+	        else if (parent.end !== nil && end == nil) {
 	            warn("[timekeeper] Group \"" + parent.name + "\" is stopped");
 	        }
 	        else if (!disabled) {
@@ -170,24 +168,28 @@
 	            entry.add = add;
 	            entry.time = time;
 	            entry.group = group;
-	            !disabled && activeGroups.unshift(entry);
+	            entry.mark = groupMark;
+	            !disabled && !isolate && activeGroups.unshift(entry);
 	        }
 	        else {
 	            !disabled && activeEntries.push(entry);
 	        }
-	        !disabled && (start == nil) && perfSupported && perf[s_mark](mark);
+	        !disabled && (start == nil) && perfSupported && perf[s_mark](id);
 	        return entry;
 	    }
 	    function stopEntry(end) {
-	        if (this.end === 0) {
+	        if (this.end === nil) {
 	            this.end = end >= 0 ? end : perf.now();
 	            (end == nil) && perfSupported && measure(this);
 	            emit(this);
 	            closeGroup(this.parent, end);
 	        }
+	        return this;
 	    }
 	    function stopGroup(end) {
+	        groupStopAll(this);
 	        closeGroup(this, end);
+	        return this;
 	    }
 	    function closeGroup(entry, end) {
 	        needPrint && print();
@@ -195,7 +197,7 @@
 	            if (entry.active > 0) {
 	                (--entry.active === 0) && closeGroup(entry, end);
 	            }
-	            else if (entry.end === 0) {
+	            else if (entry.end === nil) {
 	                var idx = activeGroups.indexOf(entry);
 	                (idx > -1) && activeGroups.splice(idx, 1);
 	                entry.end = end >= 0 ? end : perf.now();
@@ -228,13 +230,28 @@
 	            warn && warn("[timekeeper] Timer \"" + name + "\" doesn't exist");
 	        }
 	    }
-	    function group(name, start) {
-	        return createEntry(name, this, true, start);
+	    function groupStopAll(group) {
+	        var entries = group.entries;
+	        var idx = entries.length;
+	        while (idx--) {
+	            entries[idx].stop();
+	        }
+	    }
+	    function groupMark(name) {
+	        groupStopAll(this);
+	        this.time(name);
+	    }
+	    function group(name, start, isolate) {
+	        if (start === true) {
+	            isolate = start;
+	            start = nil;
+	        }
+	        return createEntry(name, isolate ? nil : this, true, start, nil, isolate);
 	    }
 	    function groupEnd(name, end) {
-	        for (var idx = 0; idx < activeGroups.length; idx++) {
-	            if (name == nil || activeGroups[idx].name === name) {
-	                activeGroups[idx].stop(end);
+	        for (var i = 0; i < activeGroups.length; i++) {
+	            if (name == nil || activeGroups[i].name === name) {
+	                activeGroups[i].stop(end);
 	                return;
 	            }
 	        }
@@ -267,18 +284,18 @@
 
 }({}));
 
-
+		
 			// navigation
-			var timekeeperNavigation=function(t){"use strict";return t.navigationTimings=function(r){try{var t=performance.timing,n=t.navigationStart,e=t.redirectStart,a=t.redirectEnd,d=t.fetchStart,o=t.domainLookupStart,i=t.domainLookupEnd,c=t.requestStart,p=t.responseStart,m=t.responseEnd;r.group("tk-navigation-net",n),r.add("redirect",e,a),r.add("app-cache",d,o),r.add("dns",o,i),r.add("tcp",i,c),r.add("request",c,p),r.add("response",c,m),r.groupEnd("tk-navigation-net",m)}catch(t){}window.addEventListener("DOMContentLoaded",function t(){try{var n=performance.timing,e=n.responseEnd,a=n.domInteractive,d=n.domContentLoadedEventEnd,o=n.domComplete;if(!o)return void setTimeout(t,250);r.group("tk-navigation-dom",e),r.add("interactive",e,a),r.add("content-loaded",a,d),r.add("complete",d,o),r.groupEnd("tk-navigation-dom",o)}catch(t){}})},t}({});
+			var timekeeperNavigation=function(t){"use strict";return t.navigationTimings=function(i){try{var t=performance.timing,e=t.navigationStart,n=t.redirectStart,a=t.redirectEnd,d=t.fetchStart,o=t.domainLookupStart,r=t.domainLookupEnd,c=t.requestStart,p=t.responseStart,s=t.responseEnd,m=i.group("tk-navigation-net",e,!0);m.add("redirect",n,a),m.add("app-cache",d,o),m.add("dns",o,r),m.add("tcp",r,c),m.add("request",c,p),m.add("response",c,s),m.stop(s)}catch(t){}window.addEventListener("DOMContentLoaded",function t(){try{var e=performance.timing,n=e.responseEnd,a=e.domInteractive,d=e.domContentLoadedEventEnd,o=e.domComplete;if(!o)return void setTimeout(t,250);var r=i.group("tk-navigation-dom",n,!0);r.add("interactive",n,a),r.add("content-loaded",a,d),r.add("complete",d,o),r.stop(o)}catch(t){}})},t}({});
 
 			timekeeperNavigation.navigationTimings(timekeeper.system);
-
+		
 
 			// paint
 			var timekeeperPaint=function(t){"use strict";return t.paintTimings=function(i){window.addEventListener("DOMContentLoaded",function t(){try{var n=performance.getEntriesByType("paint");if(1<n.length){var e=0,r=n.sort(function(t,n){return t.startTime-n.startTime}).map(function(t){var n=[t.name,e,t.startTime];return e=t.startTime,n});i.group("tk-paint",0),r.forEach(function(t){i.add(t[0],t[1],t[2])}),i.groupEnd("tk-paint",e)}else setTimeout(t,250)}catch(t){}})},t}({});
 
 			timekeeperPaint.paintTimings(timekeeper.system);
-
+		
 		</script>
 	<script>
 		var keeper = timekeeper.create({
@@ -343,7 +360,7 @@
 	<script>
 		keeper.groupEnd('body');
 
-		const ginit = keeper.group('init');
+		const ginit = keeper.group('init', true);
 		let timer = ginit.time('before');
 		setTimeout(async () => {
 			timer.stop();
@@ -355,6 +372,19 @@
 			setTimeout(() => {
 				timer.stop();
 				ginit.stop();
+			}, 5);
+		}, 10);
+
+		const gapp = keeper.group('app', true);
+		gapp.mark('boot');
+		setTimeout(async () => {
+			gapp.mark('route');
+			// Slow block
+			await new Promise(r => setTimeout(r, 30));
+
+			gapp.mark('nav')
+			setTimeout(() => {
+				gapp.stop();
 			}, 5);
 		}, 10);
 	</script>

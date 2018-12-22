@@ -65,16 +65,14 @@ npm i --save @perf-tools/timekeeper
 	<script>
 		keeper.timeEnd('javascript');
 
-		keeper.group('app');
-		keeper.time('require');
-		require(['app/bootstrap'], keeper.wrap(function (bootstrap) {
-			keeper.timeEnd('require');
+		const gapp = keeper.group('app', true);
 
-			keeper.time('boot');
-			bootstrap(document)
-			keeper.timeEnd('boot');
-		}));
-		keeper.groupEnd('app');
+		gapp.mark('require');
+		require(['app/bootstrap'], (bootstrap) => {
+			gapp.mark('boot');
+			bootstrap(document);
+			gapp.stop();
+		});
 	</script>
 	<!-- ... -->
 	<script>
@@ -88,7 +86,7 @@ npm i --save @perf-tools/timekeeper
 
 ### API
 
-- **create**(options: `KeeperOptions`): `Keeper`
+- **create**(options: `KeeperOptions`): `TimeKeeper`
   - **options**
     - **disabled**: `boolean`
     - **print**: `boolean`
@@ -97,15 +95,31 @@ npm i --save @perf-tools/timekeeper
 	- **timeline**: `boolean`
 	- **listener**: `(entry: Entry) => void`
 	- **warn**: `(msg: string) => void`
-  - **Keeper**
+  - **TimeKeeper**
     - **print**: `(enable?: boolean) => void`
-    - **disabled**: `(state: boolean) => void`
+    - **disable**: `(state: boolean) => void`
     - **listen**: `(fn: (entry: Entry) => void) => void`
-    - **time**(name: `string`): `Entry`
-    - **timeEnd**(name: `string`)
-    - **group**(name: `string`)
-    - **groupEnd**(name?: `string`)
-    - **wrap**`<R>`(fn: `(...args: A) => R`): `(...args: A) => R`
+    - **add**(name: `string`, start: `number`, end: `number`): `Entry`
+    - **time**(name: `string`, start?: `number`): `Entry`
+    - **timeEnd**(name: `string`, end?: `number`): `void`
+    - **group**(name: `string`): `GroupEntry`
+    - **group**(name: `string`, isolate: `true`): `GroupEntry`
+    - **group**(name: `string`, start: `number`, isolate?: `true`): `GroupEntry`
+    - **groupEnd**(name?: `string`, end?: `number`): `void`
+  - **Entry**
+    - **id**: `string` — unique identifier
+    - **name**: `string` — name of measure
+    - **start**: `number` — start mark
+    - **end**: `number` — end mark
+    - **parent**: `GroupEntry | null` — reference on parent
+	- **stop**(): `void` — complete the measurement (set `end` prop)
+  - **GroupEntry** (extends `Entry`)
+    - **entries**: `Entry[]` — nested metrics
+	- **add**(name: `string`, start: `number`, end: `number`): `Entry`
+    - **time**(name: `string`, start?: `number`): `Entry`
+    - **timeEnd**(name: `string`, end?: `number`): `void`
+    - **mark**(name: `string`): `void`
+    - **group**(name: `string`): `GroupEntry`
 
 ---
 

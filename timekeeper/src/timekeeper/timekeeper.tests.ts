@@ -15,11 +15,11 @@ describe('time', () => {
 		},
 	});
 	const expected = {
-		mark: 'label-1-mark',
+		id: 'label-1-mark',
 		name: 'label',
 		active: 0,
 		start: 1,
-		end: 0,
+		end: null,
 		parent: null,
 		entries: null,
 	};
@@ -74,11 +74,32 @@ describe('group', () => {
 	});
 
 	it('groupEntry', () => {
-		const gapp = keeper.group('app');
-		gapp.stop();
+		keeper.group('app').stop();
 
 		expect(keeper.entries[0].active).toBe(0);
 		expect(keeper.entries[0].end).toBe(ts);
+	});
+
+	it('groupMark', () => {
+		const gapp = keeper.group('app');
+		gapp.mark('first');
+		gapp.mark('second');
+		gapp.stop();
+
+		expect(keeper.entries.length).toBe(1);
+		expect(gapp.entries.length).toBe(2);
+		expect(gapp.entries[0].name).toBe('first');
+		expect(gapp.entries[0].end).toBe(3);
+		expect(gapp.entries[1].end).toBe(5);
+		expect(gapp.end).toBe(6);
+	});
+
+	it('isolate', () => {
+		const gapp = keeper.group('app', true);
+		gapp.stop();
+
+		expect(gapp.start).toBe(1);
+		expect(gapp.end).toBe(2);
 	});
 
 	it('empty', () => {

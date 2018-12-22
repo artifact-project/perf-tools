@@ -49,7 +49,7 @@ function has<T extends object>(target: T, key: keyof T): boolean {
 }
 
 export type Entry = {
-	mark: string;
+	id: string;
 	name: string;
 	parent: GroupEntry;
 	entries: Entry[];
@@ -62,7 +62,8 @@ export type Entry = {
 export type GroupEntry = Entry & {
 	add: TimeKeeper['add'];
 	time: TimeKeeper['time'];
-	group: TimeKeeper['group'];
+	group: (name: string, start?: number) => GroupEntry;
+	mark: (name: string) => void;
 }
 
 export type KeeperOptions = {
@@ -88,7 +89,9 @@ export type TimeKeeper = {
 	time(name: string): Entry;
 	timeEnd(name: string): void;
 
+	group(name: string, isolate: true): GroupEntry;
 	group(name: string, start?: number): GroupEntry;
+	group(name: string, start: number, isolate: true): GroupEntry;
 	groupEnd(name?: string, end?: number): void;
 }
 
@@ -118,8 +121,6 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 	let cid = 0;
 	let lock = false;
-	let label: string;
-	let mark: string;
 
 	function disable(state: boolean) {
 		disabled = state;
@@ -127,7 +128,6 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 	function listen(fn: (entry: Entry) => void) {
 		listener = fn;
-
 		let idx = emitEntries.length;
 		while (idx--) {
 			fn(emitEntries[idx]);
@@ -147,11 +147,11 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	}
 
 	function measure(entry: Entry) {
-		mark = entry[s_mark];
-		label = `${prefix}${entry.name}`;
+		let id = entry.id;
+		let label = `${prefix}${entry.name}`;
 
-		perf[s_measure](label, mark);
-		perf[s_clearMarks](mark);
+		perf[s_measure](label, id);
+		perf[s_clearMarks](id);
 		perf[s_clearMeasures](label);
 	}
 
@@ -169,7 +169,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		for (; i < entries.length; i++) {
 			entry = entries[i];
 
-			if (entry.end && !entry.active) {
+			if (entry.end !== nil && !entry.active) {
 				nextEntries = entry.entries;
 				nextLength = nextEntries ? nextEntries.length : 0;
 
@@ -243,28 +243,29 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		isGroup: boolean,
 		start?: number,
 		end?: number,
+		isolate?: true,
 	): Entry | GroupEntry {
-		label = `${prefix}${name}-${++cid}`;
-		mark = `${label}-mark`;
+		let label = `${prefix}${name}-${++cid}`;
+		let id = `${label}-mark`;
 
 		if ((parent as any) === api) {
 			parent = activeGroups[0] || nil;
 		}
 
 		const entry: Entry | GroupEntry = {
-			mark,
+			id,
 			name,
 			parent,
 			entries:  isGroup ? [] : nil,
 			active: +isGroup,
-			start: start >= 0 ? start : perf.now(),
-			end: end >= 0 ? end : 0,
+			start: start != nil ? start : perf.now(),
+			end: end != nil ? end : nil,
 			stop: isGroup ? stopGroup : stopEntry,
 		};
 
 		if (parent === nil) {
 			!disabled && entries.push(entry);
-		} else if (parent.end !== 0 && end == nil) {
+		} else if (parent.end !== nil && end == nil) {
 			warn(`[timekeeper] Group "${parent.name}" is stopped`);
 		} else if (!disabled) {
 			parent.active++;
@@ -275,28 +276,32 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			(entry as GroupEntry).add = add;
 			(entry as GroupEntry).time = time;
 			(entry as GroupEntry).group = group;
-			!disabled && activeGroups.unshift(entry as GroupEntry);
+			(entry as GroupEntry).mark = groupMark;
+			!disabled && !isolate && activeGroups.unshift(entry as GroupEntry);
 		} else {
 			!disabled && activeEntries.push(entry);
 		}
 
-		!disabled && (start == nil) && perfSupported && perf[s_mark](mark);
+		!disabled && (start == nil) && perfSupported && perf[s_mark](id);
 
 		return entry;
 	}
 
 	function stopEntry(this: Entry, end?: number) {
-		if (this.end === 0) {
+		if (this.end === nil) {
 			this.end = end >= 0 ? end : perf.now();
 
 			(end == nil) && perfSupported && measure(this);
 			emit(this);
 			closeGroup(this.parent, end);
 		}
+		return this;
 	}
 
 	function stopGroup(this: GroupEntry, end?: number) {
+		groupStopAll(this);
 		closeGroup(this, end);
+		return this;
 	}
 
 	function closeGroup(entry: GroupEntry, end?: number) {
@@ -305,8 +310,8 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		if (entry !== nil) {
 			if (entry.active > 0) {
 				(--entry.active === 0) && closeGroup(entry, end);
-			} else if (entry.end === 0) {
-				const idx = activeGroups.indexOf(entry);
+			} else if (entry.end === nil) {
+				let idx = activeGroups.indexOf(entry);
 				(idx > -1) && activeGroups.splice(idx, 1);
 
 				entry.end = end >= 0 ? end : perf.now();
@@ -334,6 +339,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 			while (idx--) {
 				entry = activeEntries[idx];
+
 				if (entry.name === name) {
 					entry.stop();
 					activeEntries.splice(idx, 1);
@@ -345,14 +351,39 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		}
 	}
 
-	function group(this: GroupEntry, name: string, start?: number): GroupEntry {
-		return createEntry(name, this, true, start) as GroupEntry;
+	function groupStopAll(group: GroupEntry) {
+		let entries = group.entries;
+		let idx = entries.length;
+		while (idx--) {
+			entries[idx].stop();
+		}
+	}
+
+	function groupMark(this: GroupEntry, name: string) {
+		groupStopAll(this);
+		this.time(name);
+	}
+
+	function group(this: GroupEntry, name: string, start?: number | true, isolate?: true): GroupEntry {
+		if (start === true) {
+			isolate = start;
+			start = nil;
+		}
+
+		return createEntry(
+			name,
+			isolate ? nil : this,
+			true,
+			start as number,
+			nil,
+			isolate,
+		) as GroupEntry;
 	}
 
 	function groupEnd(name: string, end?: number): void {
-		for (let idx = 0; idx < activeGroups.length; idx++) {
-			if (name == nil || activeGroups[idx].name === name) {
-				activeGroups[idx].stop(end);
+		for (let i = 0; i < activeGroups.length; i++) {
+			if (name == nil || activeGroups[i].name === name) {
+				activeGroups[i].stop(end);
 				return;
 			}
 		}
