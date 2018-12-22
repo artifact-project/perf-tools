@@ -33,29 +33,6 @@ nativePerf.now = nativePerf.now
 	|| (() => (dateNow() - startOffset))
 ;
 
-export type Entry = {
-	mark: string;
-	name: string;
-	parent: Entry;
-	entries: Entry[];
-	active: number;
-	start: number;
-	end: number;
-	stop: (end?: number) => void;
-}
-
-export type KeeperOptions = {
-	disabled: boolean;
-	print: boolean;
-	prefix: string;
-	perf: Partial<Performance>;
-	console: Partial<Console>;
-	timeline: boolean;
-	maxEntries: number;
-	listener: (entry: Entry) => void;
-	warn: (msg: string) => void;
-}
-
 export function color(ms: any): string {
 	return 'color: #' + (
 		ms < 2 ? 'ccc' :
@@ -71,21 +48,48 @@ function has<T extends object>(target: T, key: keyof T): boolean {
 	return target.hasOwnProperty(key);
 }
 
+export type Entry = {
+	mark: string;
+	name: string;
+	parent: GroupEntry;
+	entries: Entry[];
+	active: number;
+	start: number;
+	end: number;
+	stop: (end?: number) => void;
+}
+
+export type GroupEntry = Entry & {
+	add: TimeKeeper['add'];
+	time: TimeKeeper['time'];
+	group: TimeKeeper['group'];
+}
+
+export type KeeperOptions = {
+	disabled: boolean;
+	print: boolean;
+	prefix: string;
+	perf: Partial<Performance>;
+	console: Partial<Console>;
+	timeline: boolean;
+	maxEntries: number;
+	listener: (entry: Entry) => void;
+	warn: (msg: string) => void;
+}
+
 export type TimeKeeper = {
 	readonly entries: Entry[];
 
 	print(): void;
 	listen(fn: (entry: Entry) => void): void;
-	disabled(state: boolean): void;
+	disable(state: boolean): void;
 
 	add(name: string, start: number, end: number): void;
 	time(name: string): Entry;
 	timeEnd(name: string): void;
 
-	group(name: string, start?: number): void;
+	group(name: string, start?: number): GroupEntry;
 	groupEnd(name?: string, end?: number): void;
-
-	wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R;
 }
 
 export function create(options: Partial<KeeperOptions>): TimeKeeper {
@@ -108,13 +112,28 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	);
 	const entries: Entry[] = [];
 	const emitEntries: Entry[] = [];
-	const entriesIndex: {[name:string]: Entry[]} = {};
+	const activeEntries: Entry[] = [];
+	const activeGroups: GroupEntry[] = [];
+	let api: TimeKeeper;
 
 	let cid = 0;
-	let activeEntry: Entry = nil;
 	let lock = false;
 	let label: string;
 	let mark: string;
+
+	function disable(state: boolean) {
+		disabled = state;
+	}
+
+	function listen(fn: (entry: Entry) => void) {
+		listener = fn;
+
+		let idx = emitEntries.length;
+		while (idx--) {
+			fn(emitEntries[idx]);
+		}
+		emitEntries.length = 0;
+	}
 
 	function emit(entry: Entry) {
 		if (listener) {
@@ -124,16 +143,6 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			if (emitEntries.length > maxEntries) {
 				emitEntries.length = maxEntries;
 			}
-		}
-	}
-
-	function stopEntry(this: Entry, end?: number) {
-		if (this.end === 0) {
-			this.end = end >= 0 ? end : perf.now();
-
-			(end == nil) && perfSupported && measure(this);
-			emit(this);
-			closeGroup(this.parent, end);
 		}
 	}
 
@@ -149,6 +158,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	function __print__(entries: Entry[]) {
 		let i = 0;
 		let total = 0;
+		let start: number;
 		let entry: Entry;
 		let duration: number;
 		let selfDuration: number;
@@ -163,12 +173,8 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 				nextEntries = entry.entries;
 				nextLength = nextEntries ? nextEntries.length : 0;
 
-				if (entry.start === -1) {
-					entry.start = nextEntries[0].start;
-					entry.end = nextEntries[nextLength -1].end;
-				}
-
-				duration = entry.end - entry.start;
+				start = entry.start;
+				duration = entry.end - start;
 				logMsg = `${prefix}${entry.name}: %c${duration.toFixed(3)}ms`;
 
 				if (nextLength < 1) {
@@ -190,6 +196,13 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 					selfDuration = duration - __print__(nextEntries);
 
 					if (selfDuration > 3) {
+						emit(createEntry(
+							'[[unknown]]',
+							entry as GroupEntry,
+							false,
+							start,
+							start + selfDuration,
+						));
 						console.log(
 							`${prefix}[[unknown]]: %c${selfDuration.toFixed(3)}ms`,
 							`${BOLD}${color(selfDuration)}`,
@@ -224,51 +237,78 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		}
 	}
 
-	function createEntry(name: string, isGroup: boolean, start?: number) {
-		if (disabled) {
-			return {} as Entry;
+	function createEntry(
+		name: string,
+		parent: GroupEntry | null,
+		isGroup: boolean,
+		start?: number,
+		end?: number,
+	): Entry | GroupEntry {
+		label = `${prefix}${name}-${++cid}`;
+		mark = `${label}-mark`;
+
+		if ((parent as any) === api) {
+			parent = activeGroups[0] || nil;
 		}
 
-		label = `${prefix}${name}-${++cid}`;
-
-		const entry = {
-			mark: `${label}-mark`,
+		const entry: Entry | GroupEntry = {
+			mark,
 			name,
-			parent: activeEntry,
-			entries:  nil,
+			parent,
+			entries:  isGroup ? [] : nil,
 			active: +isGroup,
 			start: start >= 0 ? start : perf.now(),
-			end: 0,
-			stop: stopEntry,
+			end: end >= 0 ? end : 0,
+			stop: isGroup ? stopGroup : stopEntry,
 		};
 
-		if (activeEntry !== nil) {
-			activeEntry.active++;
-			activeEntry.entries.push(entry);
-		} else {
-			entries.push(entry);
+		if (parent === nil) {
+			!disabled && entries.push(entry);
+		} else if (parent.end !== 0 && end == nil) {
+			warn(`[timekeeper] Group "${parent.name}" is stopped`);
+		} else if (!disabled) {
+			parent.active++;
+			parent.entries.push(entry);
 		}
 
 		if (isGroup) {
-			entry.entries = [];
-			activeEntry = entry;
+			(entry as GroupEntry).add = add;
+			(entry as GroupEntry).time = time;
+			(entry as GroupEntry).group = group;
+			!disabled && activeGroups.unshift(entry as GroupEntry);
 		} else {
-			!has(entriesIndex, name) && (entriesIndex[name] = []);
-			entriesIndex[name].push(entry);
+			!disabled && activeEntries.push(entry);
 		}
 
-		(start == nil) && perfSupported && perf[s_mark](entry[s_mark]);
+		!disabled && (start == nil) && perfSupported && perf[s_mark](mark);
 
 		return entry;
 	}
 
-	function closeGroup(entry: Entry, end?: number) {
+	function stopEntry(this: Entry, end?: number) {
+		if (this.end === 0) {
+			this.end = end >= 0 ? end : perf.now();
+
+			(end == nil) && perfSupported && measure(this);
+			emit(this);
+			closeGroup(this.parent, end);
+		}
+	}
+
+	function stopGroup(this: GroupEntry, end?: number) {
+		closeGroup(this, end);
+	}
+
+	function closeGroup(entry: GroupEntry, end?: number) {
 		needPrint && print();
 
 		if (entry !== nil) {
 			if (entry.active > 0) {
 				(--entry.active === 0) && closeGroup(entry, end);
 			} else if (entry.end === 0) {
+				const idx = activeGroups.indexOf(entry);
+				(idx > -1) && activeGroups.splice(idx, 1);
+
 				entry.end = end >= 0 ? end : perf.now();
 				(end == nil) && perfSupported && measure(entry);
 				emit(this);
@@ -277,95 +317,61 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		}
 	}
 
-	// Public
-	return {
-		entries,
-		print,
+	function add(this: GroupEntry, name: string, start: number, end: number) {
+		if (start >= 0 && start <= end) {
+			createEntry(name, this, false, start).stop(end);
+		}
+	}
 
-		disabled(state: boolean) {
-			disabled = state;
-		},
+	function time(this: GroupEntry, name: string) {
+		return createEntry(name, this, false);
+	}
 
-		listen(fn: (entry: Entry) => void) {
-			listener = fn;
+	function timeEnd(name: string) {
+		if (!disabled) {
+			let idx = activeEntries.length;
+			let entry: Entry;
 
-			let idx = emitEntries.length;
 			while (idx--) {
-				fn(emitEntries[idx]);
-			}
-			emitEntries.length = 0;
-		},
-
-		add(this: TimeKeeper, name: string, start: number, end: number) {
-			if (start >= 0 && start <= end) {
-				createEntry(name, false, start).stop(end);
-			}
-		},
-
-		time(name: string) {
-			return createEntry(name, false);
-		},
-
-		timeEnd(name: string) {
-			if (!disabled) {
-				if (has(entriesIndex, name)) {
-					const entries = entriesIndex[name];
-					let idx = entries.length;
-					let entry: Entry;
-
-					while (idx--) {
-						entry = entries[idx];
-
-						if (entry.end === 0) {
-							entry.stop();
-							return;
-						}
-					}
+				entry = activeEntries[idx];
+				if (entry.name === name) {
+					entry.stop();
+					activeEntries.splice(idx, 1);
+					return;
 				}
-
-				warn && warn(`[timekeeper] Timer "${name}" doesn't exist`);
 			}
-		},
 
-		group(name: string, start?: number) {
-			createEntry(name, true, start);
-		},
+			warn && warn(`[timekeeper] Timer "${name}" doesn't exist`);
+		}
+	}
 
-		groupEnd(name?: string, end?: number) {
-			if (disabled || activeEntry === nil) {
-				!disabled && warn && warn(`[timekeeper] No active groups`);
+	function group(this: GroupEntry, name: string, start?: number): GroupEntry {
+		return createEntry(name, this, true, start) as GroupEntry;
+	}
+
+	function groupEnd(name: string, end?: number): void {
+		for (let idx = 0; idx < activeGroups.length; idx++) {
+			if (name == nil || activeGroups[idx].name === name) {
+				activeGroups[idx].stop(end);
 				return;
 			}
+		}
 
-			if (name != nil && activeEntry.name !== name) {
-				warn && warn(`[timekeeper] Wrong group "${name}" (actual: "${activeEntry.name}")`);
-			}
+		warn(`[timekeeper] Group "${name}" not found`);
+	}
 
-			closeGroup(activeEntry, end);
-			activeEntry = activeEntry.parent;
-		},
-
-		wrap<A extends any[], R>(fn: (...args: A) => R): (...args: A) => R {
-			const group = activeEntry;
-			let retVal: R;
-			let wrapped = fn;
-
-			if (!disabled) {
-				wrapped = function () {
-					const _activeEntry = activeEntry;
-
-					group.active++;
-					activeEntry = group;
-					retVal = fn.apply(this, arguments);
-					closeGroup(group);
-					activeEntry = _activeEntry;
-					return retVal;
-				};
-			}
-
-			return wrapped;
-		},
-	};
+	// Public API
+	return (api = {
+		entries,
+		print,
+		disable,
+		listen,
+		add,
+		time,
+		timeEnd,
+		group,
+		groupEnd,
+	});
 };
 
 export const system = globalThis.timekeeper ? globalThis.timekeeper.system : create({

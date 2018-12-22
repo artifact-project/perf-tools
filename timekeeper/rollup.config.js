@@ -32,6 +32,16 @@ export default [].concat(
 		plugins,
 	},
 
+	{
+		input: 'index.ts',
+		output: {
+			file: 'timekeeper.dev.js',
+			format: 'iife',
+			name: 'timekeeper',
+		},
+		plugins: plugins.slice(0, -1),
+	},
+
 	// Plugins
 	[
 		'navigation',

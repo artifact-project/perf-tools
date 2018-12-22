@@ -10,7 +10,7 @@ writeFileSync(
 	content.replace(
 		/(<script id="tk">)[\s\S]*?(<\/script>)/,
 		`$1
-		${readFileSync('../timekeeper.js')}
+		${readFileSync('../timekeeper.dev.js')}
 		${Object.entries({
 			navigation: 'timekeeperNavigation.navigationTimings',
 			paint: 'timekeeperPaint.paintTimings',

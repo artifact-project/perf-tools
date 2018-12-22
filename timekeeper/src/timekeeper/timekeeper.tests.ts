@@ -22,22 +22,20 @@ describe('time', () => {
 		end: 0,
 		parent: null,
 		entries: null,
-		stop: null,
 	};
 
 	it('normal', () => {
 		expect(keeper.entries).toEqual([]);
 
 		keeper.time('label');
-		expected.stop = keeper.entries[0].stop;
-		expect(keeper.entries).toEqual([expected]);
+		Object.entries(expected).forEach(([key, val]) => {
+			expect(`${key}:${JSON.stringify(val)}`).toBe(`${key}:${JSON.stringify(keeper.entries[0][key])}`);
+		});
+		expect(keeper.entries.length).toEqual(1);
 
 		keeper.timeEnd('label');
-		expect(keeper.entries).toEqual([{
-			...expected,
-			end: 2,
-		}]);
-
+		expect(keeper.entries.length).toEqual(1);
+		expect(keeper.entries[0].end).toEqual(2);
 		expect(warn).toEqual([]);
 	});
 
@@ -47,7 +45,7 @@ describe('time', () => {
 		expect(warn.length).toBe(1);
 	});
 
-	it('close', () => {
+	it('stop', () => {
 		const length = keeper.entries.length;
 		const timeLabel = keeper.time('label');
 
@@ -75,134 +73,62 @@ describe('group', () => {
 		keeper.entries.length = 0;
 	});
 
-	it('failed', () => {
-		expect(warn.length).toBe(0);
+	it('groupEntry', () => {
+		const gapp = keeper.group('app');
+		gapp.stop();
+
+		expect(keeper.entries[0].active).toBe(0);
+		expect(keeper.entries[0].end).toBe(ts);
+	});
+
+	it('empty', () => {
+		keeper.group('app');
 		keeper.groupEnd();
-		expect(warn.length).toBe(1);
+
+		expect(keeper.entries[0].active).toBe(0);
+		expect(keeper.entries[0].end).toBe(ts);
 	});
 
-	describe('sync', () => {
-		it('empty', () => {
-			keeper.group('app');
-			keeper.groupEnd();
+	it('nested: classic', () => {
+		keeper.group('app');
+		keeper.group('head');
+		keeper.time('css');
+		keeper.timeEnd('css');
+		keeper.groupEnd();
 
-			expect(keeper.entries[0].active).toBe(0);
-			expect(keeper.entries[0].end).toBe(ts);
-		});
+		keeper.time('body');
+		keeper.timeEnd('body');
+		keeper.groupEnd();
 
-		it('nested', () => {
-			keeper.group('app');
-			keeper.group('head');
-			keeper.time('css');
-			keeper.timeEnd('css');
-			keeper.groupEnd();
-
-			keeper.time('body');
-			keeper.timeEnd('body');
-			keeper.groupEnd();
-
-			expect(keeper.entries[0].entries.length).toBe(2);
-			expect(keeper.entries[0].active).toBe(0);
-			expect(keeper.entries[0].end).toBe(ts);
-		});
+		expect(`root:${keeper.entries.length}`).toBe(`root:1`);
+		expect(`group:${keeper.entries[0].entries.length}`).toBe(`group:2`);
+		expect(keeper.entries[0].active).toBe(0);
+		expect(keeper.entries[0].end).toBe(ts);
 	});
 
-	describe('async', () => {
-		it('flat: active', () => {
-			keeper.group('app');
-			keeper.time('require');
-			keeper.groupEnd();
+	it('nested: modern', () => {
+		const gapp = keeper.group('app');
+		const ghead = gapp.group('head');
 
-			expect(keeper.entries[0].active).toBe(1);
-			expect(keeper.entries[0].end).toBe(0);
-		});
+		ghead.time('css').stop();
+		ghead.stop();
 
-		it('flat: completed', () => {
-			keeper.group('app');
-			keeper.time('require');
-			keeper.groupEnd();
-			keeper.timeEnd('require');
+		gapp.time('body').stop();
+		gapp.stop();
 
-			expect(keeper.entries[0].active).toBe(0);
-			expect(keeper.entries[0].end).toBe(ts);
-		});
+		expect(`root:${keeper.entries.length}`).toBe(`root:1`);
+		expect(`group:${keeper.entries[0].entries.length}`).toBe(`group:2`);
+		expect(keeper.entries[0].active).toBe(0);
+		expect(keeper.entries[0].end).toBe(ts);
+	});
 
-		it('nested', () => {
-			keeper.group('app');
-			keeper.group('head');
-			keeper.time('css');
-			keeper.groupEnd();
-			keeper.timeEnd('css');
+	it('nested: warn', () => {
+		const gapp = keeper.group('app');
+		gapp.time('head').stop();
+		gapp.stop();
+		gapp.time('body').stop();
 
-			keeper.time('body');
-			keeper.groupEnd();
-			keeper.timeEnd('body');
-
-			expect(keeper.entries[0].entries.length).toBe(2);
-			expect(keeper.entries[0].active).toBe(0);
-			expect(keeper.entries[0].end).toBe(ts);
-		});
-
-		it('wrap', async () => {
-			keeper.group('app');
-			const ret = keeper.wrap(async ()  => {
-				keeper.time('timeout');
-				await new Promise(keeper.wrap(resolve => {
-					keeper.timeEnd('timeout');
-					keeper.time('any');
-					setTimeout(() => {
-						keeper.timeEnd('any');
-						resolve();
-					}, 10);
-				}));
-			})();
-			keeper.groupEnd('app');
-			await ret;
-
-			keeper.group('footer');
-			keeper.time('metricts');
-			keeper.timeEnd('metricts');
-			keeper.groupEnd();
-
-			expect(keeper.entries.map(e => e.name)).toEqual([
-				'app',
-				'footer',
-			]);
-			expect(keeper.entries[0].entries.map(e => e.name)).toEqual([
-				'timeout',
-				'any',
-			]);
-			expect(keeper.entries[1].entries.map(e => e.name)).toEqual([
-				'metricts',
-			]);
-		});
-
-		it('wrap2', async () => {
-			keeper.group('root');
-			let timer = keeper.time('primise');
-
-			const ret = new Promise(keeper.wrap((resolve)  => {
-				setTimeout(keeper.wrap(() => {
-					timer.stop();
-					timer = keeper.time('end');
-
-					setTimeout(keeper.wrap(() => {
-						keeper.timeEnd('end');
-						resolve();
-					}), 10);
-				}), 10);
-			}));
-			keeper.groupEnd();
-			await ret;
-
-			expect(keeper.entries.map(e => e.name)).toEqual([
-				'root',
-			]);
-			expect(keeper.entries[0].entries.map(e => e.name)).toEqual([
-				'primise',
-				'end',
-			]);
-		});
+		expect(warn).toEqual([`[timekeeper] Group \"app\" is stopped`]);
 	});
 });
 
@@ -342,17 +268,11 @@ it('disabled', () => {
 		},
 	});
 
-	keeper.group('root');
-	keeper.wrap(() => {
-		keeper.time('foo');
-		keeper.timeEnd('bar');
-	})();
-	keeper.groupEnd();
-
+	keeper.group('root').stop();
 	expect(keeper.entries.length).toBe(0);
 });
 
-it('warn', () => {
+it('time warn', () => {
 	const warn = [];
 	const keeper = create({
 		warn: (m) => warn.push(m),
@@ -360,12 +280,9 @@ it('warn', () => {
 
 	keeper.timeEnd('inner');
 	keeper.groupEnd('root');
-	keeper.group('root');
-	keeper.groupEnd('inner');
 
 	expect(warn).toEqual([
 		"[timekeeper] Timer \"inner\" doesn't exist",
-		"[timekeeper] No active groups",
-		"[timekeeper] Wrong group \"inner\" (actual: \"root\")",
+		"[timekeeper] Group \"root\" not found",
 	]);
 });
