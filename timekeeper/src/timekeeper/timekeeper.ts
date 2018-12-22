@@ -268,7 +268,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		if (entry !== nil) {
 			if (entry.active > 0) {
 				(--entry.active === 0) && closeGroup(entry, end);
-			} else {
+			} else if (entry.end === 0) {
 				entry.end = end >= 0 ? end : perf.now();
 				(end == nil) && perfSupported && measure(entry);
 				emit(this);
