@@ -90,6 +90,7 @@ npm i --save @perf-tools/timekeeper
 
 - **create**(options: `KeeperOptions`): `Keeper`
   - **options**
+    - **disabled**: `boolean`
     - **print**: `boolean`
 	- **perf**: `Partial<Performance>`
 	- **console**: `Partial<Console>`
