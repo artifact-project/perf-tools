@@ -131,7 +131,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		if (this.end === 0) {
 			this.end = end >= 0 ? end : perf.now();
 
-			perfSupported && measure(this);
+			(end == nil) && perfSupported && measure(this);
 			emit(this);
 			closeGroup(this.parent, end);
 		}
@@ -191,7 +191,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 					if (selfDuration > 3) {
 						console.log(
-							`${prefix}[[self]]: %c${selfDuration.toFixed(3)}ms`,
+							`${prefix}[[unknown]]: %c${selfDuration.toFixed(3)}ms`,
 							`${BOLD}${color(selfDuration)}`,
 						);
 					}

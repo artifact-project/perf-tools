@@ -6,6 +6,7 @@ export function navigationTimings(keeper: TimeKeeper) {
 			navigationStart,
 			redirectStart,
 			redirectEnd,
+			fetchStart,
 			domainLookupStart,
 			domainLookupEnd,
 			requestStart,
@@ -15,7 +16,7 @@ export function navigationTimings(keeper: TimeKeeper) {
 
 		keeper.group('tk-navigation-net', navigationStart);
 		keeper.add('redirect', redirectStart, redirectEnd);
-		keeper.add('app-cache', redirectEnd, domainLookupStart);
+		keeper.add('app-cache', fetchStart, domainLookupStart);
 		keeper.add('dns', domainLookupStart, domainLookupEnd);
 		keeper.add('tcp', domainLookupEnd, requestStart);
 		keeper.add('request', requestStart, responseStart);
