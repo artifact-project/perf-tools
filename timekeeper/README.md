@@ -112,7 +112,7 @@ npm i --save @perf-tools/timekeeper
     - **start**: `number` — start mark
     - **end**: `number` — end mark
     - **parent**: `GroupEntry | null` — reference on parent
-	- **stop**(): `void` — complete the measurement (set `end` prop)
+	- **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
   - **GroupEntry** (extends `Entry`)
     - **entries**: `Entry[]` — nested metrics
 	- **add**(name: `string`, start: `number`, end: `number`): `Entry`
