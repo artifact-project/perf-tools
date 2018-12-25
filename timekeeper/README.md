@@ -2,16 +2,16 @@
 ----------------------
 TimeKeeper — It's a time profiling helper and good replacement for `console.time`.
 
-```
+```sh
 npm i --save @perf-tools/timekeeper
 ```
 
 ### Support
 
  - Groups!
- - UserTiming -> DevTools / Performance
+ - DevTools -> Performance -> UserTiming 💡
  - Output -> DevTools / Console or custom output
- - Plugins
+ - Timings out of box ⚡️
    - [Navigation Timings](./timings/navigation)
    - [Paint Timing](./timings/paint)
 
