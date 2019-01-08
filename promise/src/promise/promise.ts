@@ -11,14 +11,14 @@ function LazyPromiseConstructor<T>(
 	) => void
 ) {
 	this._state = STATE_PENDING;
-	this._result = null;
+	this._result = null as any;
 	this._promise = null as PromiseLike<T>;
 	this._nativeResolve = null as Function;
 	this._nativeReject = null as Function;
 
 	executor(
 		// Resolve
-		(value) => {
+		(value: T) => {
 			if (this._state === STATE_PENDING) {
 				this._state = STATE_RESOLVED;
 				this._result = value;
@@ -30,7 +30,7 @@ function LazyPromiseConstructor<T>(
 		},
 
 		// Reject
-		(reason) => {
+		(reason: any) => {
 			if (this._state === STATE_PENDING) {
 				this._state = STATE_REJECTED;
 				this._result = reason;

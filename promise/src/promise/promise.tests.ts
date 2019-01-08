@@ -28,6 +28,11 @@ it('finally', async () => {
 	expect(val).toEqual('finally');
 });
 
+it('toString', async () => {
+	const promise = new LazyPromise(() => {});
+	expect(promise.toString()).toEqual('[object Promise]');
+});
+
 describe('sync', () => {
 	it('resolve', async () => {
 		expect(await new LazyPromise((resolve) => {
