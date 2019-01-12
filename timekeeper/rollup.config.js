@@ -22,6 +22,7 @@ const plugins = [].concat(
 );
 
 export default [].concat(
+	// Prod
 	{
 		input: 'index.ts',
 		output: {
@@ -32,6 +33,7 @@ export default [].concat(
 		plugins,
 	},
 
+	// Dev
 	{
 		input: 'index.ts',
 		output: {
@@ -49,10 +51,28 @@ export default [].concat(
 	].map(name => ({
 		input: `./timings/${name}/index.ts`,
 		output: {
-			file: `timekeeper.${name}.js`,
+			file: `timekeeper.timings.${name}.js`,
 			format: 'iife',
-			name: `timekeeper${name.charAt(0).toUpperCase()}${name.substr(1)}`,
+			name: toCamelCase(`timekeeper-timings-${name}`),
 		},
 		plugins,
-	}))
+	})),
+
+	// Analytics
+	[
+		'google',
+		'mailru',
+	].map(name => ({
+		input: `./analytics/${name}/index.ts`,
+		output: {
+			file: `timekeeper.analytics.${name}.js`,
+			format: 'iife',
+			name: `timekeeperAnalytics`,
+		},
+		plugins,
+	})),
 );
+
+function toCamelCase(s) {
+	return s.replace(/-(.)/g, (_, chr) => chr.toUpperCase());
+}

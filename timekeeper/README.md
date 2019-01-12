@@ -11,9 +11,12 @@ npm i --save @perf-tools/timekeeper
  - Groups!
  - DevTools -> Performance -> UserTiming 💡
  - Output -> DevTools / Console or custom output
- - Timings out of box ⚡️
-   - [Navigation Timings](./timings/navigation)
-   - [Paint Timing](./timings/paint)
+ - Out of box ⚡️
+   - Timings ⏱
+     - [Navigation Timings](./timings/navigation)
+     - [Paint Timing](./timings/paint)
+   - Analytics 📈
+     - [Google](./analytics/google)
 
  ---
 

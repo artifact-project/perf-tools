@@ -12,11 +12,11 @@ writeFileSync(
 		`$1
 		${readFileSync('../timekeeper.dev.js')}
 		${Object.entries({
-			navigation: 'timekeeperNavigation.navigationTimings',
-			paint: 'timekeeperPaint.paintTimings',
+			navigation: 'timekeeperTimingsNavigation.navigationTimings',
+			paint: 'timekeeperTimingsPaint.paintTimings',
 		}).map(([name, method]) => `
 			// ${name}
-			${readFileSync(`../timekeeper.${name}.js`)}
+			${readFileSync(`../timekeeper.timings.${name}.js`)}
 			${method}(timekeeper.system);
 		`).join('\n')}
 		$2`,

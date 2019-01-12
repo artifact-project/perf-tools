@@ -63,3 +63,4 @@ typings/
 # Distributive
 dist
 compiled
+*.d.ts
