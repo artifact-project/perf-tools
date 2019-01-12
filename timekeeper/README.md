@@ -1,6 +1,7 @@
 @perf-tools/timekeeper
 ----------------------
 TimeKeeper — It's a time profiling helper and good replacement for `console.time`.
+- [Example](https://artifact-project.github.io/perf-tools/timekeeper/example/)
 
 ```sh
 npm i --save @perf-tools/timekeeper
