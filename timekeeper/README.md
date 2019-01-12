@@ -7,7 +7,9 @@ TimeKeeper — It's a time profiling helper and good replacement for `console.ti
 npm i --save @perf-tools/timekeeper
 ```
 
-### Support
+---
+
+### Features
 
  - Groups! 🗃
  - DevTools -> Performance -> UserTiming 💡
