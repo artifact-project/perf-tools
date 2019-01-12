@@ -256,6 +256,7 @@ var timekeeper = (function (exports) {
 	    }
 	    // Public API
 	    return (api = {
+	        perf: perf,
 	        entries: entries,
 	        print: print,
 	        disable: disable,

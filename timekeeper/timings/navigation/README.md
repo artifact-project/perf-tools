@@ -1,5 +1,6 @@
 Navigation Timings
 ------------------
+- https://i.stack.imgur.com/qBvJL.png
 - https://developer.mozilla.org/en-US/docs/Web/API/Navigation_timing_API
 - https://developer.mozilla.org/en-US/docs/Web/API/PerformanceTiming
 
@@ -21,6 +22,7 @@ timekeeperTimingsNavigation.navigationTimings(timekeeper.system);
 ---
 
 #### As Module
+
 ```ts
 import { system } from '@perf-tools/timekeeper';
 import { navigationTimings } from '@perf-tools/timekeeper/timings/navigation';

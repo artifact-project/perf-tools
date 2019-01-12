@@ -48,6 +48,7 @@ export default [].concat(
 	[
 		'navigation',
 		'paint',
+		'interactive',
 	].map(name => ({
 		input: `./timings/${name}/index.ts`,
 		output: {

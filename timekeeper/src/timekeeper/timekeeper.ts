@@ -44,10 +44,6 @@ export function color(ms: any): string {
 	);
 }
 
-function has<T extends object>(target: T, key: keyof T): boolean {
-	return target.hasOwnProperty(key);
-}
-
 export type Entry = {
 	id: string;
 	name: string;
@@ -80,6 +76,7 @@ export type KeeperOptions = {
 
 export type TimeKeeper = {
 	readonly entries: Entry[];
+	readonly perf: Pick<Performance, 'now'>;
 
 	print(): void;
 	listen(fn: (entry: Entry) => void): void;
@@ -393,6 +390,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 	// Public API
 	return (api = {
+		perf: perf as Performance,
 		entries,
 		print,
 		disable,

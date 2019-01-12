@@ -14,6 +14,7 @@ writeFileSync(
 		${Object.entries({
 			navigation: 'timekeeperTimingsNavigation.navigationTimings',
 			paint: 'timekeeperTimingsPaint.paintTimings',
+			interactive: 'timekeeperTimingsInteractive.interactiveTimings',
 		}).map(([name, method]) => `
 			// ${name}
 			${readFileSync(`../timekeeper.timings.${name}.js`)}

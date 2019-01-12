@@ -38,10 +38,30 @@ export function navigationTimings(keeper: TimeKeeper) {
 				return;
 			}
 
-			const gdom = keeper.group('tk-navigation-dom', responseEnd, true);
+			const gdom = keeper.group('tk-navigation-dom-ready', responseEnd, true);
 			gdom.add('interactive', responseEnd, domInteractive);
 			gdom.add('content-loaded', domInteractive, domContentLoadedEventEnd);
 			gdom.add('complete', domContentLoadedEventEnd, domComplete);
+			gdom.stop(domComplete);
+		} catch (_) {}
+	});
+
+	window.addEventListener('load', function check() {
+		try {
+			const {
+				responseEnd,
+				domComplete,
+				loadEventEnd,
+			} = performance.timing;
+
+			if (!loadEventEnd) {
+				setTimeout(check, 250);
+				return;
+			}
+
+			const gdom = keeper.group('tk-navigation-dom-load', responseEnd, true);
+			gdom.add('ready', responseEnd, domComplete);
+			gdom.add('load', domComplete, loadEventEnd);
 			gdom.stop(domComplete);
 		} catch (_) {}
 	});

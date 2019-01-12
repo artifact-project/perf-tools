@@ -20,6 +20,7 @@ timekeeperTimingsPaint.paintTimings(timekeeper.system);
 ---
 
 #### As Module
+
 ```ts
 import { system } from '@perf-tools/timekeeper';
 import { paintTimings } from '@perf-tools/timekeeper/timings/paint';
