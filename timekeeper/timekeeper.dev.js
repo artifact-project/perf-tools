@@ -269,7 +269,7 @@ var timekeeper = (function (exports) {
 	    });
 	}
 	var system = globalThis.timekeeper ? globalThis.timekeeper.system : create({
-	    print: /^(file:|https?:\/\/localhost)/.test(globalThis.location + ''),
+	    print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(globalThis.location + ''),
 	    timeline: true,
 	    prefix: '⚡️',
 	});

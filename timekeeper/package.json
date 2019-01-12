@@ -20,7 +20,7 @@
     "test": "jest",
     "ts-build": "tsc",
     "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo '' && npm run build-example",
-    "build-example": "cd __example__ && node ./build.js",
+    "build-example": "cd example && node ./build.js",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build && npm run build",
     "postpublish": "npm run git-clean"
