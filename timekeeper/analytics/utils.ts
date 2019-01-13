@@ -5,8 +5,8 @@ export type BaseAnalyticsOptions = {
 }
 
 export const baseAnalyticsOptions: BaseAnalyticsOptions = {
-	useTabName: ({pathname}: Location) => (pathname === '/'
-		? 'index'
-		: pathname.substr(1)).replace(/[\/\.]+/g, '-')
+	useTabName: ({pathname}: Location) => (pathname === '/' ? 'index' : pathname)
+		.replace(/[\/\.]+/g, '-')
+		.replace(/^-|-$/g, '')
 	,
 };
