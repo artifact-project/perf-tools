@@ -20,7 +20,7 @@ export function navigationTimings(keeper: TimeKeeper) {
 		gnet.add('dns', domainLookupStart, domainLookupEnd);
 		gnet.add('tcp', domainLookupEnd, requestStart);
 		gnet.add('request', requestStart, responseStart);
-		gnet.add('response', requestStart, responseEnd);
+		gnet.add('response', responseStart, responseEnd);
 		gnet.stop(responseEnd);
 	} catch (_) {}
 
