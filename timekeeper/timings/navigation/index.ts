@@ -24,7 +24,7 @@ export function navigationTimings(keeper: TimeKeeper) {
 		gnet.stop(responseEnd);
 	} catch (_) {}
 
-	window.addEventListener('DOMContentLoaded', function check() {
+	ready(function checkDomComplete() {
 		try {
 			const {
 				responseEnd,
@@ -34,7 +34,7 @@ export function navigationTimings(keeper: TimeKeeper) {
 			} = performance.timing;
 
 			if (!domComplete) {
-				setTimeout(check, 250);
+				setTimeout(checkDomComplete, 250);
 				return;
 			}
 
@@ -46,7 +46,7 @@ export function navigationTimings(keeper: TimeKeeper) {
 		} catch (_) {}
 	});
 
-	window.addEventListener('load', function check() {
+	ready(function checkLoadEventEnd() {
 		try {
 			const {
 				responseEnd,
@@ -55,14 +55,22 @@ export function navigationTimings(keeper: TimeKeeper) {
 			} = performance.timing;
 
 			if (!loadEventEnd) {
-				setTimeout(check, 250);
+				setTimeout(checkLoadEventEnd, 250);
 				return;
 			}
 
 			const gdom = keeper.group('tk-navigation-dom-load', responseEnd, true);
 			gdom.add('ready', responseEnd, domComplete);
 			gdom.add('load', domComplete, loadEventEnd);
-			gdom.stop(domComplete);
+			gdom.stop(loadEventEnd);
 		} catch (_) {}
 	});
+}
+
+function ready(fn: () => void) {
+	if (document.readyState === 'complete') {
+		fn();
+	} else {
+		window.addEventListener('DOMContentLoaded', fn);
+	}
 }

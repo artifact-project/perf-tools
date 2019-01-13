@@ -3,7 +3,7 @@ import { TimeKeeper } from '../../src/timekeeper/timekeeper';
 type PaintTuple = [string, number, number];
 
 export function paintTimings(keeper: TimeKeeper) {
-	window.addEventListener('DOMContentLoaded', function check() {
+	ready(function check() {
 		try {
 			const entries = performance.getEntriesByType('paint');
 
@@ -28,4 +28,12 @@ export function paintTimings(keeper: TimeKeeper) {
 			}
 		} catch (_) {}
 	});
+}
+
+function ready(fn: () => void) {
+	if (document.readyState === 'complete') {
+		fn();
+	} else {
+		window.addEventListener('DOMContentLoaded', fn);
+	}
 }

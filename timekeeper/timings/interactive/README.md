@@ -1,7 +1,7 @@
 System interactivity
 --------------------
 - Time to Interactive (TTI)
-- Time to First click/touch
+- Time to First click/touch and other events
 - Tab Unload
 - Latency
 
