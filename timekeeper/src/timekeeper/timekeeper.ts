@@ -84,6 +84,7 @@ export type TimeKeeper = {
 
 	add(name: string, start: number, end: number): void;
 	time(name: string): Entry;
+	time(name: string, executer: () => void): void;
 	timeEnd(name: string): void;
 
 	group(name: string, isolate: true): GroupEntry;
@@ -325,8 +326,15 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		}
 	}
 
-	function time(this: GroupEntry, name: string) {
-		return createEntry(name, this, false);
+	function time(this: GroupEntry, name: string, executer?: () => void) {
+		const entry = createEntry(name, this, false);
+
+		if (executer != null) {
+			executer();
+			entry.stop();
+		} else {
+			return entry;
+		}
 	}
 
 	function timeEnd(name: string) {

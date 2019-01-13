@@ -20,7 +20,7 @@
     "test": "jest",
     "ts-build": "tsc",
     "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo '' && npm run build-example",
-    "build-example": "cd example && node ./build.js",
+    "build-example": "node ./build.example.js",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build && npm run build",
     "postpublish": "npm run git-clean"
@@ -31,7 +31,9 @@
     "src/*/*.js",
     "src/*/*.d.ts",
     "timings/*/*.ts",
-    "timings/*/*.d.ts"
+    "timings/*/*.d.ts",
+    "analytics/*/*.ts",
+    "analytics/*/*.d.ts"
   ],
   "devDependencies": {
     "@types/jest": "^19.2.3",

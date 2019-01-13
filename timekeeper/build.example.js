@@ -10,16 +10,21 @@ writeFileSync(
 	content.replace(
 		/(<script id="tk">)[\s\S]*?(<\/script>)/,
 		`$1
-		${readFileSync('../timekeeper.dev.js')}
+
+		// TimeKeeper
+		${readFileSync('./timekeeper.dev.js')}
+
+		// Plugins
 		${Object.entries({
 			navigation: 'timekeeperTimingsNavigation.navigationTimings',
 			paint: 'timekeeperTimingsPaint.paintTimings',
 			interactive: 'timekeeperTimingsInteractive.interactiveTimings',
 		}).map(([name, method]) => `
-			// ${name}
-			${readFileSync(`../timekeeper.timings.${name}.js`)}
+			// Timings: ${name}
+			${readFileSync(`./timekeeper.timings.${name}.js`)}
 			${method}(timekeeper.system);
 		`).join('\n')}
+
 		$2`,
 	),
 );

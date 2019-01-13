@@ -209,8 +209,15 @@ var timekeeper = (function (exports) {
 	            createEntry(name, this, false, start).stop(end);
 	        }
 	    }
-	    function time(name) {
-	        return createEntry(name, this, false);
+	    function time(name, executer) {
+	        var entry = createEntry(name, this, false);
+	        if (executer != null) {
+	            executer();
+	            entry.stop();
+	        }
+	        else {
+	            return entry;
+	        }
 	    }
 	    function timeEnd(name) {
 	        if (!disabled) {

@@ -52,6 +52,18 @@ describe('time', () => {
 		timeLabel.stop();
 		expect(keeper.entries.length).toBe(length + 1);
 	});
+
+	it('function', () => {
+		const length = keeper.entries.length;
+		let inner = false;
+
+		keeper.time('label', () => {
+			inner = true;
+		});
+
+		expect(keeper.entries.length).toBe(length + 1);
+		expect(inner).toBe(true);
+	});
 });
 
 describe('group', () => {

@@ -1,6 +1,11 @@
 <html>
 <head>
+	<meta charset="utf-8"/>
+	<title>TimeKeeper :: Example</title>
+
 	<script id="tk">
+
+		// TimeKeeper
 		var timekeeper = (function (exports) {
 	'use strict';
 
@@ -212,8 +217,15 @@
 	            createEntry(name, this, false, start).stop(end);
 	        }
 	    }
-	    function time(name) {
-	        return createEntry(name, this, false);
+	    function time(name, executer) {
+	        var entry = createEntry(name, this, false);
+	        if (executer != null) {
+	            executer();
+	            entry.stop();
+	        }
+	        else {
+	            return entry;
+	        }
 	    }
 	    function timeEnd(name) {
 	        if (!disabled) {
@@ -285,24 +297,27 @@
 
 }({}));
 
+
+		// Plugins
 		
-			// navigation
+			// Timings: navigation
 			var timekeeperTimingsNavigation=function(t){"use strict";return t.navigationTimings=function(i){try{var t=performance.timing,e=t.navigationStart,n=t.redirectStart,d=t.redirectEnd,a=t.fetchStart,o=t.domainLookupStart,r=t.domainLookupEnd,c=t.requestStart,s=t.responseStart,p=t.responseEnd,m=i.group("tk-navigation-net",e,!0);m.add("redirect",n,d),m.add("app-cache",a,o),m.add("dns",o,r),m.add("tcp",r,c),m.add("request",c,s),m.add("response",c,p),m.stop(p)}catch(t){}window.addEventListener("DOMContentLoaded",function t(){try{var e=performance.timing,n=e.responseEnd,d=e.domInteractive,a=e.domContentLoadedEventEnd,o=e.domComplete;if(!o)return void setTimeout(t,250);var r=i.group("tk-navigation-dom-ready",n,!0);r.add("interactive",n,d),r.add("content-loaded",d,a),r.add("complete",a,o),r.stop(o)}catch(t){}}),window.addEventListener("load",function t(){try{var e=performance.timing,n=e.responseEnd,d=e.domComplete,a=e.loadEventEnd;if(!a)return void setTimeout(t,250);var o=i.group("tk-navigation-dom-load",n,!0);o.add("ready",n,d),o.add("load",d,a),o.stop(d)}catch(t){}})},t}({});
 
 			timekeeperTimingsNavigation.navigationTimings(timekeeper.system);
 		
 
-			// paint
+			// Timings: paint
 			var timekeeperTimingsPaint=function(t){"use strict";return t.paintTimings=function(r){window.addEventListener("DOMContentLoaded",function t(){try{var n=performance.getEntriesByType("paint");if(1<n.length){var e=0,i=n.sort(function(t,n){return t.startTime-n.startTime}).map(function(t){var n=[t.name,e,t.startTime];return e=t.startTime,n});r.group("tk-paint",0),i.forEach(function(t){r.add(t[0],t[1],t[2])}),r.groupEnd("tk-paint",e)}else setTimeout(t,250)}catch(t){}})},t}({});
 
 			timekeeperTimingsPaint.paintTimings(timekeeper.system);
 		
 
-			// interactive
+			// Timings: interactive
 			var timekeeperTimingsInteractive=function(n){"use strict";var c=Function("return this")(),e=c.document,u={tabName:function(n){var t=n.pathname;return("/"===t?"index":t).replace(/[\/\.]/g,"-")},minLatency:100};function f(n,e,i){n.forEach(function(n){var t=function(){c.removeEventListener(n,t,!0),e(n)};(i=i||c).addEventListener(n,t,!0)})}return n.interactiveTimings=function(r,i){void 0===i&&(i=u);var n,a=function(){return r.perf.now()},t=["click","touchup","submit","abort","blur","contextmenu","deviceorientation","offline","online","paint","popstate","resize","wheel","scroll"];function o(n,t,e,i){void 0===e&&(e=0),void 0===i&&(i=a());var o=r.group("tk-interactive-"+n,e,!0);o.add(t,e,i),o.stop(i)}f(t,function(n){o("first-"+n,"value")}),f(["beforeunload"],function(){o("tab-unload",i.tabName(c.location))}),["click","touchup","input","submit","resize","scroll"].forEach(function(t){var e;function n(){var n=a();n-e>=i.minLatency&&o("latency",t,e,n)}c.addEventListener(t,function(){e=a(),requestAnimationFrame(n)},!0)}),n=function(){f(t,function(n){o("first-"+n,"after-ready")})},"complete"===e.readyState?n():f(["DOMContentLoaded"],n,e)},n}({});
 
 			timekeeperTimingsInteractive.interactiveTimings(timekeeper.system);
 		
+
 		</script>
 	<script>
 		var keeper = timekeeper.create({
@@ -402,9 +417,9 @@
 				return fibonacci(num - 1) + fibonacci(num - 2);
 			}
 
-			const timer = keeper.time('fibonacci')
-			console.log('fibonacci:', fibonacci(25 + Math.random() * 15));
-			timer.stop();
+			keeper.time('fibonacci', () => {
+				console.log('fibonacci:', fibonacci(25 + Math.random() * 15));
+			});
 		});
 	</script>
 </body>
