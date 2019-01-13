@@ -1,18 +1,16 @@
 import { TimeKeeper } from '../../src/timekeeper/timekeeper';
+import { sendTimingsFactory, domReady, globalThis } from '../utils';
 
-export type Options = {
-	tabName: (location: Location) => string;
+export type InteractiveOptions = {
 	minLatency: number;
 }
 
-const globalThis = Function('return this')() as Window;
-const document = globalThis.document;
-const defaultOptions: Options = {
-	tabName: ({pathname}: Location) => (pathname === '/' ? 'index' : pathname).replace(/[\/\.]/g, '-'),
+const defaultOptions: InteractiveOptions = {
 	minLatency: 100,
 };
 
-export function interactiveTimings(keeper: TimeKeeper, options: Options = defaultOptions) {
+export function interactiveTimings(keeper: TimeKeeper, options: InteractiveOptions = defaultOptions) {
+	const sendTimings = sendTimingsFactory('tk-interactive', keeper);
 	const now = () => keeper.perf.now();
 	const firstWinEvents = [
 		'click',
@@ -33,10 +31,9 @@ export function interactiveTimings(keeper: TimeKeeper, options: Options = defaul
 	];
 
 	function send(groupName: string, label: string,  start: number = 0, end: number = now()) {
-		const group = keeper.group(`tk-interactive-${groupName}`, start, true);
-
-		group.add(label, start, end);
-		group.stop(end);
+		sendTimings(groupName, start, end, [
+			[label, start, end],
+		])
 	}
 
 	// Window
@@ -46,7 +43,7 @@ export function interactiveTimings(keeper: TimeKeeper, options: Options = defaul
 
 	// Tab unload
 	once(['beforeunload'], () => {
-		send(`tab-unload`, options.tabName(globalThis.location));
+		send(`tab-unload`, 'value');
 	});
 
 	// Latency
@@ -64,7 +61,7 @@ export function interactiveTimings(keeper: TimeKeeper, options: Options = defaul
 			const end = now();
 
 			if (end - start >= options.minLatency) {
-				send(`latency`, eventType, start, end);
+				send(`latency-${eventType}`, 'value', start, end);
 			}
 		}
 
@@ -75,19 +72,11 @@ export function interactiveTimings(keeper: TimeKeeper, options: Options = defaul
 	})
 
 	// After DOM Ready
-	ready(() => {
+	domReady(() => {
 		once(firstWinEvents, (eventType) => {
-			send(`first-${eventType}`, 'after-ready');
+			send(`first-${eventType}`, `after-ready`);
 		});
 	});
-}
-
-function ready(fn: () => void) {
-	if (document.readyState === 'complete') {
-		fn();
-	} else {
-		once(['DOMContentLoaded'], fn, document);
-	}
 }
 
 function once(events: string[], fn: (eventType: string) => void, ctx?: Document | Window) {

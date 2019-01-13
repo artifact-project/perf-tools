@@ -25,6 +25,18 @@ writeFileSync(
 			${method}(timekeeper.system);
 		`).join('\n')}
 
+		// Analytics
+		const analytics = [];
+		${Object.entries({
+			google: 'timekeeperAnalytics.googleAnalytics',
+		}).map(([name, method]) => `
+			// Analytics: ${name}
+			${readFileSync(`./timekeeper.analytics.${name}.js`)}
+			analytics.push(${method}());
+		`).join('\n')}
+
+		timekeeper.system.setAnalytics(analytics);
+
 		$2`,
 	),
 );

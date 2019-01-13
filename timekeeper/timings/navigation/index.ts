@@ -1,6 +1,9 @@
 import { TimeKeeper } from '../../src/timekeeper/timekeeper';
+import { sendTimingsFactory, domReady } from '../utils';
 
 export function navigationTimings(keeper: TimeKeeper) {
+	const sendTimings = sendTimingsFactory('tk-navigation', keeper);
+
 	try {
 		const {
 			navigationStart,
@@ -14,17 +17,17 @@ export function navigationTimings(keeper: TimeKeeper) {
 			responseEnd,
 		} = performance.timing;
 
-		const gnet = keeper.group('tk-navigation-net', navigationStart, true);
-		gnet.add('redirect', redirectStart, redirectEnd);
-		gnet.add('app-cache', fetchStart, domainLookupStart);
-		gnet.add('dns', domainLookupStart, domainLookupEnd);
-		gnet.add('tcp', domainLookupEnd, requestStart);
-		gnet.add('request', requestStart, responseStart);
-		gnet.add('response', responseStart, responseEnd);
-		gnet.stop(responseEnd);
+		sendTimings('net', navigationStart, responseEnd, [
+			['redirect', redirectStart, redirectEnd],
+			['app-cache', fetchStart, domainLookupStart],
+			['dns', domainLookupStart, domainLookupEnd],
+			['tcp', domainLookupEnd, requestStart],
+			['request', requestStart, responseStart],
+			['response', responseStart, responseEnd],
+		]);
 	} catch (_) {}
 
-	ready(function checkDomComplete() {
+	domReady(function checkDomComplete() {
 		try {
 			const {
 				responseEnd,
@@ -38,15 +41,15 @@ export function navigationTimings(keeper: TimeKeeper) {
 				return;
 			}
 
-			const gdom = keeper.group('tk-navigation-dom-ready', responseEnd, true);
-			gdom.add('interactive', responseEnd, domInteractive);
-			gdom.add('content-loaded', domInteractive, domContentLoadedEventEnd);
-			gdom.add('complete', domContentLoadedEventEnd, domComplete);
-			gdom.stop(domComplete);
+			sendTimings('dom-ready', responseEnd, domComplete, [
+				['interactive', responseEnd, domInteractive],
+				['content-loaded', domInteractive, domContentLoadedEventEnd],
+				['complete', domContentLoadedEventEnd, domComplete],
+			]);
 		} catch (_) {}
 	});
 
-	ready(function checkLoadEventEnd() {
+	domReady(function checkLoadEventEnd() {
 		try {
 			const {
 				responseEnd,
@@ -59,18 +62,10 @@ export function navigationTimings(keeper: TimeKeeper) {
 				return;
 			}
 
-			const gdom = keeper.group('tk-navigation-dom-load', responseEnd, true);
-			gdom.add('ready', responseEnd, domComplete);
-			gdom.add('load', domComplete, loadEventEnd);
-			gdom.stop(loadEventEnd);
+			sendTimings('dom-load', responseEnd, loadEventEnd, [
+				['ready', responseEnd, domComplete],
+				['load', domComplete, loadEventEnd],
+			]);
 		} catch (_) {}
 	});
-}
-
-function ready(fn: () => void) {
-	if (document.readyState === 'complete') {
-		fn();
-	} else {
-		window.addEventListener('DOMContentLoaded', fn);
-	}
 }

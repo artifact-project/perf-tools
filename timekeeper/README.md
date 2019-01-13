@@ -1,7 +1,7 @@
 @perf-tools/timekeeper
 ----------------------
 TimeKeeper — It's a time profiling helper and good replacement for `console.time`.
-- [Example](https://artifact-project.github.io/perf-tools/timekeeper/)
+- [See Example](https://artifact-project.github.io/perf-tools/timekeeper/)
 
 ```sh
 npm i --save @perf-tools/timekeeper
@@ -100,12 +100,12 @@ npm i --save @perf-tools/timekeeper
 	- **perf**: `Partial<Performance>`
 	- **console**: `Partial<Console>`
 	- **timeline**: `boolean`
-	- **listener**: `(entry: Entry) => void`
+	- **analytics**: `Array<(entry: Entry) => void>`
 	- **warn**: `(msg: string) => void`
   - **TimeKeeper**
     - **print**: `(enable?: boolean) => void`
     - **disable**: `(state: boolean) => void`
-    - **listen**: `(fn: (entry: Entry) => void) => void`
+    - **setAnalytics**: `(list: Array<(entry: Entry) => void>) => void`
     - **add**(name: `string`, start: `number`, end: `number`): `Entry`
     - **time**(name: `string`, start?: `number`): `Entry`
     - **timeEnd**(name: `string`, end?: `number`): `void`

@@ -69,8 +69,7 @@ export type KeeperOptions = {
 	perf: Partial<Performance>;
 	console: Partial<Console>;
 	timeline: boolean;
-	maxEntries: number;
-	listener: (entry: Entry) => void;
+	analytics: Array<(entry: Entry) => void>;
 	warn: (msg: string) => void;
 }
 
@@ -79,8 +78,8 @@ export type TimeKeeper = {
 	readonly perf: Pick<Performance, 'now'>;
 
 	print(): void;
-	listen(fn: (entry: Entry) => void): void;
 	disable(state: boolean): void;
+	setAnalytics(list: KeeperOptions['analytics']): void;
 
 	add(name: string, start: number, end: number): void;
 	time(name: string): Entry;
@@ -97,11 +96,10 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	const perf = options.perf || nativePerf;
 	const prefix = options.prefix || '';
 	const console = options.console || nativeConsole;
-	const maxEntries = options.maxEntries == nil ? 1e3 : options.maxEntries;
 	const warn = options.warn || console.warn && console.warn.bind(console);
+	let analytics = options.analytics || [];
 	let needPrint = options.print;
 	let disabled = options.disabled;
-	let listener = options.listener;
 
 	// Private
 	const perfSupported = !!(
@@ -124,23 +122,28 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		disabled = state;
 	}
 
-	function listen(fn: (entry: Entry) => void) {
-		listener = fn;
-		let idx = emitEntries.length;
+	function setAnalytics(list: KeeperOptions['analytics']) {
+		let idx = list.length;
+
 		while (idx--) {
-			fn(emitEntries[idx]);
+			let jdx = emitEntries.length;
+			while (jdx--) {
+				list[idx](emitEntries[jdx]);
+			}
 		}
+
+		analytics = list;
 		emitEntries.length = 0;
 	}
 
 	function emit(entry: Entry) {
-		if (listener) {
-			listener(entry);
+		let idx = analytics.length;
+		if (idx) {
+			while (idx--) {
+				analytics[idx](entry);
+			}
 		} else {
 			emitEntries.unshift(entry);
-			if (emitEntries.length > maxEntries) {
-				emitEntries.length = maxEntries;
-			}
 		}
 	}
 
@@ -314,7 +317,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 				entry.end = end >= 0 ? end : perf.now();
 				(end == nil) && perfSupported && measure(entry);
-				emit(this);
+				emit(entry);
 				closeGroup(entry.parent, end);
 			}
 		}
@@ -402,7 +405,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		entries,
 		print,
 		disable,
-		listen,
+		setAnalytics,
 		add,
 		time,
 		timeEnd,

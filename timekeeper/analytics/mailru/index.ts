@@ -1,18 +1,30 @@
 import { Entry } from '../../src/timekeeper/timekeeper';
+import { BaseAnalyticsOptions, baseAnalyticsOptions, globalThis } from '../utils';
 
 type MailRuAnalyticsParams = {
-	category: string;
+	group: string;
 	label: string;
 	value: number;
 };
 
 type MailRuAnalytics = (packet: string) => void;
 
-export function mailruAnalytics(xray?: MailRuAnalytics) {
+type MaulRuContext = Window & {
+	require: (module: string) => MailRuAnalytics;
+	xray: MailRuAnalytics;
+};
+
+export function mailruAnalytics(xray?: MailRuAnalytics, options: BaseAnalyticsOptions = baseAnalyticsOptions) {
 	const queue = [] as MailRuAnalyticsParams[];
 	const send = (params: MailRuAnalyticsParams) => {
 		if (xray) {
-			xray(`${params.category}&${params.label}=${params.value}`);
+			let label = params.label;
+
+			if (options.useTabName) {
+				label = `${options.useTabName(globalThis.location)}-${label}`;
+			}
+
+			xray(`${params.group}&${params.label}=${params.value}`);
 		} else {
 			queue.push(params);
 		}
@@ -31,7 +43,7 @@ export function mailruAnalytics(xray?: MailRuAnalytics) {
 	}
 
 	return (entry: Entry) => {
-		let category = entry.name;
+		let group = entry.name;
 		let label = 'value';
 
 		if (entry.parent) {
@@ -43,28 +55,23 @@ export function mailruAnalytics(xray?: MailRuAnalytics) {
 				if (entry.parent) {
 					label = `${entry.name}_${name}`;
 				} else {
-					category = entry.name;
+					group = entry.name;
 					break;
 				}
 			}
 		}
 
 		send({
-			category,
+			group,
 			label,
 			value: entry.end - entry.start,
 		});
 	};
 }
 
-const globalThis = Function('return this')() as Window & {
-	require?: (module: string) => MailRuAnalytics;
-	xray?: MailRuAnalytics;
-};
-
 function get(): MailRuAnalytics {
-	const require = globalThis.require;
-	let xray = globalThis.xray;
+	const require = (globalThis as MaulRuContext).require;
+	let xray = (globalThis as MaulRuContext).xray;
 
 	try {
 		xray = require('@mail/xray');

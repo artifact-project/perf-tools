@@ -33,11 +33,10 @@ var timekeeper = (function (exports) {
 	    var perf = options.perf || nativePerf;
 	    var prefix = options.prefix || '';
 	    var console = options.console || nativeConsole;
-	    var maxEntries = options.maxEntries == nil ? 1e3 : options.maxEntries;
 	    var warn = options.warn || console.warn && console.warn.bind(console);
+	    var analytics = options.analytics || [];
 	    var needPrint = options.print;
 	    var disabled = options.disabled;
-	    var listener = options.listener;
 	    // Private
 	    var perfSupported = !!(options.timeline
 	        && perf[s_mark]
@@ -54,23 +53,26 @@ var timekeeper = (function (exports) {
 	    function disable(state) {
 	        disabled = state;
 	    }
-	    function listen(fn) {
-	        listener = fn;
-	        var idx = emitEntries.length;
+	    function setAnalytics(list) {
+	        var idx = list.length;
 	        while (idx--) {
-	            fn(emitEntries[idx]);
+	            var jdx = emitEntries.length;
+	            while (jdx--) {
+	                list[idx](emitEntries[jdx]);
+	            }
 	        }
+	        analytics = list;
 	        emitEntries.length = 0;
 	    }
 	    function emit(entry) {
-	        if (listener) {
-	            listener(entry);
+	        var idx = analytics.length;
+	        if (idx) {
+	            while (idx--) {
+	                analytics[idx](entry);
+	            }
 	        }
 	        else {
 	            emitEntries.unshift(entry);
-	            if (emitEntries.length > maxEntries) {
-	                emitEntries.length = maxEntries;
-	            }
 	        }
 	    }
 	    function measure(entry) {
@@ -199,7 +201,7 @@ var timekeeper = (function (exports) {
 	                (idx > -1) && activeGroups.splice(idx, 1);
 	                entry.end = end >= 0 ? end : perf.now();
 	                (end == nil) && perfSupported && measure(entry);
-	                emit(this);
+	                emit(entry);
 	                closeGroup(entry.parent, end);
 	            }
 	        }
@@ -267,7 +269,7 @@ var timekeeper = (function (exports) {
 	        entries: entries,
 	        print: print,
 	        disable: disable,
-	        listen: listen,
+	        setAnalytics: setAnalytics,
 	        add: add,
 	        time: time,
 	        timeEnd: timeEnd,

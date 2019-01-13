@@ -32,7 +32,6 @@ interactiveTimings(system);
 
 // or with options
 interactiveTimings(system, {
-	tapName: ({pathname}: Location) => (pathname === '/' ? 'index' : pathname).replace(/[\/\.]/g, '-'),
 	minLatency: 100,
 });
 ```

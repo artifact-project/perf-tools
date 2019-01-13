@@ -30,8 +30,12 @@
     "*.d.ts",
     "src/*/*.js",
     "src/*/*.d.ts",
+    "timings/*.ts",
+    "timings/*.d.ts",
     "timings/*/*.ts",
     "timings/*/*.d.ts",
+    "analytics/*.ts",
+    "analytics/*.d.ts",
     "analytics/*/*.ts",
     "analytics/*/*.d.ts"
   ],
