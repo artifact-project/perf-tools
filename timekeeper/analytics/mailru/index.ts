@@ -45,17 +45,17 @@ export function mailruAnalytics(xray?: MailRuAnalytics, options: BaseAnalyticsOp
 	return (entry: Entry) => {
 		let group = entry.name;
 		let label = 'value';
+		let cursor = entry.parent;
 
-		if (entry.parent) {
+		if (cursor) {
 			label = entry.name;
 
 			while (true) {
-				entry = entry.parent;
-
-				if (entry.parent) {
-					label = `${entry.name}_${name}`;
+				if (cursor.parent) {
+					label = `${cursor.name}_${name}`;
+					cursor = cursor.parent;
 				} else {
-					group = entry.name;
+					group = cursor.name;
 					break;
 				}
 			}

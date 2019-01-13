@@ -41,17 +41,17 @@ export function googleAnalytics(ga?: GoogleAnalytics, options: BaseAnalyticsOpti
 	return (entry: Entry) => {
 		let timingCategory = entry.name;
 		let timingVar = 'value';
+		let cursor = entry.parent;
 
-		if (entry.parent) {
+		if (cursor) {
 			timingVar = entry.name;
 
 			while (true) {
-				entry = entry.parent;
-
-				if (entry.parent) {
-					timingVar = `${entry.name}_${timingVar}`;
+				if (cursor.parent) {
+					timingVar = `${cursor.name}_${timingVar}`;
+					cursor = cursor.parent;
 				} else {
-					timingCategory = entry.name;
+					timingCategory = cursor.name;
 					break;
 				}
 			}
