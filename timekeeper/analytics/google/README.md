@@ -1,5 +1,6 @@
 Google Analytics
 ----------------
+- [Behavior -> Site Speed -> User Timings](https://analytics.google.com/analytics/web/)
 - https://developers.google.com/analytics/devguides/collection/analyticsjs/user-timings
 
 ---
