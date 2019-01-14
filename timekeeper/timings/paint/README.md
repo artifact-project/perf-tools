@@ -10,8 +10,8 @@ Paint Timing
 
 ```html
 <script>
-/* Paste code from ./timekeeper.js */
-/* Paste code from ./timekeeper.timings.paint.js */
+/* Paste code from ./dist/timekeeper.js */
+/* Paste code from ./dist/timekeeper.timings.paint.js */
 
 timekeeperTimingsPaint.paintTimings(timekeeper.system);
 </script>

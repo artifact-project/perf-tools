@@ -12,8 +12,8 @@ Navigation Timings
 
 ```html
 <script>
-/* Paste code from ./timekeeper.js */
-/* Paste code from ./timekeeper.timings.navigation.js */
+/* Paste code from ./dist/timekeeper.js */
+/* Paste code from ./dist/timekeeper.timings.navigation.js */
 
 timekeeperTimingsNavigation.navigationTimings(timekeeper.system);
 </script>

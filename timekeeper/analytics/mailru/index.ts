@@ -1,5 +1,5 @@
 import { Entry } from '../../src/timekeeper/timekeeper';
-import { BaseAnalyticsOptions, baseAnalyticsOptions, globalThis } from '../utils';
+import { AnalyticsOptions, globalThis, getOption } from '../utils';
 
 type MailRuAnalyticsParams = {
 	group: string;
@@ -14,17 +14,27 @@ type MaulRuContext = Window & {
 	xray: MailRuAnalytics;
 };
 
-export function mailruAnalytics(xray?: MailRuAnalytics, options: BaseAnalyticsOptions = baseAnalyticsOptions) {
+export function mailruAnalytics(options?: AnalyticsOptions & {project?: string}, xray?: MailRuAnalytics) {
+	const prefix = getOption(options, 'prefix');
+	const project = getOption(options, 'project');
+	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as MailRuAnalyticsParams[];
 	const send = (params: MailRuAnalyticsParams) => {
 		if (xray) {
-			let label = params.label;
+			const {
+				group,
+				label,
+				value,
+			} = params;
 
-			if (options.useTabName) {
-				label = `${options.useTabName(globalThis.location)}-${label}`;
+			xray(`${prefix}${group}_${label}&v=${value}${(project ? `&p=${project}` : '')}`);
+
+			if (useTabName) {
+				xray(
+					`${prefix}${group}_${label}_${useTabName(globalThis.location)}&v=${value}`
+					+ (project ? `&p=${project}` : '')
+				);
 			}
-
-			xray(`${params.group}&${params.label}=${params.value}`);
 		} else {
 			queue.push(params);
 		}

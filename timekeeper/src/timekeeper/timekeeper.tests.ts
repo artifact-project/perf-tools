@@ -82,6 +82,7 @@ describe('group', () => {
 
 	beforeEach(() => {
 		ts = 0;
+		warn.length = 0;
 		keeper.entries.length = 0;
 	});
 
@@ -96,14 +97,16 @@ describe('group', () => {
 		const gapp = keeper.group('app');
 		gapp.mark('first');
 		gapp.mark('second');
+		gapp.mark('third');
 		gapp.stop();
 
+		expect(warn).toEqual([]);
 		expect(keeper.entries.length).toBe(1);
-		expect(gapp.entries.length).toBe(2);
+		expect(gapp.entries.length).toBe(3);
 		expect(gapp.entries[0].name).toBe('first');
 		expect(gapp.entries[0].end).toBe(3);
 		expect(gapp.entries[1].end).toBe(5);
-		expect(gapp.end).toBe(6);
+		expect(gapp.end).toBe(8);
 	});
 
 	it('isolate', () => {

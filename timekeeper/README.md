@@ -18,7 +18,7 @@ npm i --save @perf-tools/timekeeper
    - Timings ⏱
      - [Navigation Timings](./timings/navigation) 🚏
      - [Paint Timing](./timings/paint) 🏞
-     - [Interactive](./timings/interactive) 🎛
+     - [Performance](./timings/performance) 🚀
    - Analytics 📈
      - [Google](./analytics/google)
 
@@ -31,13 +31,25 @@ npm i --save @perf-tools/timekeeper
 <head>
 	<script>
 		/**
-		 * Replace this comment on the code from this file:
-		 * https://github.com/artifact-project/perf-tools/blob/master/timekeeper/timekeeper.js
+		 * Replace this comment on the code from this files:
+		 *  - https://github.com/artifact-project/perf-tools/blob/master/timekeeper/dist/timekeeper.with-timings.js
+		 *  - https://github.com/artifact-project/perf-tools/blob/master/timekeeper/dist/timekeeper.analytics.google.js
 		 */
+
+		// Setup system keeper
+		timekeeper.print(true);
+		timekeeper.setAnalytics([timekeeperAnalyticsGoogle.googleAnalytics()]);
+
+		// Create custom keeper
 		var keeper = timekeeper.create({
 			print: true,    // DevTools -> Console
 			timeline: true, // DevTools -> Performance
 			prefix: '⏱',
+			analytics: [
+				timekeeperAnalyticsGoogle.googleAnalytics({
+					prefix: 'MyApp-',
+				}),
+			],
 		});
 		keeper.group('head');
 	</script>

@@ -58,6 +58,7 @@ export type Entry = {
 export type GroupEntry = Entry & {
 	add: TimeKeeper['add'];
 	time: TimeKeeper['time'];
+	timeEnd: TimeKeeper['timeEnd'];
 	group: (name: string, start?: number) => GroupEntry;
 	mark: (name: string) => void;
 }
@@ -232,6 +233,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	function print(state?: boolean) {
 		if (state != nil) {
 			needPrint = state;
+			state && print();
 		} else if (lock === false) {
 			lock = true;
 			(globalThis.requestAnimationFrame || setTimeout)(printDefered);
@@ -276,6 +278,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		if (isGroup) {
 			(entry as GroupEntry).add = add;
 			(entry as GroupEntry).time = time;
+			(entry as GroupEntry).timeEnd = timeEnd;
 			(entry as GroupEntry).group = group;
 			(entry as GroupEntry).mark = groupMark;
 			!disabled && !isolate && activeGroups.unshift(entry as GroupEntry);
@@ -362,8 +365,10 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 	function groupStopAll(group: GroupEntry) {
 		let entries = group.entries;
 		let idx = entries.length;
+		let entry: Entry;
 		while (idx--) {
-			entries[idx].stop();
+			entry = entries[idx];
+			(entry.entries === nil) && entry.stop();
 		}
 	}
 

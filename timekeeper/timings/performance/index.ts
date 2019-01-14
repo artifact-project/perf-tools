@@ -1,16 +1,18 @@
 import { TimeKeeper } from '../../src/timekeeper/timekeeper';
 import { sendTimingsFactory, domReady, globalThis } from '../utils';
 
-export type InteractiveOptions = {
+export type PerformanceOptions = {
 	minLatency: number;
+	ttiDelay: number;
 }
 
-const defaultOptions: InteractiveOptions = {
+const defaultOptions: PerformanceOptions = {
 	minLatency: 100,
+	ttiDelay: 3000,
 };
 
-export function interactiveTimings(keeper: TimeKeeper, options: InteractiveOptions = defaultOptions) {
-	const sendTimings = sendTimingsFactory('tk-interactive', keeper);
+export function performanceTimings(keeper: TimeKeeper, options: PerformanceOptions = defaultOptions) {
+	const sendTimings = sendTimingsFactory('tk-performance', keeper);
 	const now = () => keeper.perf.now();
 	const firstWinEvents = [
 		'click',
@@ -69,12 +71,45 @@ export function interactiveTimings(keeper: TimeKeeper, options: InteractiveOptio
 			start = now();
 			requestAnimationFrame(calc);
 		}, true);
-	})
+	});
+
+	// TTI
+	let ttiLastEntry: PerformanceEntry;
+	let ttiPerfObserver: PerformanceObserver;
+
+	try {
+		ttiPerfObserver  = new PerformanceObserver((list) => {
+			ttiLastEntry = list.getEntries().pop();
+		});
+
+		ttiPerfObserver.observe({
+			entryTypes: ['longtask'],
+		});
+	} catch (_) {}
 
 	// After DOM Ready
 	domReady(() => {
 		once(firstWinEvents, (eventType) => {
 			send(`first-${eventType}`, `after-ready`);
+
+			if (ttiPerfObserver) {
+				const check = () => {
+					if (ttiLastEntry) {
+						const tti = ttiLastEntry.startTime + ttiLastEntry.duration;
+
+						if (performance.now() - tti >= options.ttiDelay) {
+							send(`tti`, 'value', 0, tti);
+							ttiPerfObserver.disconnect();
+						} else {
+
+						}
+					} else {
+						setTimeout(check, options.ttiDelay);
+					}
+				}
+
+				check();
+			}
 		});
 	});
 }

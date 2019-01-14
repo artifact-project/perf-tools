@@ -1,5 +1,5 @@
 import { Entry } from '../../src/timekeeper/timekeeper';
-import { BaseAnalyticsOptions, baseAnalyticsOptions, globalThis } from '../utils';
+import { AnalyticsOptions, globalThis, getOption } from '../utils';
 
 const HIT_TYPE_TIMING = 'timing';
 
@@ -16,7 +16,9 @@ type GoogleAnalytics = (
 	params: GoogleAnalyticsParams,
 ) => void;
 
-export function googleAnalytics(ga?: GoogleAnalytics, options: BaseAnalyticsOptions = baseAnalyticsOptions) {
+export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics, ) {
+	const prefix = getOption(options, 'prefix');
+	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as GoogleAnalyticsParams[];
 	const send = (params: GoogleAnalyticsParams) => {
 		if (ga) {
@@ -59,10 +61,10 @@ export function googleAnalytics(ga?: GoogleAnalytics, options: BaseAnalyticsOpti
 
 		send({
 			hitType: HIT_TYPE_TIMING,
-			timingCategory,
+			timingCategory: `${prefix}${timingCategory}`,
 			timingVar,
 			timingValue: Math.round(entry.end - entry.start),
-			timingLabel: options.useTabName ? options.useTabName(globalThis.location) : void 0,
+			timingLabel: useTabName ? useTabName(globalThis.location) : void 0,
 		});
 	};
 }

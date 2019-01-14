@@ -26,7 +26,7 @@ export default [].concat(
 	{
 		input: 'index.ts',
 		output: {
-			file: 'timekeeper.js',
+			file: './dist/timekeeper.js',
 			format: 'iife',
 			name: 'timekeeper',
 		},
@@ -37,7 +37,7 @@ export default [].concat(
 	{
 		input: 'index.ts',
 		output: {
-			file: 'timekeeper.dev.js',
+			file: './dist/timekeeper.dev.js',
 			format: 'iife',
 			name: 'timekeeper',
 		},
@@ -48,11 +48,11 @@ export default [].concat(
 	[
 		'navigation',
 		'paint',
-		'interactive',
+		'performance',
 	].map(name => ({
 		input: `./timings/${name}/index.ts`,
 		output: {
-			file: `timekeeper.timings.${name}.js`,
+			file: `./dist/timekeeper.timings.${name}.js`,
 			format: 'iife',
 			name: toCamelCase(`timekeeper-timings-${name}`),
 		},
@@ -66,9 +66,9 @@ export default [].concat(
 	].map(name => ({
 		input: `./analytics/${name}/index.ts`,
 		output: {
-			file: `timekeeper.analytics.${name}.js`,
+			file: `./dist/timekeeper.analytics.${name}.js`,
 			format: 'iife',
-			name: `timekeeperAnalytics`,
+			name: toCamelCase(`timekeeper-analytics-${name}`),
 		},
 		plugins,
 	})),

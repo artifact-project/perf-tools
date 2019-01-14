@@ -1,7 +1,7 @@
 {
   "name": "@perf-tools/timekeeper",
-  "version": "1.0.6",
-  "description": "Time profiling helper",
+  "version": "1.1.0",
+  "description": "TimeKeeper — It's a time profiling helper and good replacement for `console.time`.",
   "keywords": [
     "perf-tools",
     "performance",
@@ -14,13 +14,14 @@
   "author": "RubaXa <ibnRubaXa@gmail.com",
   "license": "MIT",
   "repository": "git@github.com:artifact-project/perf-tools.git",
-  "homepage": "https://github.com/artifact-project/perf-tools/",
+  "homepage": "https://github.com/artifact-project/perf-tools/tree/master/timekeeper",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "ts-build": "tsc",
-    "build": "NODE_ENV=production rollup --config && echo 'FileSize:' `ls -lh ./timekeeper.js | awk -F ' ' {'print $5'}` && echo '' && npm run build-example",
-    "build-example": "node ./build.example.js",
+    "size": "echo 'FileSize:' `ls -lh ./dist/timekeeper.js | awk -F ' ' {'print $5'}` && echo ''",
+    "build": "NODE_ENV=production rollup --config && npm run size && npm run post-build",
+    "post-build": "node ./post-build.js",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build && npm run build",
     "postpublish": "npm run git-clean"
@@ -48,7 +49,8 @@
     "rollup-plugin-typescript2": "^0.17.0",
     "rollup-plugin-uglify": "^6.0.0",
     "ts-jest": "^20.0.4",
-    "typescript": "^3.1.1"
+    "typescript": "^3.1.1",
+    "uglify-js": "^3.4.9"
   },
   "jest": {
     "transform": {

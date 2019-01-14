@@ -11,8 +11,8 @@ Google Analytics
 
 ```html
 <script>
-/* Paste code from ./timekeeper.js */
-/* Paste code from ./timekeeper.analytics.google.js */
+/* Paste code from ./dist/timekeeper.js */
+/* Paste code from ./dist/timekeeper.analytics.google.js */
 
 timekeeper.system.listen(timekeeperAnalytics.googleAnalytics());
 </script>
@@ -26,5 +26,10 @@ timekeeper.system.listen(timekeeperAnalytics.googleAnalytics());
 import { system } from '@perf-tools/timekeeper';
 import { googleAnalytics } from '@perf-tools/timekeeper/analytics/google';
 
-system.listen(googleAnalytics());
+system.setAnalytics([googleAnalytics()]);
+
+// OR
+system.setAnalytics([googleAnalytics({
+	prefix: 'MyApp-',
+})]);
 ```
