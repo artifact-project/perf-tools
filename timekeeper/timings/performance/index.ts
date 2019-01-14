@@ -80,7 +80,6 @@ export function performanceTimings(keeper: TimeKeeper, options: PerformanceOptio
 	try {
 		ttiPerfObserver = new PerformanceObserver((list) => {
 			ttiLastEntry = list.getEntries().pop();
-			console.log('2222');
 		});
 
 		ttiPerfObserver.observe({

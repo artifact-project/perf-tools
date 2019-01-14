@@ -33,5 +33,6 @@ performanceTimings(system);
 // or with options
 performanceTimings(system, {
 	minLatency: 150, // by default `100`
+	ttiDelay: 2500, // by default `3000`
 });
 ```
