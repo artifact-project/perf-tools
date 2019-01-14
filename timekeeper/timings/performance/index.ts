@@ -78,8 +78,9 @@ export function performanceTimings(keeper: TimeKeeper, options: PerformanceOptio
 	let ttiPerfObserver: PerformanceObserver;
 
 	try {
-		ttiPerfObserver  = new PerformanceObserver((list) => {
+		ttiPerfObserver = new PerformanceObserver((list) => {
 			ttiLastEntry = list.getEntries().pop();
+			console.log('2222');
 		});
 
 		ttiPerfObserver.observe({
@@ -89,27 +90,36 @@ export function performanceTimings(keeper: TimeKeeper, options: PerformanceOptio
 
 	// After DOM Ready
 	domReady(() => {
-		once(firstWinEvents, (eventType) => {
-			send(`first-${eventType}`, `after-ready`);
+		// TTI Check
+		if (ttiPerfObserver) {
+			let tti: number;
+			const check = () => {
+				if (ttiLastEntry) {
+					tti = ttiLastEntry.startTime + ttiLastEntry.duration;
 
-			if (ttiPerfObserver) {
-				const check = () => {
-					if (ttiLastEntry) {
-						const tti = ttiLastEntry.startTime + ttiLastEntry.duration;
-
-						if (performance.now() - tti >= options.ttiDelay) {
-							send(`tti`, 'value', 0, tti);
-							ttiPerfObserver.disconnect();
-						} else {
-
-						}
+					if (now() - tti >= options.ttiDelay) {
+						send(`tti`, 'value', 0, tti);
+						ttiPerfObserver.disconnect();
 					} else {
 						setTimeout(check, options.ttiDelay);
 					}
+				} else if (tti) {
+					send(`tti`, 'value', 0, tti);
+					ttiPerfObserver.disconnect();
+				} else {
+					// Небыло лонг тасков, поэтому делаем паузу и если их опять не будет,
+					// то считает, что приложение уже готово на момент DOMReady!
+					tti = now();
+					setTimeout(check, 500);
 				}
-
-				check();
 			}
+
+			check();
+		}
+
+		// Events
+		once(firstWinEvents, (eventType) => {
+			send(`first-${eventType}`, `after-ready`);
 		});
 	});
 }
