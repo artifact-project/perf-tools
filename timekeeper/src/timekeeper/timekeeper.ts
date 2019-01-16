@@ -33,7 +33,9 @@ nativePerf.now = nativePerf.now
 	|| (() => (dateNow() - startOffset))
 ;
 
-export function color(ms: any): string {
+export function color(ms: number, unit: Entry['unit']): string {
+	ms /= unit === 'KiB' ? 5 : 1;
+
 	return 'color: #' + (
 		ms < 2 ? 'ccc' :
 		ms < 5 ? '666' :
@@ -52,10 +54,12 @@ export type Entry = {
 	active: number;
 	start: number;
 	end: number;
+	unit: 'ms' | 'KiB';
 	stop: (end?: number) => void;
 }
 
 export type GroupEntry = Entry & {
+	_?: true; // collapsed
 	add: TimeKeeper['add'];
 	time: TimeKeeper['time'];
 	timeEnd: TimeKeeper['timeEnd'];
@@ -162,6 +166,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		let total = 0;
 		let start: number;
 		let entry: Entry;
+		let unit: Entry['unit'];
 		let duration: number;
 		let selfDuration: number;
 		let logMsg: string;
@@ -170,30 +175,31 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 
 		for (; i < entries.length; i++) {
 			entry = entries[i];
+			unit = entry.unit;
 
 			if (entry.end !== nil && !entry.active) {
 				nextEntries = entry.entries;
 				nextLength = nextEntries ? nextEntries.length : 0;
 
 				start = entry.start;
-				duration = entry.end - start;
-				logMsg = `${prefix}${entry.name}: %c${duration.toFixed(3)}ms`;
+				duration = (entry.end - start) / (unit === 'KiB' ? 1024 : 1);
+				logMsg = `${prefix}${entry.name}: %c${duration.toFixed(3)}${unit}`;
 
 				if (nextLength < 1) {
 					console.log(
 						logMsg,
-						`${BOLD}${color(duration)}`,
+						`${BOLD}${color(duration, unit)}`,
 					);
 
 					total += duration;
 				} else {
 					console[
-						console[s_groupCollapsed] && nextLength < 2
+						console[s_groupCollapsed] && ((entry as GroupEntry)._ || nextLength < 2)
 							? s_groupCollapsed
 							: s_group
 					](
 						logMsg,
-						color(duration),
+						color(duration, unit),
 					);
 					selfDuration = duration - __print__(nextEntries);
 
@@ -207,7 +213,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 						));
 						console.log(
 							`${prefix}[[unknown]]: %c${selfDuration.toFixed(3)}ms`,
-							`${BOLD}${color(selfDuration)}`,
+							`${BOLD}${color(selfDuration, unit)}`,
 						);
 					}
 
@@ -260,6 +266,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 			name,
 			parent,
 			entries:  isGroup ? [] : nil,
+			unit: 'ms',
 			active: +isGroup,
 			start: start != nil ? start : perf.now(),
 			end: end != nil ? end : nil,
@@ -271,6 +278,7 @@ export function create(options: Partial<KeeperOptions>): TimeKeeper {
 		} else if (parent.end !== nil && end == nil) {
 			warn(`[timekeeper] Group "${parent.name}" is stopped`);
 		} else if (!disabled) {
+			entry.unit = parent.unit;
 			parent.active++;
 			parent.entries.push(entry);
 		}

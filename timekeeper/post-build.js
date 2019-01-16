@@ -17,11 +17,12 @@ writeFileSync(
 		// TimeKeeper
 		${readFileSync('./dist/timekeeper.dev.js')}
 
-		// Plugins
+		// Timings
 		${Object.entries({
 			navigation: 'timekeeperTimingsNavigation.navigationTimings',
 			paint: 'timekeeperTimingsPaint.paintTimings',
 			performance: 'timekeeperTimingsPerformance.performanceTimings',
+			resource: 'timekeeperTimingsResource.resourceTimings',
 		}).map(([name, method]) => {
 			const content = [
 				`// Timings: ${name}`,

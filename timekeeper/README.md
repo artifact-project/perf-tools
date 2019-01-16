@@ -1,3 +1,6 @@
+# ⚠️ **DEPRECATED**: Use @perf-tools/keeper ⚠️
+
+
 @perf-tools/timekeeper
 ----------------------
 TimeKeeper — It's a time profiling helper and good replacement for `console.time`.
