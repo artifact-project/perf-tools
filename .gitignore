@@ -64,5 +64,4 @@ package-lock.json
 .npmyrc
 
 # Distributive
-dist
 compiled
