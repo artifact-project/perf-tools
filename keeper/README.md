@@ -17,11 +17,11 @@ npm i --save @perf-tools/keeper
  - Output -> DevTools / Console or custom output 💬
  - Out of box ⚡️
    - Monitorings ⏱
+	 - [FPS](./ext/fps) 🌀
      - [Navigation Timings](./ext/navigation) 🚏
      - [Paint Timings](./ext/paint) 🏞
 	 - [Performance](./ext/performance) 🚀
 	 - [Resource/Traffic](./ext/resource) ⚖️
-	 - [FPS](./ext/fps) 🌀
    - Analytics 📈
      - [Google](./analytics/google)
      - [Yandex](./analytics/yandex)
