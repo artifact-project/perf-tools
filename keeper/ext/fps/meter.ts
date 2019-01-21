@@ -2,10 +2,11 @@ import { domReady, globalThis, now, document } from '../utils';
 
 let helper: HTMLElement;
 let helperStyle: HTMLElement['style'];
-let values = [] as number[];
 let startTime = 0;
 let rafId = 0;
-let paintCount = 0;
+let startPaintCount: number;
+let paintCount: number;
+let prevHelperLeft: number;
 let enabled = false;
 let rate = 300;
 let handle: (fps: number) => void;
@@ -28,47 +29,31 @@ export function stopMeasure() {
 const ZERO_PX = '0px';
 
 function measure() {
-	values.length = 0;
 	startTime = now();
+	startPaintCount = globalThis.mozPaintCount || 0;
+	paintCount = 0;
+	prevHelperLeft = -1;
 	helperStyle.left = helperStyle.left === ZERO_PX ? `${window.innerWidth/2}px` : ZERO_PX;
 
-	if (globalThis.mozPaintCount != null) {
-		paintCount = globalThis.mozPaintCount;
-	} else {
-		saveValue();
-	}
+	saveValue();
 }
 
 function saveValue() {
-	const val = +globalThis.getComputedStyle(helper, null).left.slice(0, -2);
-	val && values.push(val);
+	const left = +globalThis.getComputedStyle(helper, null).left.slice(0, -2);
+
+	if (prevHelperLeft !== left) {
+		paintCount++;
+		prevHelperLeft = left;
+	}
+
 	rafId = requestAnimationFrame(saveValue);
 }
 
 function onTransitionEnd() {
 	const duration = now() - startTime;
-	let frames = 0;
+	const frames = (globalThis.mozPaintCount || paintCount) - startPaintCount;
 
-	if (globalThis.mozPaintCount != null) {
-		frames = globalThis.mozPaintCount - paintCount;
-	} else {
-		cancelAnimationFrame(rafId);
-
-		let duplicates = 0;
-		let current = -1;
-
-		for (let i = 0; i < values.length; i++) {
-			const val = values[i];
-
-			if (val == current) {
-				duplicates++;
-			} else {
-				current = val;
-			}
-		}
-
-		frames = values.length - duplicates;
-	}
+	cancelAnimationFrame(rafId);
 
 	if (enabled) {
 		handle(Math.min(Math.round(frames * 1000 / duration), 60));
