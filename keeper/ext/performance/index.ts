@@ -94,7 +94,8 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 			const end = now();
 
 			if (end - start >= options.minLatency) {
-				send(`latency-${eventType}`, 'value', start, end);
+				set('value', start, end);
+				flush(`latency-${eventType}`, start, end, true);
 			}
 		}
 
