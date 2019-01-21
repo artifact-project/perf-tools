@@ -22,7 +22,7 @@ export const defaultResourceStatsOptions: ResourceStatsOptions = {
 export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions = defaultResourceStatsOptions) {
 	const [setBytes, sendBytes] = createTamingsGroup('pk-resource-traffic', keeper, 'KiB');
 	const [setCachedBytes, sendCachedBytes] = createTamingsGroup('pk-resource-traffic-cached', keeper, 'KiB');
-	const [setStats, sendStats] = createTamingsGroup('pk-resource-stats', keeper);
+	const [setStats, sendStats] = createTamingsGroup('pk-resource-stats', keeper, 'KiB');
 	const resourceName = options.resourceName || ((entry: PerformanceResourceTiming) => {
 		const parsed = R_RESOURCE.exec(entry.name);
 		return parsed ? [entry.initiatorType, parsed[1]] : null;
@@ -115,7 +115,7 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 
 			// Stats
 			Object.keys(stats).forEach((key) => {
-				setStats(key, 0, stats[key]);
+				setStats(key, 0, stats[key], key === 'duration' ? 'ms' : /size/i.test(key) ? 'KiB' : 'raw');
 			});
 			sendStats(rootName, 0, stats.size);
 

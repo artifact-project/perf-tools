@@ -104,7 +104,7 @@ var perfKeeper = (function (exports) {
 	                nextLength = nextEntries ? nextEntries.length : 0;
 	                start = entry.start;
 	                duration = (entry.end - start) / (unit === 'KiB' ? 1024 : 1);
-	                logMsg = "" + prefix + entry.name + ": %c" + duration.toFixed(3) + unit;
+	                logMsg = "" + prefix + entry.name + ": %c" + (unit === 'raw' ? duration : duration.toFixed(3) + unit);
 	                if (nextLength < 1) {
 	                    console.log(logMsg, "" + BOLD + color(duration, unit));
 	                    total += duration;

@@ -58,7 +58,7 @@ export type Entry = {
 	active: number;
 	start: number;
 	end: number;
-	unit: 'ms' | 'KiB' | 'fps';
+	unit: 'ms' | 'KiB' | 'fps' | 'raw';
 	stop: (end?: number) => void;
 }
 
@@ -187,7 +187,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 
 				start = entry.start;
 				duration = (entry.end - start) / (unit === 'KiB' ? 1024 : 1);
-				logMsg = `${prefix}${entry.name}: %c${duration.toFixed(3)}${unit}`;
+				logMsg = `${prefix}${entry.name}: %c${unit === 'raw' ? duration : duration.toFixed(3) + unit}`;
 
 				if (nextLength < 1) {
 					console.log(
