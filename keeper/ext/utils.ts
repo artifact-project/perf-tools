@@ -36,7 +36,7 @@ export type TimingTuple = [
 
 const EMPTY_ARRAY = [];
 
-export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entry['unit']): TimingTuple {
+export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entry['unit'], sort?: boolean): TimingTuple {
 	let rootTiming = {} as Timing;
 
 	function set(path: string | string[], start: number, end: number, unit?: Entry['unit']) {
@@ -70,7 +70,8 @@ export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entr
 
 				nestedGroup._ = true;
 				nestedGroup.unit = unit || 'ms';
-				nestedKeys.sort().forEach((key) => {
+
+				(sort === false ? nestedKeys : nestedKeys.sort()).forEach((key) => {
 					walk(nested[key], nestedGroup);
 				});
 

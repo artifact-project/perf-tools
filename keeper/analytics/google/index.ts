@@ -16,8 +16,8 @@ type GoogleAnalytics = (
 	params: GoogleAnalyticsParams,
 ) => void;
 
-export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics, ) {
-	const prefix = getOption(options, 'prefix');
+export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics) {
+	const prefix = getOption(options, 'prefix') || '';
 	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as GoogleAnalyticsParams[];
 	const send = (params: GoogleAnalyticsParams) => {

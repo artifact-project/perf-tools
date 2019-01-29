@@ -8,7 +8,7 @@ export const defaultNavTimingsOptions: NavTimingsOptions = {
 };
 
 export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = defaultNavTimingsOptions) {
-	const [set, send] = createTamingsGroup('pk-navigation', keeper);
+	const [set, send] = createTamingsGroup('pk-navigation', keeper, 'ms', false);
 
 	try {
 		const {
@@ -23,8 +23,17 @@ export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = def
 			responseEnd,
 		} = performance.timing;
 
-		set('redirect', redirectStart, redirectEnd);
-		set('app-cache', fetchStart, domainLookupStart);
+		if (redirectStart) {
+			set('init', navigationStart, redirectStart);
+			set('redirect', redirectStart, redirectEnd);
+			set('app-cache', redirectEnd, domainLookupStart);
+		} else if (fetchStart) {
+			set('init', navigationStart, fetchStart);
+			set('app-cache', fetchStart, domainLookupStart);
+		} else {
+			set('init', navigationStart, domainLookupStart);
+		}
+
 		set('dns', domainLookupStart, domainLookupEnd);
 		set('tcp', domainLookupEnd, requestStart);
 		set('request', requestStart, responseStart);
@@ -68,7 +77,7 @@ export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = def
 
 			set('ready', responseEnd, domComplete)
 			set('load', domComplete, loadEventEnd);
-			send('dom-load', responseEnd, loadEventEnd);
+			send('dom-load', responseEnd, loadEventEnd, true);
 		} catch (_) {}
 	});
 }
