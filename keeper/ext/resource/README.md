@@ -13,7 +13,7 @@ Resources
 /* Paste code from ./dist/perf-keeper.js */
 /* Paste code from ./dist/perf-keeper.ext.resource.js */
 
-perfKeeperExtResource.resourceTimings(perfKeeper.system);
+perfKeeperExtResource.resourceStats(perfKeeper.system);
 </script>
 ```
 
