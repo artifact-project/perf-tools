@@ -6,6 +6,7 @@ export type AnalyticsOptions = {
 }
 
 const baseAnalyticsOptions: AnalyticsOptions = {
+	prefix: '',
 	useTabName: ({pathname}: Location) => (pathname === '/' ? 'index' : pathname)
 		.replace(/[\/\.]+/g, '-')
 		.replace(/^-|-$/g, '')
