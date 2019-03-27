@@ -39,7 +39,7 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 			path.unshift(cursor.name);
 		} while (cursor = cursor.parent);
 
-		useTabName && path.push('URLs', useTabName(location));
+		useTabName && path.push('__page__', useTabName(location));
 
 		let obj = params;
 		let i = 0;
