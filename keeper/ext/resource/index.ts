@@ -84,7 +84,7 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 						entryType,
 						initiatorType,
 						protocol
-					]
+					];
 
 					commonCategories.forEach(category => {
 						addSize(cached, category, size)
@@ -100,7 +100,7 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 						};
 
 						patch.forEach((category, index) => {
-							if (Array.isArray[category]) {
+							if (Array.isArray(category)) {
 								category.forEach(add)
 							} else {
 								add(category, index, patch)
