@@ -3,7 +3,7 @@ import { performance } from '@perf-tools/performance';
 
 describe('time', () => {
 	let ts = 0;
-	const warn = [];
+	const warn = [] as string[];
 	const keeper = create({
 		timeline: true,
 		perf: {
@@ -11,7 +11,7 @@ describe('time', () => {
 			now: () => ++ts,
 		},
 		console: {
-			warn: (val) => warn.push(val),
+			warn: (val: string) => warn.push(val),
 		},
 	});
 	const expected = {
@@ -68,7 +68,7 @@ describe('time', () => {
 
 describe('group', () => {
 	let ts = 0;
-	const warn = [];
+	const warn = [] as string[];
 	const keeper = create({
 		timeline: true,
 		perf: {
@@ -76,7 +76,7 @@ describe('group', () => {
 			now: () => ++ts,
 		},
 		console: {
-			warn: (val) => warn.push(val),
+			warn: (val: string) => warn.push(val),
 		},
 	});
 
@@ -102,10 +102,10 @@ describe('group', () => {
 
 		expect(warn).toEqual([]);
 		expect(keeper.entries.length).toBe(1);
-		expect(gapp.entries.length).toBe(3);
-		expect(gapp.entries[0].name).toBe('first');
-		expect(gapp.entries[0].end).toBe(3);
-		expect(gapp.entries[1].end).toBe(5);
+		expect(gapp.entries!.length).toBe(3);
+		expect(gapp.entries![0].name).toBe('first');
+		expect(gapp.entries![0].end).toBe(3);
+		expect(gapp.entries![1].end).toBe(5);
 		expect(gapp.end).toBe(8);
 	});
 
@@ -137,7 +137,7 @@ describe('group', () => {
 		keeper.groupEnd();
 
 		expect(`root:${keeper.entries.length}`).toBe(`root:1`);
-		expect(`group:${keeper.entries[0].entries.length}`).toBe(`group:2`);
+		expect(`group:${keeper.entries![0].entries!.length}`).toBe(`group:2`);
 		expect(keeper.entries[0].active).toBe(0);
 		expect(keeper.entries[0].end).toBe(ts);
 	});
@@ -153,7 +153,7 @@ describe('group', () => {
 		gapp.stop();
 
 		expect(`root:${keeper.entries.length}`).toBe(`root:1`);
-		expect(`group:${keeper.entries[0].entries.length}`).toBe(`group:2`);
+		expect(`group:${keeper.entries![0].entries!.length}`).toBe(`group:2`);
 		expect(keeper.entries[0].active).toBe(0);
 		expect(keeper.entries[0].end).toBe(ts);
 	});
@@ -170,16 +170,16 @@ describe('group', () => {
 
 it('print', async () => {
 	let ts = 0;
-	const log = [];
-	const warn = [];
+	const log = [] as string[];
+	const warn = [] as string[];
 	const keeper = create({
 		print: true,
 		perf: {
 			now: () => ++ts,
 		},
 		console: {
-			warn: (val) => warn.push(val),
-			log: (...args) => log.push(args[0].replace(/%c/g, '')),
+			warn: (val: string) => warn.push(val),
+			log: (...args: string[]) => log.push(args[0].replace(/%c/g, '')),
 			group: (name) => log.push(`group:${name}`),
 			groupEnd: () => log.push(`groupEnd`),
 		},
@@ -217,7 +217,7 @@ it('print', async () => {
 
 describe('perf', () => {
 	let ts = 0;
-	const perf = [];
+	const perf = [] as string[];
 	const keeper = create({
 		timeline: true,
 		prefix: '',
@@ -309,7 +309,7 @@ it('disabled', () => {
 });
 
 it('time warn', () => {
-	const warn = [];
+	const warn = [] as string[];
 	const keeper = create({
 		warn: (m) => warn.push(m),
 	});
