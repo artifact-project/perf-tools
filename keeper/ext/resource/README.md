@@ -52,23 +52,16 @@ resourceStats(system, {
 
 // more complex examples with `resourceName`
 resourceStats(system, {
-	resourceName: (entry) => {
-		const { name } = entry
-
-		let result = []
+	resourceName: ({ name }) => {
+		const result = [];
 
 		// can be multidimensional array
 		if (/unpkg\.com/.test(name)) {
-			result.push(['cdn', 'unpkg'])
-
-			if (/min\.js$/.test(name) {
-				result.push(['js','min'])
-			}
-		} else {
-			result = null
+			result.push(['cdn', 'unpkg']);
+			/min\.js($|\?)/.test(name) && result.push(['js', 'min']);
 		}
 
-		return result
-	}
+		return result;
+	},
 });
 ```

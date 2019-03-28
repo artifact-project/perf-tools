@@ -53,11 +53,11 @@ export function color(v: number, unit: Entry['unit']): string {
 export type Entry = {
 	id: string;
 	name: string;
-	parent: GroupEntry;
-	entries: Entry[];
+	parent: GroupEntry | null;
+	entries: Entry[] | null;
 	active: number;
-	start: number;
-	end: number;
+	start: number | null;
+	end: number | null;
 	unit: 'ms' | 'KiB' | 'fps' | 'raw';
 	stop: (end?: number) => void;
 }
@@ -160,9 +160,9 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		let id = entry.id;
 		let label = `${prefix}${entry.name}`;
 
-		perf[s_measure](label, id);
-		perf[s_clearMarks](id);
-		perf[s_clearMeasures](label);
+		perf[s_measure]!(label, id);
+		perf[s_clearMarks]!(id);
+		perf[s_clearMeasures]!(label);
 	}
 
 	function __print__(entries: Entry[]) {
@@ -182,15 +182,15 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 			unit = entry.unit;
 
 			if (entry.end !== nil && !entry.active) {
-				nextEntries = entry.entries;
+				nextEntries = entry.entries!;
 				nextLength = nextEntries ? nextEntries.length : 0;
 
-				start = entry.start;
+				start = entry.start!;
 				duration = (entry.end - start) / (unit === 'KiB' ? 1024 : 1);
 				logMsg = `${prefix}${entry.name}: %c${unit === 'raw' ? duration : duration.toFixed(3) + unit}`;
 
 				if (nextLength < 1) {
-					console.log(
+					console.log!(
 						logMsg,
 						`${BOLD}${color(duration, unit)}`,
 					);
@@ -201,7 +201,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 						console[s_groupCollapsed] && ((entry as GroupEntry)._ || nextLength < 2)
 							? s_groupCollapsed
 							: s_group
-					](
+					]!(
 						logMsg,
 						color(duration, unit),
 					);
@@ -215,14 +215,14 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 							start,
 							start + selfDuration,
 						));
-						console.log(
+						console.log!(
 							`${prefix}[[unknown]]: %c${selfDuration.toFixed(3)}ms`,
 							`${BOLD}${color(selfDuration, unit)}`,
 						);
 					}
 
 					total += duration;
-					console.groupEnd();
+					console.groupEnd!();
 				}
 
 				if (entry.parent === nil) {
@@ -255,7 +255,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		parent: GroupEntry | null,
 		isGroup: boolean,
 		start?: number,
-		end?: number,
+		end?: number | null,
 		isolate?: true,
 	): Entry | GroupEntry {
 		let label = `${prefix}${name}-${++cid}`;
@@ -272,7 +272,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 			entries:  isGroup ? [] : nil,
 			unit: 'ms',
 			active: +isGroup,
-			start: start != nil ? start : perf.now(),
+			start: start != nil ? start : perf.now!(),
 			end: end != nil ? end : nil,
 			stop: isGroup ? stopGroup : stopEntry,
 		};
@@ -284,12 +284,12 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		} else if (!disabled) {
 			entry.unit = parent.unit;
 			parent.active++;
-			parent.entries.push(entry);
+			parent.entries!.push(entry);
 		}
 
 		if (isGroup) {
 			(entry as GroupEntry).add = add;
-			(entry as GroupEntry).time = time;
+			(entry as GroupEntry).time = time as PerfKeeper['time'];
 			(entry as GroupEntry).timeEnd = timeEnd;
 			(entry as GroupEntry).group = group;
 			(entry as GroupEntry).mark = groupMark;
@@ -298,18 +298,18 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 			!disabled && activeEntries.push(entry);
 		}
 
-		!disabled && (start == nil) && perfSupported && perf[s_mark](id);
+		!disabled && (start == nil) && perfSupported && perf[s_mark]!(id);
 
 		return entry;
 	}
 
 	function stopEntry(this: Entry, end?: number) {
 		if (this.end === nil) {
-			this.end = end >= 0 ? end : perf.now();
+			this.end = end! >= 0 ? end! : perf.now!();
 
 			(end == nil) && perfSupported && measure(this);
 			emit(this);
-			closeGroup(this.parent, end);
+			closeGroup(this.parent!, end);
 		}
 		return this;
 	}
@@ -330,10 +330,10 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 				let idx = activeGroups.indexOf(entry);
 				(idx > -1) && activeGroups.splice(idx, 1);
 
-				entry.end = end >= 0 ? end : perf.now();
+				entry.end = end! >= 0 ? end! : perf.now!();
 				(end == nil) && perfSupported && measure(entry);
 				emit(entry);
-				closeGroup(entry.parent, end);
+				closeGroup(entry.parent!, end);
 			}
 		}
 	}
@@ -375,7 +375,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 	}
 
 	function groupStopAll(group: GroupEntry) {
-		let entries = group.entries;
+		let entries = group.entries!;
 		let idx = entries.length;
 		let entry: Entry;
 		while (idx--) {
@@ -389,7 +389,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		this.time(name);
 	}
 
-	function group(this: GroupEntry, name: string, start?: number | true, isolate?: true): GroupEntry {
+	function group(this: GroupEntry, name: string, start?: number | true | null, isolate?: true): GroupEntry {
 		if (start === true) {
 			isolate = start;
 			start = nil;
@@ -424,7 +424,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		disable,
 		setAnalytics,
 		add,
-		time,
+		time: time as PerfKeeper['time'],
 		timeEnd,
 		group,
 		groupEnd,

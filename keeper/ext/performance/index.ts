@@ -106,7 +106,7 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 	});
 
 	// TTI
-	let ttiLastEntry: PerformanceEntry;
+	let ttiLastEntry: PerformanceEntry | undefined;
 	let ttiPerfObserver: PerformanceObserver;
 
 	try {

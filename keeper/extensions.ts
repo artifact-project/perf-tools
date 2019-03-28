@@ -15,7 +15,7 @@ export type Extensions = Partial<{
 }>
 
 export function set(keeper: PerfKeeper, options: Extensions) {
-	function apply<O extends object>(ext: (keeper: PerfKeeper, options: O) => void, options: O, defaults: O) {
+	function apply<O extends object>(ext: (keeper: PerfKeeper, options?: O) => void, options?: O, defaults?: O) {
 		ext(keeper, {
 			...Object(defaults),
 			...Object(options),

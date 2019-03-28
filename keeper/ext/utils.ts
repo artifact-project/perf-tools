@@ -31,10 +31,10 @@ export type Timing = {
 
 export type TimingTuple = [
 	(path: string | string[], start: number, end: number, unit?: Entry['unit']) => void,
-	(groupName: string, start: number, end: number, reset?: boolean) => void
+	(groupName: string | null, start: number, end: number, reset?: boolean) => void
 ]
 
-const EMPTY_ARRAY = [];
+const EMPTY_ARRAY = [] as string[];
 
 export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entry['unit'], sort?: boolean): TimingTuple {
 	let rootTiming = {} as Timing;
@@ -52,16 +52,16 @@ export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entr
 		} else {
 			timing.start = start;
 			timing.end = end;
-			timing.unit = unit;
+			timing.unit = unit as Entry['unit'];
 		}
 	}
 
-	function send(groupName: string, start: number, end: number, reset?: boolean) {
+	function send(groupName: string | null, start: number, end: number, reset?: boolean) {
 		rootTiming.name = groupName ? `${name}-${groupName}` : name;
 		rootTiming.start = start;
 		rootTiming.end = end;
 
-		(function walk(timing: Timing, group: GroupEntry) {
+		(function walk(timing: Timing, group: GroupEntry | null) {
 			const nested = timing.nested;
 			const nestedKeys = nested ? Object.keys(nested) : EMPTY_ARRAY;
 
@@ -76,9 +76,9 @@ export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entr
 				});
 
 				nestedGroup.stop(timing.end);
-			} else {
+			} else if (group) {
 				group.add(timing.name, timing.start, timing.end);
-				group.entries[group.entries.length - 1].unit = timing.unit || group.unit;
+				group.entries![group.entries!.length - 1].unit = timing.unit || group.unit;
 			}
 		})(rootTiming, null);
 

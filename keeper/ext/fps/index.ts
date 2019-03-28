@@ -4,7 +4,7 @@ import { startMeasure, stopMeasure } from './meter';
 
 export type FPSMeterOptions = {
 	rate: number;
-	scrollableName?: (scrollRef: HTMLElement | Document) => string;
+	scrollableName?: (scrollRef: HTMLElement | Document) => string | null | undefined;
 }
 
 export const defaultFPSMeterOptions: FPSMeterOptions = {

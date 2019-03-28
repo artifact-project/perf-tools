@@ -8,7 +8,7 @@ type YandexAnalyticsParams = {
 type YandexAnalytics = (id: string, cmd: 'params', params: YandexAnalyticsParams) => void;
 
 export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: YandexAnalytics) {
-	const id = getOption(options, 'id');
+	const id = getOption(options, 'id')!;
 	const prefix = getOption(options, 'prefix');
 	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as YandexAnalyticsParams[];
@@ -37,7 +37,7 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 
 		do {
 			path.unshift(cursor.name);
-		} while (cursor = cursor.parent);
+		} while (cursor = cursor.parent!);
 
 		useTabName && path.push('__page__', useTabName(location));
 
@@ -49,7 +49,7 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 			obj = (obj[(i === 0 && prefix ? prefix : '')+ path[i]] = {});
 		}
 
-		obj[path[l]] = Math.round(entry.end - entry.start);
+		obj[path[l]] = entry.end && entry.start ? Math.round(entry.end - entry.start) : 0;
 		send(params);
 	};
 }

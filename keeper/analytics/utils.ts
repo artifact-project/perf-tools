@@ -16,7 +16,7 @@ const baseAnalyticsOptions: AnalyticsOptions = {
 export function getOption<
 	O extends AnalyticsOptions,
 	N extends keyof O
->(options: O, name: N): O[N] | undefined {
+>(options: O | undefined, name: N): O[N] | undefined {
 	return options && (name in options)
 		? options[name]
 		: (baseAnalyticsOptions as O)[name]

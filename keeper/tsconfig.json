@@ -5,6 +5,7 @@
     "declaration": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
+    "strictNullChecks": true,
     "lib": [
       "dom",
       "es5",

@@ -14,7 +14,7 @@ type MaulRuContext = Window & {
 	xray: MailRuAnalytics;
 };
 
-export function mailruAnalytics(options?: AnalyticsOptions & {project?: string}, xray?: MailRuAnalytics) {
+export function mailruAnalytics(options?: AnalyticsOptions & {project?: string}, xray?: MailRuAnalytics | null) {
 	const prefix = getOption(options, 'prefix');
 	const project = getOption(options, 'project');
 	const useTabName = getOption(options, 'useTabName');
@@ -74,12 +74,12 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 		send({
 			group,
 			label,
-			value: entry.end - entry.start,
+			value: entry.end && entry.start ? entry.end - entry.start : 0,
 		});
 	};
 }
 
-function get(): MailRuAnalytics {
+function get(): MailRuAnalytics | null {
 	const require = (globalThis as MaulRuContext).require;
 	let xray = (globalThis as MaulRuContext).xray;
 

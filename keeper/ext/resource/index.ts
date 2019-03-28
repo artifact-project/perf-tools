@@ -3,8 +3,8 @@ import { domReady, createTamingsGroup, performance } from '../utils';
 
 export type ResourceStatsIntervals = Array<[string, number]>
 export type ResourceStatsOptions = {
-	beforeEntryAdd?: (entry: PerformanceResourceTiming) => boolean | undefined;
-	resourceName?: (entry: PerformanceResourceTiming) => string[] | Array<string[]>;
+	onBeforeEntryAdd?: (entry: PerformanceResourceTiming) => boolean | undefined;
+	resourceName?: (entry: PerformanceResourceTiming) => null | undefined | string[] | Array<string[]>;
 	intervals?: ResourceStatsIntervals;
 }
 
@@ -23,7 +23,7 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 	const [setBytes, sendBytes] = createTamingsGroup('pk-resource-traffic', keeper, 'KiB');
 	const [setCachedBytes, sendCachedBytes] = createTamingsGroup('pk-resource-traffic-cached', keeper, 'KiB');
 	const [setStats, sendStats] = createTamingsGroup('pk-resource-stats', keeper, 'KiB');
-	const beforeEntryAdd = options.beforeEntryAdd
+	const onBeforeEntryAdd = options.onBeforeEntryAdd
 	const resourceName = options.resourceName || ((entry: PerformanceResourceTiming) => {
 		const parsed = R_RESOURCE.exec(entry.name);
 		return parsed ? [entry.initiatorType, parsed[1]] : null;
@@ -67,8 +67,8 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 			check();
 
 			entries.forEach(entry => {
-				if (beforeEntryAdd && beforeEntryAdd(entry) === false) {
-					return
+				if (onBeforeEntryAdd && onBeforeEntryAdd(entry) === false) {
+					return;
 				}
 
 				let {
@@ -89,29 +89,31 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 					const commonCategories = [
 						entryType,
 						initiatorType,
-						protocol
+						protocol,
 					];
 
 					commonCategories.forEach(category => {
-						addSize(cached, category, size)
+						addSize(cached, category, size);
 					})
 
 					if (initiatorType !== 'html') {
-						const patch = resourceName(entry)
+						const names = resourceName(entry);
 
-						const add = (category, index, row) => {
-							if (index > 0 || commonCategories.indexOf(category) < 0) {
-								addSize(cached, row.slice(0, index + 1), size);
+						const add = (category: string, idx: number, path: string[]) => {
+							if (idx > 0 || commonCategories.indexOf(category) !== -1) {
+								addSize(cached, path.slice(0, idx + 1), size);
 							}
 						};
 
-						patch.forEach((category, index) => {
-							if (Array.isArray(category)) {
-								category.forEach(add)
+						if (names && names.length) {
+							if (Array.isArray(names[0])) {
+								(names as string[][]).forEach(values => {
+									values.forEach(add);
+								});
 							} else {
-								add(category, index, patch)
+								(names as string[]).forEach(add);
 							}
-						});
+						}
 					}
 				}
 

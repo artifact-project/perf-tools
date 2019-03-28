@@ -39,7 +39,8 @@ function measure() {
 }
 
 function saveValue() {
-	const left = +globalThis.getComputedStyle(helper, null).left.slice(0, -2);
+	const style = globalThis.getComputedStyle(helper, null);
+	const left = style && style.left ? +style.left.slice(0, -2) : 0;
 
 	if (prevHelperLeft !== left) {
 		paintCount++;
