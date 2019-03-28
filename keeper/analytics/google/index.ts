@@ -1,4 +1,4 @@
-import { Entry } from '../../src/keeper/keeper';
+import { PerfEntry } from '../../src/keeper/keeper';
 import { AnalyticsOptions, globalThis, getOption } from '../utils';
 
 const HIT_TYPE_TIMING = 'timing';
@@ -40,7 +40,7 @@ export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics
 		})();
 	}
 
-	return (entry: Entry) => {
+	return (entry: PerfEntry) => {
 		let timingCategory = entry.name;
 		let timingVar = 'value';
 		let cursor = entry.parent;

@@ -26,9 +26,32 @@ npm i --save @perf-tools/keeper
      - [Google](./analytics/google)
      - [Yandex](./analytics/yandex)
 
- ---
+---
 
 ### Usage
+
+```ts
+// System keeper
+import { system } from '@perf-tools/keeper';
+
+
+// Custom keeper
+import { create } from '@perf-tools/keeper';
+import { googleAnalytics } from '@perf-tools/keeper/analytics/google';
+
+const keeper = perfKeeper.create({
+	print: true,    // DevTools -> Console
+	timeline: true, // DevTools -> Performance
+	prefix: '⏱',
+	analytics: [
+		googleAnalytics({prefix: 'MyApp-'}),
+	],
+});
+```
+
+---
+
+### Inline Usage
 
 ```html
 <html>
@@ -118,12 +141,12 @@ npm i --save @perf-tools/keeper
 	- **perf**: `Partial<Performance>`
 	- **console**: `Partial<Console>`
 	- **timeline**: `boolean`
-	- **analytics**: `Array<(entry: Entry) => void>`
+	- **analytics**: `Array<(entry: PerfEntry) => void>`
 	- **warn**: `(msg: string) => void`
   - **PerfKeeper**
     - **print**: `(enable?: boolean) => void`
     - **disable**: `(state: boolean) => void`
-    - **setAnalytics**: `(list: Array<(entry: Entry) => void>) => void`
+    - **setAnalytics**: `(list: Array<(entry: PerfEntry) => void>) => void`
     - **add**(name: `string`, start: `number`, end: `number`): `Entry`
     - **time**(name: `string`, start?: `number`): `Entry`
     - **timeEnd**(name: `string`, end?: `number`): `void`
@@ -136,7 +159,7 @@ npm i --save @perf-tools/keeper
     - **name**: `string` — name of measure
     - **start**: `number` — start mark
     - **end**: `number` — end mark
-    - **parent**: `GroupEntry | null` — reference on parent
+    - **parent**: `PerfGroupEntry | null` — reference on parent
 	- **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
   - **GroupEntry** (extends `Entry`)
     - **entries**: `Entry[]` — nested metrics

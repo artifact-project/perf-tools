@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { createTamingsGroup, globalThis, now } from '../utils';
+import { createTimingsGroup, globalThis, now } from '../utils';
 import { startMeasure, stopMeasure } from './meter';
 
 export type FPSMeterOptions = {
@@ -48,7 +48,7 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 
 	function sendStats() {
 		const name = options.scrollableName ? options.scrollableName(element) : null;
-		const [set, send] = createTamingsGroup(`pk-fps${name ? `-${name}` : ''}`, keeper, 'fps');
+		const [set, send] = createTimingsGroup(`pk-fps${name ? `-${name}` : ''}`, keeper, 'fps');
 		const length = fpsHistory.length;
 		const middle = Math.floor(length / 2)
 		let avg = 0;

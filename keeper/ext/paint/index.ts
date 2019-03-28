@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { domReady, createTamingsGroup, performance } from '../utils';
+import { domReady, createTimingsGroup, performance } from '../utils';
 
 export type PaintTimingsOptions = {
 }
@@ -8,7 +8,7 @@ export const defaultPaintTimingsOptions: PaintTimingsOptions = {
 };
 
 export function paintTimings(keeper: PerfKeeper, _: PaintTimingsOptions = defaultPaintTimingsOptions) {
-	const [set, send] = createTamingsGroup('pk-paint', keeper);
+	const [set, send] = createTimingsGroup('pk-paint', keeper);
 
 	domReady(function check() {
 		try {

@@ -1,4 +1,4 @@
-import { Entry } from '../../src/keeper/keeper';
+import { PerfEntry } from '../../src/keeper/keeper';
 import { AnalyticsOptions, getOption } from '../utils';
 
 type YandexAnalyticsParams = {
@@ -30,7 +30,7 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 		}
 	})();
 
-	return (entry: Entry) => {
+	return (entry: PerfEntry) => {
 		const path = [] as string[];
 		const params = {} as YandexAnalyticsParams;
 		let cursor = entry;

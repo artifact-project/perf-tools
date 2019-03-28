@@ -1,4 +1,4 @@
-import { Entry } from '../../src/keeper/keeper';
+import { PerfEntry } from '../../src/keeper/keeper';
 import { AnalyticsOptions, globalThis, getOption } from '../utils';
 
 type MailRuAnalyticsParams = {
@@ -52,7 +52,7 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 		})();
 	}
 
-	return (entry: Entry) => {
+	return (entry: PerfEntry) => {
 		let group = entry.name;
 		let label = 'value';
 		let cursor = entry.parent;

@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { domReady, createTamingsGroup, performance } from '../utils';
+import { domReady, createTimingsGroup, performance } from '../utils';
 
 export type ResourceStatsIntervals = Array<[string, number]>
 export type ResourceStatsOptions = {
@@ -20,9 +20,9 @@ export const defaultResourceStatsOptions: ResourceStatsOptions = {
 };
 
 export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions = defaultResourceStatsOptions) {
-	const [setBytes, sendBytes] = createTamingsGroup('pk-resource-traffic', keeper, 'KiB');
-	const [setCachedBytes, sendCachedBytes] = createTamingsGroup('pk-resource-traffic-cached', keeper, 'KiB');
-	const [setStats, sendStats] = createTamingsGroup('pk-resource-stats', keeper, 'KiB');
+	const [setBytes, sendBytes] = createTimingsGroup('pk-resource-traffic', keeper, 'KiB');
+	const [setCachedBytes, sendCachedBytes] = createTimingsGroup('pk-resource-traffic-cached', keeper, 'KiB');
+	const [setStats, sendStats] = createTimingsGroup('pk-resource-stats', keeper, 'KiB');
 	const onBeforeEntryAdd = options.onBeforeEntryAdd
 	const resourceName = options.resourceName || ((entry: PerformanceResourceTiming) => {
 		const parsed = R_RESOURCE.exec(entry.name);

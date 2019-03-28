@@ -1,4 +1,4 @@
-import { PerfKeeper, Entry, GroupEntry } from '../src/keeper/keeper';
+import { PerfKeeper, PerfEntry, PerfGroupEntry } from '../src/keeper/keeper';
 
 export const globalThis = Function('return this')() as Window & {
 	mozPaintCount: number;
@@ -23,23 +23,23 @@ export type Timing = {
 	name: string;
 	start: number;
 	end: number;
-	unit: Entry['unit'];
+	unit: PerfEntry['unit'];
 	nested: {
 		[name:string]: Timing;
 	};
 }
 
 export type TimingTuple = [
-	(path: string | string[], start: number, end: number, unit?: Entry['unit']) => void,
+	(path: string | string[], start: number, end: number, unit?: PerfEntry['unit']) => void,
 	(groupName: string | null, start: number, end: number, reset?: boolean) => void
 ]
 
 const EMPTY_ARRAY = [] as string[];
 
-export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entry['unit'], sort?: boolean): TimingTuple {
+export function createTimingsGroup(name: string, keeper: PerfKeeper, unit?: PerfEntry['unit'], sort?: boolean): TimingTuple {
 	let rootTiming = {} as Timing;
 
-	function set(path: string | string[], start: number, end: number, unit?: Entry['unit']) {
+	function set(path: string | string[], start: number, end: number, unit?: PerfEntry['unit']) {
 		let timing: Timing = rootTiming;
 
 		EMPTY_ARRAY.concat(path).forEach(name => {
@@ -52,7 +52,7 @@ export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entr
 		} else {
 			timing.start = start;
 			timing.end = end;
-			timing.unit = unit as Entry['unit'];
+			timing.unit = unit as PerfEntry['unit'];
 		}
 	}
 
@@ -61,7 +61,7 @@ export function createTamingsGroup(name: string, keeper: PerfKeeper, unit?: Entr
 		rootTiming.start = start;
 		rootTiming.end = end;
 
-		(function walk(timing: Timing, group: GroupEntry | null) {
+		(function walk(timing: Timing, group: PerfGroupEntry | null) {
 			const nested = timing.nested;
 			const nestedKeys = nested ? Object.keys(nested) : EMPTY_ARRAY;
 

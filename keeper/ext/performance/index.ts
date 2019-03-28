@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { domReady, globalThis, createTamingsGroup, now } from '../utils';
+import { domReady, globalThis, createTimingsGroup, now } from '../utils';
 
 export type PerformanceOptions = {
 	minLatency: number;
@@ -20,7 +20,7 @@ type Batch = {
 export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptions = defaultPerformanceOptions) {
 	let batch = {} as Batch;
 	let lock = false;
-	const [set, flush] = createTamingsGroup('pk-performance', keeper);
+	const [set, flush] = createTimingsGroup('pk-performance', keeper);
 	const firstWinEvents = [
 		'click',
 		'touchup',

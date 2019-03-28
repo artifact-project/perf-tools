@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { domReady, createTamingsGroup, performance } from '../utils';
+import { domReady, createTimingsGroup, performance } from '../utils';
 
 export type NavTimingsOptions = {
 };
@@ -8,7 +8,7 @@ export const defaultNavTimingsOptions: NavTimingsOptions = {
 };
 
 export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = defaultNavTimingsOptions) {
-	const [set, send] = createTamingsGroup('pk-navigation', keeper, 'ms', false);
+	const [set, send] = createTimingsGroup('pk-navigation', keeper, 'ms', false);
 
 	try {
 		const {
