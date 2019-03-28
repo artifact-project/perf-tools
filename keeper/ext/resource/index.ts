@@ -3,6 +3,7 @@ import { domReady, createTamingsGroup, performance } from '../utils';
 
 export type ResourceStatsIntervals = Array<[string, number]>
 export type ResourceStatsOptions = {
+	beforeEntryAdd?: (entry: PerformanceResourceTiming) => boolean;
 	resourceName?: (entry: PerformanceResourceTiming) => string[] | Array<string[]>;
 	intervals?: ResourceStatsIntervals;
 }
@@ -22,6 +23,7 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 	const [setBytes, sendBytes] = createTamingsGroup('pk-resource-traffic', keeper, 'KiB');
 	const [setCachedBytes, sendCachedBytes] = createTamingsGroup('pk-resource-traffic-cached', keeper, 'KiB');
 	const [setStats, sendStats] = createTamingsGroup('pk-resource-stats', keeper, 'KiB');
+	const beforeEntryAdd = options.beforeEntryAdd
 	const resourceName = options.resourceName || ((entry: PerformanceResourceTiming) => {
 		const parsed = R_RESOURCE.exec(entry.name);
 		return parsed ? [entry.initiatorType, parsed[1]] : null;
@@ -65,6 +67,10 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 			check();
 
 			entries.forEach(entry => {
+				if (beforeEntryAdd && !beforeEntryAdd(entry)) {
+					return
+				}
+
 				let {
 					duration,
 					transferSize,

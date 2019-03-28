@@ -29,6 +29,17 @@ resourceStats(system);
 
 // or with options
 resourceStats(system, {
+	beforeEntryAdd: (entry) => {
+		const { duration, initiatorType, name } = entry;
+
+		if (initiatorType === 'fetch') {
+			sendSomeStatFromMyFetch([name, duration]);
+		}
+
+		// return falsy result to remove this resource from global stats
+		return true
+	},
+
 	resourceName: (entry) => /\.cdn\./.test(entry.name) ? ['cdn'] : null,
 
 	// by default: `15sec`, `1min`, `5min`, `15min`, `30min`, `1hour`, `1day` and `2days`
