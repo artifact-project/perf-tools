@@ -3,7 +3,7 @@ import { domReady, createTamingsGroup, performance } from '../utils';
 
 export type ResourceStatsIntervals = Array<[string, number]>
 export type ResourceStatsOptions = {
-	beforeEntryAdd?: (entry: PerformanceResourceTiming) => boolean;
+	beforeEntryAdd?: (entry: PerformanceResourceTiming) => boolean | undefined;
 	resourceName?: (entry: PerformanceResourceTiming) => string[] | Array<string[]>;
 	intervals?: ResourceStatsIntervals;
 }
@@ -67,7 +67,7 @@ export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions 
 			check();
 
 			entries.forEach(entry => {
-				if (beforeEntryAdd && !beforeEntryAdd(entry)) {
+				if (beforeEntryAdd && beforeEntryAdd(entry) === false) {
 					return
 				}
 
