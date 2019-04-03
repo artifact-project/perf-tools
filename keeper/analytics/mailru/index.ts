@@ -26,12 +26,13 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 				label,
 				value,
 			} = params;
+			const labelParam = label ? `_${label}` : '';
 
-			xray(`${prefix}${group}_${label}&v=${value}${(project ? `&p=${project}` : '')}`);
+			xray(`${prefix}${group}${labelParam}&v=${value}${(project ? `&p=${project}` : '')}`);
 
 			if (useTabName) {
 				xray(
-					`${prefix}${group}_${label}_${useTabName(globalThis.location)}&v=${value}`
+					`${prefix}${group}${labelParam}_${useTabName(globalThis.location)}&v=${value}`
 					+ (project ? `&p=${project}` : '')
 				);
 			}
