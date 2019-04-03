@@ -26,7 +26,8 @@
     "clean-dist": "rm -f ./dist/*.d.ts && rm -rf ./dist/*/",
     "git-clean": "git clean -f",
     "prepublish": "npm run test && npm run ts-build && npm run build",
-    "postpublish": "npm run git-clean"
+    "postpublish": "npm run git-clean",
+    "postversion": "git push && git push --tags"
   },
   "files": [
     "*.js",
