@@ -63,7 +63,7 @@ export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics
 			hitType: HIT_TYPE_TIMING,
 			timingCategory: `${prefix}${timingCategory}`,
 			timingVar,
-			timingValue: entry.end && entry.start ? Math.round(entry.end - entry.start) : 0,
+			timingValue: Math.round(entry.end || 0 - entry.start || 0),
 			timingLabel: useTabName ? useTabName(globalThis.location) : void 0,
 		});
 	};

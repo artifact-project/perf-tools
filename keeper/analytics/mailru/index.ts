@@ -75,7 +75,7 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 		send({
 			group,
 			label,
-			value: entry.end && entry.start ? Math.round(entry.end - entry.start) : 0,
+			value: Math.round(entry.end || 0 - entry.start || 0),
 		});
 	};
 }

@@ -49,7 +49,7 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 			obj = (obj[(i === 0 && prefix ? prefix : '')+ path[i]] = {});
 		}
 
-		obj[path[l]] = entry.end && entry.start ? Math.round(entry.end - entry.start) : 0;
+		obj[path[l]] = Math.round(entry.end || 0 - entry.start || 0),
 		send(params);
 	};
 }
