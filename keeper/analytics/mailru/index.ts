@@ -63,7 +63,7 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 
 			while (true) {
 				if (cursor.parent) {
-					label = `${cursor.name}_${name}`;
+					label = `${cursor.name}_${label}`;
 					cursor = cursor.parent;
 				} else {
 					group = cursor.name;
@@ -75,7 +75,7 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 		send({
 			group,
 			label,
-			value: entry.end && entry.start ? entry.end - entry.start : 0,
+			value: entry.end && entry.start ? Math.round(entry.end - entry.start) : 0,
 		});
 	};
 }
