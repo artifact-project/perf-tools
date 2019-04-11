@@ -1,5 +1,5 @@
 import { PerfEntry } from '../../src/keeper/keeper';
-import { AnalyticsOptions, getOption } from '../utils';
+import { AnalyticsOptions, getOption, isBadTiming } from '../utils';
 
 type YandexAnalyticsParams = {
 	[name:string]: number | YandexAnalyticsParams;
@@ -11,6 +11,7 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 	const id = getOption(options, 'id')!;
 	const prefix = getOption(options, 'prefix');
 	const useTabName = getOption(options, 'useTabName');
+	const sendZeroValues = getOption(options, 'sendZeroValues');
 	const queue = [] as YandexAnalyticsParams[];
 	const send = (params: YandexAnalyticsParams) => {
 		if (ym) {
@@ -31,6 +32,10 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 	})();
 
 	return (entry: PerfEntry) => {
+		if (isBadTiming(entry)) {
+			return;
+		}
+
 		const path = [] as string[];
 		const params = {} as YandexAnalyticsParams;
 		let cursor = entry;
@@ -49,7 +54,8 @@ export function yandexAnalytics(options?: AnalyticsOptions & {id: string}, ym?: 
 			obj = (obj[(i === 0 && prefix ? prefix : '')+ path[i]] = {});
 		}
 
-		obj[path[l]] = entry.end && entry.start ? Math.round(entry.end - entry.start) : 0;
-		send(params);
+		obj[path[l]] = Math.round(entry.end! - entry.start!);
+
+		(obj[path[l]] || sendZeroValues) && send(params);
 	};
 }

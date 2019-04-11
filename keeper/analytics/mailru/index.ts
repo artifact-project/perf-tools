@@ -1,5 +1,5 @@
 import { PerfEntry } from '../../src/keeper/keeper';
-import { AnalyticsOptions, globalThis, getOption } from '../utils';
+import { AnalyticsOptions, globalThis, getOption, isBadTiming } from '../utils';
 
 type MailRuAnalyticsParams = {
 	group: string;
@@ -18,6 +18,7 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 	const prefix = getOption(options, 'prefix');
 	const project = getOption(options, 'project');
 	const useTabName = getOption(options, 'useTabName');
+	const sendZeroValues = getOption(options, 'sendZeroValues');
 	const queue = [] as MailRuAnalyticsParams[];
 	const send = (params: MailRuAnalyticsParams) => {
 		if (xray) {
@@ -54,6 +55,10 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 	}
 
 	return (entry: PerfEntry) => {
+		if (isBadTiming(entry)) {
+			return;
+		}
+
 		let group = entry.name;
 		let label = 'value';
 		let cursor = entry.parent;
@@ -72,10 +77,12 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 			}
 		}
 
-		send({
+		const value = Math.round(entry.end! - entry.start!);
+
+		(value || sendZeroValues) && send({
 			group,
 			label,
-			value: entry.end && entry.start ? Math.round(entry.end - entry.start) : 0,
+			value,
 		});
 	};
 }

@@ -1,5 +1,5 @@
 import { PerfEntry } from '../../src/keeper/keeper';
-import { AnalyticsOptions, globalThis, getOption } from '../utils';
+import { AnalyticsOptions, globalThis, getOption, isBadTiming } from '../utils';
 
 const HIT_TYPE_TIMING = 'timing';
 
@@ -19,6 +19,7 @@ type GoogleAnalytics = (
 export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics) {
 	const prefix = getOption(options, 'prefix') || '';
 	const useTabName = getOption(options, 'useTabName');
+	const sendZeroValues = getOption(options, 'sendZeroValues');
 	const queue = [] as GoogleAnalyticsParams[];
 	const send = (params: GoogleAnalyticsParams) => {
 		if (ga) {
@@ -41,6 +42,10 @@ export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics
 	}
 
 	return (entry: PerfEntry) => {
+		if (isBadTiming(entry)) {
+			return;
+		}
+
 		let timingCategory = entry.name;
 		let timingVar = 'value';
 		let cursor = entry.parent;
@@ -59,11 +64,13 @@ export function googleAnalytics(options?: AnalyticsOptions, ga?: GoogleAnalytics
 			}
 		}
 
-		send({
+		const timingValue = Math.round(entry.end! - entry.start!);
+
+		(timingValue || sendZeroValues) && send({
 			hitType: HIT_TYPE_TIMING,
 			timingCategory: `${prefix}${timingCategory}`,
 			timingVar,
-			timingValue: entry.end && entry.start ? Math.round(entry.end - entry.start) : 0,
+			timingValue,
 			timingLabel: useTabName ? useTabName(globalThis.location) : void 0,
 		});
 	};
