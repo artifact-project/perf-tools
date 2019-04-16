@@ -65,13 +65,14 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 
 		Object.entries(metrics).forEach(([metricName, submetrics]) => {
 			// ['foo:1', 'bar:2', 'baz:3']
+			const tabSubmetrics = [];
 			const submetricsPairs = submetrics.map(({ label, value }) => {
 				if (useTabName) {
-					submetrics.push(`${label}_${useTabName(globalThis.location)}:${value}`);
+					tabSubmetrics.push(`${label}_${useTabName(globalThis.location)}:${value}`);
 				}
 
 				return `${label}:${value}`;
-			})
+			}).concat(tabSubmetrics);
 
 			xray(`${metricName}&i=${submetricsPairs.join(',')}${(project ? `&p=${project}` : '')}`);
 		});
