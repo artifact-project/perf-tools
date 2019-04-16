@@ -41,12 +41,47 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 			queue.push(params);
 		}
 	};
+	const sendQueue = (queue) => {
+		const metrics = {};
+
+		queue.forEach(entry => {
+			const { group, label } = entry;
+
+			// Если нет label, то шлём отдельным запросом
+			if (!label) {
+				send(entry);
+
+				return;
+			}
+
+			const metricName = `${prefix}${group}`;
+
+			if (metrics[metricName]) {
+				metrics[metricName].push(entry);
+			} else {
+				metrics[metricName] = [entry];
+			}
+		});
+
+		Object.entries(metrics).forEach(([metricName, submetrics]) => {
+			// ['foo:1', 'bar:2', 'baz:3']
+			const submetricsPairs = submetrics.map(({ label, value }) => {
+				if (useTabName) {
+					submetrics.push(`${label}_${useTabName(globalThis.location)}:${value}`);
+				}
+
+				return `${label}:${value}`;
+			})
+
+			xray(`${metricName}&i=${submetricsPairs.join(',')}${(project ? `&p=${project}` : '')}`);
+		});
+	};
 
 	if (!xray) {
 		(function check() {
 			xray = get();
 			if (xray) {
-				queue.forEach(send);
+				sendQueue(queue);
 				queue.length = 0;
 			} else {
 				setTimeout(check, 500);
