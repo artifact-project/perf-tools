@@ -17,8 +17,9 @@ type MaulRuContext = Window & {
 export function mailruAnalytics(options?: AnalyticsOptions & {project?: string}, xray?: MailRuAnalytics | null) {
 	const prefix = getOption(options, 'prefix');
 	const project = getOption(options, 'project');
-	const useTabName = getOption(options, 'useTabName');
+	const rename = getOption(options, 'rename');
 	const sendZeroValues = getOption(options, 'sendZeroValues');
+	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as MailRuAnalyticsParams[];
 	const send = (params: MailRuAnalyticsParams) => {
 		if (xray) {
@@ -27,13 +28,12 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 				label,
 				value,
 			} = params;
-			const labelParam = label ? `_${label}` : '';
 
-			xray(`${prefix}${group}${labelParam}&v=${value}${(project ? `&p=${project}` : '')}`);
+			xray(`${prefix}${rename(group, label)}&v=${value}${(project ? `&p=${project}` : '')}`);
 
 			if (useTabName) {
 				xray(
-					`${prefix}${group}${labelParam}_${useTabName(globalThis.location)}&v=${value}`
+					`${prefix}${rename(group, label)}_${useTabName(globalThis.location)}&v=${value}`
 					+ (project ? `&p=${project}` : '')
 				);
 			}

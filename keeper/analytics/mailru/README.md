@@ -31,5 +31,8 @@ system.setAnalytics([mailruAnalytics()]);
 system.setAnalytics([mailruAnalytics({
 	prefix: 'split_',
 	project: 'login', // optional
+	rename: (group, label) => { // optional
+		return `${group.replace(/resource/g, 'res')}${label}`
+	},
 })]);
 ```
