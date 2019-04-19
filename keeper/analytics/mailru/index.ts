@@ -17,7 +17,7 @@ type MaulRuContext = Window & {
 export function mailruAnalytics(options?: AnalyticsOptions & {project?: string}, xray?: MailRuAnalytics | null) {
 	const prefix = getOption(options, 'prefix');
 	const project = getOption(options, 'project');
-	const rename = getOption(options, 'rename');
+	const normalize = getOption(options, 'normalize');
 	const sendZeroValues = getOption(options, 'sendZeroValues');
 	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as MailRuAnalyticsParams[];
@@ -29,11 +29,15 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 				value,
 			} = params;
 
-			xray(`${prefix}${rename(group, label)}&v=${value}${(project ? `&p=${project}` : '')}`);
+			const metrica = [group];
+
+			label && metrica.push(label)
+
+			xray(`${prefix}${normalize(metrica).join('_')}&v=${value}${(project ? `&p=${project}` : '')}`);
 
 			if (useTabName) {
 				xray(
-					`${prefix}${rename(group, label)}_${useTabName(globalThis.location)}&v=${value}`
+					`${prefix}${normalize(metrica.concat([${useTabName(globalThis.location)}])).join('_')}&v=${value}`
 					+ (project ? `&p=${project}` : '')
 				);
 			}
