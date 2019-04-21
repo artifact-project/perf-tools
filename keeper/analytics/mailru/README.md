@@ -31,5 +31,11 @@ system.setAnalytics([mailruAnalytics()]);
 system.setAnalytics([mailruAnalytics({
 	prefix: 'split_',
 	project: 'login', // optional
+	normalize: names => ( // optional
+		names.map(metrica => metrica
+			.replace(/resource/g, 'res')
+			.replace(/navigation/g, 'nav')
+		)
+	),
 })]);
 ```

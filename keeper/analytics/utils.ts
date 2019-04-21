@@ -4,12 +4,14 @@ export const globalThis = Function('return this')() as Window;
 
 export type AnalyticsOptions = {
 	prefix?: string;
+	normalize: (names: string[]) => string[];
 	sendZeroValues?: boolean;
 	useTabName?: (location: Location) => string;
 }
 
 const baseAnalyticsOptions: AnalyticsOptions = {
 	prefix: '',
+	normalize: names => names,
 	sendZeroValues: false,
 	useTabName: ({pathname}: Location) => (pathname === '/' ? 'index' : pathname)
 		.replace(/[\/\.]+/g, '-')
