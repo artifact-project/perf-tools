@@ -37,7 +37,7 @@ export function mailruAnalytics(options?: AnalyticsOptions & {project?: string},
 
 			if (useTabName) {
 				xray(
-					`${prefix}${normalize(metrica.concat([${useTabName(globalThis.location)}])).join('_')}&v=${value}`
+					`${prefix}${normalize(metrica.concat(useTabName(globalThis.location))).join('_')}&v=${value}`
 					+ (project ? `&p=${project}` : '')
 				);
 			}
