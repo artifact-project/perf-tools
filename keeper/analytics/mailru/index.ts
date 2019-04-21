@@ -17,7 +17,7 @@ type MaulRuContext = Window & {
 export function mailruAnalytics(options?: AnalyticsOptions & {project?: string}, xray?: MailRuAnalytics | null) {
 	const prefix = getOption(options, 'prefix');
 	const project = getOption(options, 'project');
-	const normalize = getOption(options, 'normalize');
+	const normalize = getOption(options, 'normalize')!;
 	const sendZeroValues = getOption(options, 'sendZeroValues');
 	const useTabName = getOption(options, 'useTabName');
 	const queue = [] as MailRuAnalyticsParams[];
