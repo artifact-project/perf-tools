@@ -8,7 +8,7 @@ Navigation Timings
 
 NET|DOM Ready|DOM Loaded
 ---|---|---
-![NET](https://cdn-images-1.medium.com/max/400/1*BRI9tq9jWcyfNkuTnyL7zw.png)|![DOM Ready](https://cdn-images-1.medium.com/max/800/1*DXKXzb0MKPFoSXBqcrxUtQ.png)|![DOM Ready](https://cdn-images-1.medium.com/max/800/1*DXKXzb0MKPFoSXBqcrxUtQ.png)|![DOM Loaded](https://cdn-images-1.medium.com/max/2400/1*bA3cIbAWQBUdnkiwAY8hkA.png)
+![NET](https://cdn-images-1.medium.com/max/400/1*BRI9tq9jWcyfNkuTnyL7zw.png)|![DOM Ready](https://cdn-images-1.medium.com/max/800/1*DXKXzb0MKPFoSXBqcrxUtQ.png)|![DOM Loaded](https://cdn-images-1.medium.com/max/2400/1*bA3cIbAWQBUdnkiwAY8hkA.png)
 
 ---
 
