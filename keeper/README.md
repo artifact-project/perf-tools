@@ -169,21 +169,21 @@ group.stop(); // starting 'render' timer
 
 - **create**(options: `KeeperOptions`): `PerfKeeper`
   - **options**
-    - **disabled**: `boolean`
-    - **print**: `boolean`
-	- **perf**: `Partial<Performance>`
-	- **console**: `Partial<Console>`
-	- **timeline**: `boolean`
+    - **disabled**: `boolean` — turn off the work PerfKeeper (optional)
+    - **print**: `boolean` — on/off output to console (optional)
+	- **perf**: `Partial<Performance>` — custom object like `performance` (optional)
+	- **console**: `Partial<Console>` — custom object like `console` (optional)
+	- **timeline**: `boolean` — on/off usage DevTools -> User Timings (optional)
 	- **analytics**: `Array<(entry: PerfEntry) => void>`
-	- **warn**: `(msg: string) => void`
-  - **PerfKeeper**
+	- **warn**: `(msg: string) => void` — callback for catching internal warnings (optional)
+  - **PerfKeeper**, instance methods:
     - **print**: `(enable?: boolean) => void`
     - **disable**: `(state: boolean) => void`
     - **setAnalytics**: `(list: Array<(entry: PerfEntry) => void>) => void`
-    - **add**(name: `string`, start: `number`, end: `number`): `Entry`
-    - **time**(name: `string`, executer: `() => void`): `Entry`
-    - **time**(name: `string`, start?: `number`): `Entry`
-    - **timeEnd**(name: `string`, end?: `number`): `void`
+    - **add**(name: `string`, start: `number`, end: `number`, unit?: `string`): `Entry`
+    - **time**(name: `string`, callback: `() => void`): `Entry` — measure execution time of callback
+    - **time**(name: `string`, start?: `number`): `Entry` — start timer
+    - **timeEnd**(name: `string`, end?: `number`): `void` - stop timer by label
     - **group**(name: `string`): `GroupEntry`
     - **group**(name: `string`, isolate: `true`): `GroupEntry`
     - **group**(name: `string`, start: `number`, isolate?: `true`): `GroupEntry`
@@ -194,14 +194,15 @@ group.stop(); // starting 'render' timer
     - **start**: `number` — start mark
     - **end**: `number` — end mark
     - **parent**: `PerfGroupEntry | null` — reference on parent
-	- **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
+	  - **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
   - **GroupEntry** (extends `Entry`)
     - **entries**: `Entry[]` — nested metrics
-	- **add**(name: `string`, start: `number`, end: `number`): `Entry`
+	  - **add**(name: `string`, start: `number`, end: `number`): `Entry`
     - **time**(name: `string`, start?: `number`): `Entry`
     - **timeEnd**(name: `string`, end?: `number`): `void`
-    - **mark**(name: `string`): `void`
+    - **mark**(name: `string`): `void` — start the timer with stopping a previous one in the group.
     - **group**(name: `string`): `GroupEntry`
+		- **stop**(end?: `number`): `void` — complete the measurement of group (set `end` prop)
 
 ---
 
