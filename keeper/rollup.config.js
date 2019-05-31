@@ -62,6 +62,7 @@ export default [].concat(
 		'paint',
 		'performance',
 		'resource',
+		'memory',
 	].map(name => ({
 		input: `./ext/${name}/index.ts`,
 		output: {

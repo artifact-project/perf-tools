@@ -143,7 +143,7 @@ var perfKeeper = (function (exports) {
 	            (globalThis.requestAnimationFrame || setTimeout)(printDefered);
 	        }
 	    }
-	    function createEntry(name, parent, isGroup, start, end, isolate) {
+	    function createEntry(name, parent, isGroup, start, end, isolate, unit) {
 	        var label = "" + prefix + name + "-" + ++cid;
 	        var id = label + "-mark";
 	        if (parent === api) {
@@ -154,7 +154,7 @@ var perfKeeper = (function (exports) {
 	            name: name,
 	            parent: parent,
 	            entries: isGroup ? [] : nil,
-	            unit: 'ms',
+	            unit: unit || 'ms',
 	            active: +isGroup,
 	            start: start != nil ? start : perf.now(),
 	            end: end != nil ? end : nil,
@@ -215,14 +215,14 @@ var perfKeeper = (function (exports) {
 	            }
 	        }
 	    }
-	    function add(name, start, end) {
+	    function add(name, start, end, unit) {
 	        if (start >= 0 && start <= end) {
-	            createEntry(name, this, false, start).stop(end);
+	            createEntry(name, this, false, start, nil, false, unit).stop(end);
 	        }
 	    }
 	    function time(name, executer) {
 	        var entry = createEntry(name, this, false);
-	        if (executer != null) {
+	        if (executer != nil) {
 	            executer();
 	            entry.stop();
 	        }

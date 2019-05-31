@@ -1,14 +1,17 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
 import { domReady, globalThis, createTimingsGroup, now } from '../utils';
 
-export type PerformanceOptions = {
+export type PerformanceOptions = Partial<{
 	minLatency: number;
 	ttiDelay: number;
-}
+	prefIdProp: string;
+	getPerfId: (target: HTMLElement | null, prefIdProp: string) => string | null | undefined;
+}>
 
-export const defaultPerformanceOptions: PerformanceOptions = {
+export const defaultPerformanceOptions = {
 	minLatency: 100,
 	ttiDelay: 2000,
+	prefIdProp: 'data-perf-id',
 };
 
 type Batch = {
@@ -17,10 +20,12 @@ type Batch = {
 	nested: Array<[string, number, number]>;
 };
 
-export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptions = defaultPerformanceOptions) {
+export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptions = {}) {
 	let batch = {} as Batch;
 	let lock = false;
-	const [set, flush] = createTimingsGroup('pk-performance', keeper);
+	let ready = false;
+
+	const [set, flush] = createTimingsGroup('pk-perf', keeper);
 	const firstWinEvents = [
 		'click',
 		'touchup',
@@ -38,6 +43,25 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 		'wheel',
 		'scroll',
 	];
+	const {
+		minLatency = defaultPerformanceOptions.minLatency,
+		ttiDelay = defaultPerformanceOptions.ttiDelay,
+		getPerfId = (target: HTMLElement | null, prefIdProp: string) => {
+			let id: string | null | undefined;
+			while (target && !id && target.nodeType === 1) {
+				id = target.getAttribute(prefIdProp);
+				target = target.parentNode as HTMLElement;
+			}
+			return id;
+		},
+	} = options;
+
+	function getId(target: EventTarget | null) {
+		return getPerfId(
+			target && (target as HTMLElement).nodeType === 1 ? target as HTMLElement : null,
+			options.prefIdProp || defaultPerformanceOptions.prefIdProp,
+		);
+	}
 
 	function sendTimings() {
 		Object.keys(batch).forEach(key => {
@@ -69,10 +93,16 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 		lock = true;
 	}
 
+	function handleClick(eventType: string, {target}: Event) {
+		const id = getId(target);
+		const label = `first-${eventType}${ready ? '-ready' : ''}`
+
+		send(label, 'value');
+		id && send(label, id);
+	}
+
 	// Window
-	once(firstWinEvents, (eventType) => {
-		send(`first-${eventType}`, 'value');
-	});
+	once(firstWinEvents, handleClick);
 
 	// Tab unload
 	once(['beforeunload'], () => {
@@ -88,20 +118,19 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 		'resize',
 		'scroll',
 	].forEach((eventType) => {
-		let start: number;
+		globalThis.addEventListener(eventType, ({target}) => {
+			const start = now();
 
-		function calc() {
-			const end = now();
+			requestAnimationFrame(() => {
+				const end = now();
 
-			if (end - start >= options.minLatency) {
-				set('value', start, end);
-				flush(`latency-${eventType}`, start, end, true);
-			}
-		}
-
-		globalThis.addEventListener(eventType, () => {
-			start = now();
-			requestAnimationFrame(calc);
+				if (end - start >= minLatency) {
+					const id = getId(target);
+					set('value', start, end);
+					id && set(id, start, end);
+					flush(`latency-${eventType}`, start, end, true);
+				}
+			});
 		}, true);
 	});
 
@@ -121,6 +150,8 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 
 	// After DOM Ready
 	domReady(() => {
+		ready = true;
+
 		// TTI Check
 		if (ttiPerfObserver) {
 			let tti: number;
@@ -128,17 +159,19 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 				if (ttiLastEntry) {
 					tti = ttiLastEntry.startTime + ttiLastEntry.duration;
 
-					if (now() - tti >= options.ttiDelay) {
-						send(`tti`, 'value', 0, tti);
+					if (now() - tti >= ttiDelay) {
+						// Последний logntask был давно, будем считать,
+						// что эра интерактивности настала ;]
+						send('tti', 'value', 0, tti);
 						ttiPerfObserver.disconnect();
 					} else {
 						setTimeout(check, options.ttiDelay);
 					}
 				} else if (tti) {
-					send(`tti`, 'value', 0, tti);
+					send('tti', 'value', 0, tti);
 					ttiPerfObserver.disconnect();
 				} else {
-					// Небыло лонг тасков, поэтому делаем паузу и если их опять не будет,
+					// Не было logntask, поэтому делаем паузу и если их опять не будет,
 					// то считает, что приложение уже готово на момент DOMReady!
 					tti = now();
 					setTimeout(check, 500);
@@ -149,15 +182,13 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 		}
 
 		// Events
-		once(firstWinEvents, (eventType) => {
-			send(`first-${eventType}`, `after-ready`);
-		});
+		once(firstWinEvents, handleClick);
 	});
 }
 
 function once(events: string[], fn: (eventType: string, evt: Event) => void, ctx?: Document | Window) {
 	events.forEach(type => {
-		const handle = (evt) => {
+		const handle = (evt: Event) => {
 			globalThis.removeEventListener(type, handle, true);
 			fn(type, evt);
 		};

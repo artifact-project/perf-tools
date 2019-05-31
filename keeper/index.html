@@ -178,7 +178,7 @@ var perfKeeper = (function (exports) {
 	            (globalThis.requestAnimationFrame || setTimeout)(printDefered);
 	        }
 	    }
-	    function createEntry(name, parent, isGroup, start, end, isolate) {
+	    function createEntry(name, parent, isGroup, start, end, isolate, unit) {
 	        var label = "" + prefix + name + "-" + ++cid;
 	        var id = label + "-mark";
 	        if (parent === api) {
@@ -189,7 +189,7 @@ var perfKeeper = (function (exports) {
 	            name: name,
 	            parent: parent,
 	            entries: isGroup ? [] : nil,
-	            unit: 'ms',
+	            unit: unit || 'ms',
 	            active: +isGroup,
 	            start: start != nil ? start : perf.now(),
 	            end: end != nil ? end : nil,
@@ -250,14 +250,14 @@ var perfKeeper = (function (exports) {
 	            }
 	        }
 	    }
-	    function add(name, start, end) {
+	    function add(name, start, end, unit) {
 	        if (start >= 0 && start <= end) {
-	            createEntry(name, this, false, start).stop(end);
+	            createEntry(name, this, false, start, nil, false, unit).stop(end);
 	        }
 	    }
 	    function time(name, executer) {
 	        var entry = createEntry(name, this, false);
-	        if (executer != null) {
+	        if (executer != nil) {
 	            executer();
 	            entry.stop();
 	        }
@@ -351,13 +351,17 @@ var perfKeeperExtPaint=function(t){"use strict";var f=Function("return this")(),
 
 perfKeeperExtPaint.paintTimings(perfKeeper.system);
 // Ext: performance
-var perfKeeperExtPerformance=function(t){"use strict";var E=Function("return this")(),b=E.document,n=E.performance,L=n&&n.now?function(){return n.now()}:Date.now;var g=[];var k={minLatency:100,ttiDelay:2e3};function T(t,r,a){t.forEach(function(n){var e=function(t){E.removeEventListener(n,e,!0),r(n,t)};(a=a||E).addEventListener(n,e,!0)})}return t.defaultPerformanceOptions=k,t.performanceTimings=function(t,r){void 0===r&&(r=k);var a,o,u,c,i,e,s,n,f={},d=!1,l=(a="pk-performance",o=t,i={},[function(t,n,e,r){var a=i;g.concat(t).forEach(function(t){var n=a.nested||(a.nested={});a=n[t]||(n[t]={name:t})}),null!=a.end?a.end+=e-n:(a.start=n,a.end=e,a.unit=r)},function(t,n,e,r){i.name=t?a+"-"+t:a,i.start=n,i.end=e,function n(t,e){var r=t.nested,a=r?Object.keys(r):g;if(a.length){var i=(e||o).group(t.name,t.start);i._=!0,i.unit=u||"ms",(!1===c?a:a.sort()).forEach(function(t){n(r[t],i)}),i.stop(t.end)}else e&&(e.add(t.name,t.start,t.end),e.entries[e.entries.length-1].unit=t.unit||e.unit)}(i,null),r&&(i={})}]),v=l[0],m=l[1],p=["click","touchup","submit","abort","blur","contextmenu","deviceorientation","offline","online","paint","popstate","resize","wheel","scroll"];function h(){Object.keys(f).forEach(function(t){var n=f[t];n.values.forEach(function(t){v(t[0],t[1],t[2])}),m(t,n.start,n.end,!0)}),d=!(f={})}function y(t,n,e,r){void 0===e&&(e=0),void 0===r&&(r=L());var a=f[t]=f[t]||{start:0,end:0,values:[]};a.start=Math.min(a.start,e),a.end=Math.max(a.end,r),a.values.push([n,e,r]),!d&&setTimeout(h),d=!0}T(p,function(t){y("first-"+t,"value")}),T(["beforeunload"],function(){y("tab-unload","value")}),["click","touchup","input","submit","resize","scroll"].forEach(function(n){var e;function t(){var t=L();t-e>=r.minLatency&&(v("value",e,t),m("latency-"+n,e,t,!0))}E.addEventListener(n,function(){e=L(),requestAnimationFrame(t)},!0)});try{(s=new PerformanceObserver(function(t){e=t.getEntries().pop()})).observe({entryTypes:["longtask"]})}catch(t){}n=function(){if(s){var t,n=function(){e?(t=e.startTime+e.duration,L()-t>=r.ttiDelay?(y("tti","value",0,t),s.disconnect()):setTimeout(n,r.ttiDelay)):t?(y("tti","value",0,t),s.disconnect()):(t=L(),setTimeout(n,500))};n()}T(p,function(t){y("first-"+t,"after-ready")})},"complete"===b.readyState?n():E.addEventListener("DOMContentLoaded",n)},t}({});
+var perfKeeperExtPerformance=function(t){"use strict";var O=Function("return this")(),I=O.document,e=O.performance,x=e&&e.now?function(){return e.now()}:Date.now;var M=[];var j={minLatency:100,ttiDelay:2e3,prefIdProp:"data-perf-id"};function z(t,r,a){t.forEach(function(e){var n=function(t){O.removeEventListener(e,n,!0),r(e,t)};(a=a||O).addEventListener(e,n,!0)})}return t.defaultPerformanceOptions=j,t.performanceTimings=function(t,n){void 0===n&&(n={});var a,o,u,c,i,r,f,e,s={},d=!1,v=!1,l=(a="pk-perf",o=t,i={},[function(t,e,n,r){var a=i;M.concat(t).forEach(function(t){var e=a.nested||(a.nested={});a=e[t]||(e[t]={name:t})}),null!=a.end?a.end+=n-e:(a.start=e,a.end=n,a.unit=r)},function(t,e,n,r){i.name=t?a+"-"+t:a,i.start=e,i.end=n,function e(t,n){var r=t.nested,a=r?Object.keys(r):M;if(a.length){var i=(n||o).group(t.name,t.start);i._=!0,i.unit=u||"ms",(!1===c?a:a.sort()).forEach(function(t){e(r[t],i)}),i.stop(t.end)}else n&&(n.add(t.name,t.start,t.end),n.entries[n.entries.length-1].unit=t.unit||n.unit)}(i,null),r&&(i={})}]),p=l[0],m=l[1],y=["click","touchup","submit","abort","blur","contextmenu","deviceorientation","offline","online","paint","popstate","resize","wheel","scroll"],h=n.minLatency,E=void 0===h?j.minLatency:h,b=n.ttiDelay,g=void 0===b?j.ttiDelay:b,L=n.getPerfId,T=void 0===L?function(t,e){for(var n;t&&!n&&1===t.nodeType;)n=t.getAttribute(e),t=t.parentNode;return n}:L;function P(t){return T(t&&1===t.nodeType?t:null,n.prefIdProp||j.prefIdProp)}function k(){Object.keys(s).forEach(function(t){var e=s[t];e.values.forEach(function(t){p(t[0],t[1],t[2])}),m(t,e.start,e.end,!0)}),d=!(s={})}function D(t,e,n,r){void 0===n&&(n=0),void 0===r&&(r=x());var a=s[t]=s[t]||{start:0,end:0,values:[]};a.start=Math.min(a.start,n),a.end=Math.max(a.end,r),a.values.push([e,n,r]),!d&&setTimeout(k),d=!0}function w(t,e){var n=P(e.target),r="first-"+t+(v?"-ready":"");D(r,"value"),n&&D(r,n)}z(y,w),z(["beforeunload"],function(){D("tab-unload","value")}),["click","touchup","input","submit","resize","scroll"].forEach(function(a){O.addEventListener(a,function(t){var n=t.target,r=x();requestAnimationFrame(function(){var t=x();if(E<=t-r){var e=P(n);p("value",r,t),e&&p(e,r,t),m("latency-"+a,r,t,!0)}})},!0)});try{(f=new PerformanceObserver(function(t){r=t.getEntries().pop()})).observe({entryTypes:["longtask"]})}catch(t){}e=function(){if(v=!0,f){var t,e=function(){r?(t=r.startTime+r.duration,x()-t>=g?(D("tti","value",0,t),f.disconnect()):setTimeout(e,n.ttiDelay)):t?(D("tti","value",0,t),f.disconnect()):(t=x(),setTimeout(e,500))};e()}z(y,w)},"complete"===I.readyState?e():O.addEventListener("DOMContentLoaded",e)},t}({});
 
 perfKeeperExtPerformance.performanceTimings(perfKeeper.system);
 // Ext: resource
 var perfKeeperExtResource=function(e){"use strict";var d=Function("return this")(),h=d.document,p=d.performance;p&&p.now||Date.now;var u=[];function z(a,c,o,s){var i={};return[function(e,n,t,r){var a=i;u.concat(e).forEach(function(e){var n=a.nested||(a.nested={});a=n[e]||(n[e]={name:e})}),null!=a.end?a.end+=t-n:(a.start=n,a.end=t,a.unit=r)},function(e,n,t,r){i.name=e?a+"-"+e:a,i.start=n,i.end=t,function n(e,t){var r=e.nested,a=r?Object.keys(r):u;if(a.length){var i=(t||c).group(e.name,e.start);i._=!0,i.unit=o||"ms",(!1===s?a:a.sort()).forEach(function(e){n(r[e],i)}),i.stop(e.end)}else t&&(t.add(e.name,e.start,e.end),t.entries[t.entries.length-1].unit=e.unit||t.unit)}(i,null),r&&(i={})}]}var S=/^https?:\/\/(?:www\.)?(.*?)\.[a-z]+\//,E=6e4,g={};return e.defaultResourceStatsOptions=g,e.resourceStats=function(e,n){void 0===n&&(n=g);var t,r=z("pk-resource-traffic",e,"KiB"),i=r[0],c=r[1],a=z("pk-resource-traffic-cached",e,"KiB"),o=a[0],s=a[1],u=z("pk-resource-stats",e,"KiB"),f=u[0],l=u[1],m=n.onBeforeEntryAdd,v=n.resourceName||function(e){var n=S.exec(e.name);return n?[e.initiatorType,n[1]]:null},y=n.intervals||[["15sec",15e3],["1min",E],["5min",3e5],["15min",9e5],["30min",18e5],["1hour",36e5],["1day",864e5],["2days",1728e5]];t=function(){var d={size:0,cached:0,cachedSize:0,transfered:0,transferedSize:0,unmeasurable:0,duration:0},t=[],r="start";function h(e,n,t){n&&(e?o:i)(n,0,t)}function a(){var e=p.getEntriesByType("resource");e&&0<e.length&&(t=t.concat(e)),p.clearResourceTimings()}try{!function e(){a(),t.forEach(function(e){if(!m||!1!==m(e)){var n=e.duration,t=e.transferSize,r=e.entryType,a=e.nextHopProtocol,i=e.initiatorType,c=t||e.encodedBodySize||e.decodedBodySize,o=!t;if("navigation"===i&&(i="html"),i&&0<c){var s=[r,i,a];if(s.forEach(function(e){h(o,e,c)}),"html"!==i){var u=v(e),f=function(e,n,t){(0<n||-1!==s.indexOf(e))&&h(o,t.slice(0,n+1),c)};u&&u.length&&(Array.isArray(u[0])?u.forEach(function(e){e.forEach(f)}):u.forEach(f))}}d.size+=c,d.duration+=n,d[i]=(d[i]||0)+1,o?(d.cached++,d.cachedSize+=c):0<c?(d.transfered++,d.transferedSize+=c):d.unmeasurable++}}),Object.keys(d).forEach(function(e){f(e,0,d[e],"duration"===e?"ms":/size/i.test(e)?"KiB":"raw")}),l(r,0,d.size),0<d.transfered&&c(r,0,d.transferedSize),0<d.cachedSize&&s(r,0,d.cachedSize),t.length=0;var n=y.shift();n&&(r=n[0],setTimeout(e,n[1]))}(),p.onresourcetimingbufferfull=function(){a()}}catch(e){}},"complete"===h.readyState?t():d.addEventListener("DOMContentLoaded",t)},e}({});
 
 perfKeeperExtResource.resourceStats(perfKeeper.system);
+// Ext: memory
+var perfKeeperExtMemory=function(e){"use strict";var f=Function("return this")(),v=f.document,l=f.performance;l&&l.now||Date.now;var p=[];var y=6e4;return e.memoryStats=function(e,t){void 0===t&&(t={});var r,o,s,u,i,n,a=(r="pk-memory-stats",o=e,s="KiB",i={},[function(e,t,n,a){var r=i;p.concat(e).forEach(function(e){var t=r.nested||(r.nested={});r=t[e]||(t[e]={name:e})}),null!=r.end?r.end+=n-t:(r.start=t,r.end=n,r.unit=a)},function(e,t,n,a){i.name=e?r+"-"+e:r,i.start=t,i.end=n,function t(e,n){var a=e.nested,r=a?Object.keys(a):p;if(r.length){var i=(n||o).group(e.name,e.start);i._=!0,i.unit=s||"ms",(!1===u?r:r.sort()).forEach(function(e){t(a[e],i)}),i.stop(e.end)}else n&&(n.add(e.name,e.start,e.end),n.entries[n.entries.length-1].unit=e.unit||n.unit)}(i,null),a&&(i={})}]),c=a[0],d=a[1],m=t.intervals||[["15sec",15e3],["1min",y],["5min",3e5],["15min",9e5],["30min",18e5],["1hour",36e5],["1day",864e5],["2days",1728e5]];n=function(){var r="start";try{!function e(){var t=l.memory,n=m.shift(),a=t.totalJSHeapSize;c("total",0,a),c("used",0,t.usedJSHeapSize),d(r,0,a),n&&(r=n[0],setTimeout(e,n[1]))}()}catch(e){}},"complete"===v.readyState?n():f.addEventListener("DOMContentLoaded",n)},e}({});
+
+perfKeeperExtMemory.memoryStats(perfKeeper.system);
 // Analytics
 const analytics = [];
 
@@ -425,11 +429,11 @@ perfKeeper.system.setAnalytics(analytics)
 	<br/>
 
 	<div class="container">
-		<h1>@perf-tools/keeper :: Example</h1>
-		<ol>
+		<h1 data-perf-id="header">@perf-tools/keeper :: Example</h1>
+		<ol data-perf-id="list">
 			<li>Open DevTools and see Console</li>
-			<li>Click on the document</li>
-			<li>Scroll this this page</li>
+			<li>Click on the document or header</li>
+			<li>Scroll this page</li>
 			<li>npm i --save @perf-tools/keeper 🚀</li>
 		</ol>
 	</div>

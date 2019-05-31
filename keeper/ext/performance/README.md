@@ -32,7 +32,12 @@ performanceTimings(system);
 
 // or with options
 performanceTimings(system, {
-	minLatency: 150, // by default `100`
-	ttiDelay: 2500, // by default `3000`
+	minLatency: 150, // default: 100ms
+	ttiDelay: 2500,  //          2000ms
+	perfIdProp: 'data-id', //    'data-pref-id'
+	getPerfId: (target: HTMLElement, perfIdProp: string) => {
+		// ...
+		return id;
+	},
 });
 ```

@@ -5,6 +5,7 @@ import { navigationTimings, defaultNavTimingsOptions, NavTimingsOptions } from '
 import { paintTimings, defaultPaintTimingsOptions, PaintTimingsOptions } from './ext/paint';
 import { performanceTimings, defaultPerformanceOptions, PerformanceOptions } from './ext/performance';
 import { resourceStats, defaultResourceStatsOptions, ResourceStatsOptions } from './ext/resource';
+import { memoryStats, MemoryStatsOptions } from './ext/memory';
 
 export type Extensions = Partial<{
 	fps: FPSMeterOptions;
@@ -12,10 +13,15 @@ export type Extensions = Partial<{
 	paint: PaintTimingsOptions;
 	performance: PerformanceOptions;
 	resource: ResourceStatsOptions;
+	memory: MemoryStatsOptions;
 }>
 
 export function set(keeper: PerfKeeper, options: Extensions) {
-	function apply<O extends object>(ext: (keeper: PerfKeeper, options?: O) => void, options?: O, defaults?: O) {
+	function apply<O extends object>(
+		ext: (keeper: PerfKeeper, options?: O) => void,
+		options?: O,
+		defaults?: O,
+	) {
 		ext(keeper, {
 			...Object(defaults),
 			...Object(options),
@@ -27,4 +33,5 @@ export function set(keeper: PerfKeeper, options: Extensions) {
 	apply(paintTimings, options.paint, defaultPaintTimingsOptions);
 	apply(performanceTimings, options.performance, defaultPerformanceOptions);
 	apply(resourceStats, options.resource, defaultResourceStatsOptions);
+	apply(memoryStats, options.memory, {});
 }

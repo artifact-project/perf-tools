@@ -44,9 +44,9 @@ resourceStats(system, {
 
 	// by default: `15sec`, `1min`, `5min`, `15min`, `30min`, `1hour`, `1day` and `2days`
 	intervals: [
-		['1min', 60 * 1000],
-		['2min', 60 * 1000],
-		['3min', 60 * 1000],
+		['1min', 1 * 60 * 1000],
+		['2min', 2 * 60 * 1000],
+		['3min', 3 * 60 * 1000],
 	],
 });
 

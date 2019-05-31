@@ -256,7 +256,8 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		isGroup: boolean,
 		start?: number,
 		end?: number | null,
-		isolate?: true,
+		isolate?: boolean,
+		unit?: PerfEntry['unit'],
 	): PerfEntry | PerfGroupEntry {
 		let label = `${prefix}${name}-${++cid}`;
 		let id = `${label}-mark`;
@@ -270,7 +271,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 			name,
 			parent,
 			entries:  isGroup ? [] : nil,
-			unit: 'ms',
+			unit: unit || 'ms',
 			active: +isGroup,
 			start: start != nil ? start : perf.now!(),
 			end: end != nil ? end : nil,
@@ -338,16 +339,16 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		}
 	}
 
-	function add(this: PerfGroupEntry, name: string, start: number, end: number) {
+	function add(this: PerfGroupEntry, name: string, start: number, end: number, unit?: PerfEntry['unit']) {
 		if (start >= 0 && start <= end) {
-			createEntry(name, this, false, start).stop(end);
+			createEntry(name, this, false, start, nil, false, unit).stop(end);
 		}
 	}
 
 	function time(this: PerfGroupEntry, name: string, executer?: () => void) {
 		const entry = createEntry(name, this, false);
 
-		if (executer != null) {
+		if (executer != nil) {
 			executer();
 			entry.stop();
 		} else {
@@ -389,7 +390,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		this.time(name);
 	}
 
-	function group(this: PerfGroupEntry, name: string, start?: number | true | null, isolate?: true): PerfGroupEntry {
+	function group(this: PerfGroupEntry, name: string, start?: number | true | null, isolate?: boolean): PerfGroupEntry {
 		if (start === true) {
 			isolate = start;
 			start = nil;
