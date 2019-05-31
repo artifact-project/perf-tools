@@ -55,7 +55,7 @@ keeper.time('FooBar');
 keeper.timeEnd('FooBar'); // ⏱FooBar: 37ms
 
 // 2. Shorted usage variant
-const timer = keeper.time('FooBar');, () => { // ⏱FooBar: 37ms
+const timer = keeper.time('FooBar'); // ⏱FooBar: 37ms
 // ...
 timer.stop();
 
