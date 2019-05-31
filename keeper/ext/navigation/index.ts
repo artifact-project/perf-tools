@@ -8,7 +8,7 @@ export const defaultNavTimingsOptions: NavTimingsOptions = {
 };
 
 export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = defaultNavTimingsOptions) {
-	const [set, send] = createTimingsGroup('pk-navigation', keeper, 'ms', false);
+	const [set, send] = createTimingsGroup('pk-nav', keeper, 'ms', false);
 
 	try {
 		const {
@@ -22,6 +22,11 @@ export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = def
 			responseStart,
 			responseEnd,
 		} = performance.timing;
+		const connection = (navigator as any).connection;
+
+		if (connection && connection.effectiveType) {
+			set('conn-' + connection.effectiveType, 0, 1, 'raw');
+		}
 
 		if (redirectStart) {
 			set('init', navigationStart, redirectStart);

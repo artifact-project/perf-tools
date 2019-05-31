@@ -15,7 +15,7 @@ type MemoryStats = {
 }
 
 export function memoryStats(keeper: PerfKeeper, options: MemoryStatsOptions = {}) {
-	const [setStats, sendStats] = createTimingsGroup('pk-memory-stats', keeper, 'KiB');
+	const [setStats, sendStats] = createTimingsGroup('pk-memory', keeper, 'KiB');
 	const intervals = options.intervals || [
 		['15sec', 15e3],
 		['1min', MIN],
@@ -37,6 +37,7 @@ export function memoryStats(keeper: PerfKeeper, options: MemoryStatsOptions = {}
 
 			setStats('total', 0, total);
 			setStats('used', 0, memory.usedJSHeapSize);
+			setStats('js', 0, memory.jsHeapSizeLimit);
 			sendStats(rootName, 0, total);
 
 			if (next) {
