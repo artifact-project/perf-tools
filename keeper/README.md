@@ -197,7 +197,7 @@ group.stop(); // starting 'render' timer
     - **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
   - **GroupEntry** (extends `Entry`)
     - **entries**: `Entry[]` — nested metrics
-	  - **add**(name: `string`, start: `number`, end: `number`): `Entry`
+    - **add**(name: `string`, start: `number`, end: `number`): `Entry`
     - **time**(name: `string`, start?: `number`): `Entry`
     - **timeEnd**(name: `string`, end?: `number`): `void`
     - **mark**(name: `string`): `void` — start the timer with stopping a previous one in the group.
