@@ -194,7 +194,7 @@ group.stop(); // starting 'render' timer
     - **start**: `number` — start mark
     - **end**: `number` — end mark
     - **parent**: `PerfGroupEntry | null` — reference on parent
-	  - **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
+    - **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
   - **GroupEntry** (extends `Entry`)
     - **entries**: `Entry[]` — nested metrics
 	  - **add**(name: `string`, start: `number`, end: `number`): `Entry`
@@ -202,7 +202,7 @@ group.stop(); // starting 'render' timer
     - **timeEnd**(name: `string`, end?: `number`): `void`
     - **mark**(name: `string`): `void` — start the timer with stopping a previous one in the group.
     - **group**(name: `string`): `GroupEntry`
-		- **stop**(end?: `number`): `void` — complete the measurement of group (set `end` prop)
+    - **stop**(end?: `number`): `void` — complete the measurement of group (set `end` prop)
 
 ---
 
