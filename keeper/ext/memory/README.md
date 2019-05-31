@@ -1,6 +1,6 @@
 Memory
----------
-- Page size (KiB)
+------
+- https://webplatform.github.io/docs/apis/timing/properties/memory/
 
 ---
 
