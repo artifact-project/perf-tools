@@ -22,6 +22,7 @@ npm i --save @perf-tools/keeper
      - [Paint Timings](./ext/paint) 🏞
 	 - [Performance](./ext/performance) 🚀
 	 - [Resource/Traffic](./ext/resource) ⚖️
+	 - [Memory](./ext/memory) 🤖
    - Analytics 📈
      - [Google](./analytics/google)
      - [Yandex](./analytics/yandex)
@@ -41,15 +42,47 @@ import { googleAnalytics } from '@perf-tools/keeper/analytics/google';
 
 const keeper = perfKeeper.create({
 	print: true,    // DevTools -> Console
-	timeline: true, // DevTools -> Performance
+	timeline: true, // DevTools -> Performance -> User timings
 	prefix: '⏱',
 	analytics: [
 		googleAnalytics({prefix: 'MyApp-'}),
 	],
 });
+
+// 1. Classic usage variant
+keeper.time('FooBar');
+// ...
+keeper.timeEnd('FooBar'); // ⏱FooBar: 37ms
+
+// 2. Shorted usage variant
+const timer = keeper.time('FooBar');, () => { // ⏱FooBar: 37ms
+// ...
+timer.stop();
+
+// 3. Functional usage variant
+keeper.time('FooBar', () => { // ⏱FooBar: 37ms
+	// ...
+});
+
+// 4. Usage variant with groups
+const group = keeper.group('App');
+group.mark('init'); // starting 'init' timer
+// ...
+
+group.mark('prepare'); // ending 'init' and starting 'prepare' timer
+// ...
+
+group.mark('render'); // ending 'prepare' and starting 'render' timer
+// ...
+
+group.stop(); // starting 'render' timer
+
+// ⏱App: 382ms
+//    ⏱init: 243ms
+//    ⏱prepare: 19ms
+//    ⏱render: 120ms
 ```
 
----
 
 ### Inline Usage
 
@@ -148,6 +181,7 @@ const keeper = perfKeeper.create({
     - **disable**: `(state: boolean) => void`
     - **setAnalytics**: `(list: Array<(entry: PerfEntry) => void>) => void`
     - **add**(name: `string`, start: `number`, end: `number`): `Entry`
+    - **time**(name: `string`, executer: `() => void`): `Entry`
     - **time**(name: `string`, start?: `number`): `Entry`
     - **timeEnd**(name: `string`, end?: `number`): `void`
     - **group**(name: `string`): `GroupEntry`
