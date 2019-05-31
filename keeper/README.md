@@ -2,7 +2,7 @@
 -----------------------------------
 PerfKeeper — It's a tool for performance monitoring and profiling your application (also best replacement for `console.time`).
 
-- ➡️[See Example](https://artifact-project.github.io/perf-tools/keeper/) 😲
+- ➡️ &nbsp; [See Example](https://artifact-project.github.io/perf-tools/keeper/) &nbsp; 😲
 
 ```sh
 npm i --save @perf-tools/keeper
