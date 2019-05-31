@@ -9,9 +9,7 @@ Performance Timings
 
 First Event|Latency|TTI
 ---|---|---
-![First Event](https://cdn-images-1.medium.com/max/2400/1*Ma8s5-HtSPe_xMrMam3bDg.png)|
-![Latency](https://cdn-images-1.medium.com/max/2600/1*5o4-B9ZIJcPwcXViXUdygw.png)|
-![TTI](https://cdn-images-1.medium.com/max/2000/1*oD3LbhOO6YKrTNkKLBt_CQ.png)
+![First Event](https://cdn-images-1.medium.com/max/2400/1*Ma8s5-HtSPe_xMrMam3bDg.png)|![Latency](https://cdn-images-1.medium.com/max/2600/1*5o4-B9ZIJcPwcXViXUdygw.png)|![TTI](https://cdn-images-1.medium.com/max/2000/1*oD3LbhOO6YKrTNkKLBt_CQ.png)
 
 ---
 
