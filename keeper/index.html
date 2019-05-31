@@ -374,13 +374,13 @@ const analytics = [];
 			var perfKeeperAnalyticsGoogle=function(e){"use strict";var m=Function("return this")(),t={prefix:"",normalize:function(e){return e},sendZeroValues:!1,useTabName:function(e){var n=e.pathname;return("/"===n?"index":n).replace(/[\/\.]+/g,"-").replace(/^-|-$/g,"")}};function a(e,n){return e&&n in e?e[n]:t[n]}return e.googleAnalytics=function(e,n){var u=a(e,"prefix")||"",o=a(e,"useTabName"),g=a(e,"sendZeroValues"),t=[],l=function(e){n?n("send",e):t.push(e)};return n||function e(){(n=m.gtag?function(e,n){m.gtag("event","timing_complete",{name:n.timingVar,value:n.timingValue,event_category:n.timingCategory,event_label:n.timingLabel})}:m.ga)?(t.forEach(l),t.length=0):setTimeout(e,500)}(),function(e){if(null!==(n=e).start&&null!==n.end){var n,t=e.name,a="value",i=e.parent;if(i)for(a=e.name;;){if(!i.parent){t=i.name;break}a=i.name+"_"+a,i=i.parent}var r=Math.round(e.end-e.start);(r||g)&&l({hitType:"timing",timingCategory:""+u+t,timingVar:a,timingValue:r,timingLabel:o?o(m.location):void 0})}}},e}({});
 
 			analytics.push(perfKeeperAnalyticsGoogle.googleAnalytics());
-		
+
 
 			// Analytics: yandex
 			var perfKeeperAnalyticsYandex=function(n){"use strict";Function("return this")();var r={prefix:"",normalize:function(n){return n},sendZeroValues:!1,useTabName:function(n){var e=n.pathname;return("/"===e?"index":e).replace(/[\/\.]+/g,"-").replace(/^-|-$/g,"")}};function a(n,e){return n&&e in n?n[e]:r[e]}return n.yandexAnalytics=function(n,e){var r=a(n,"id"),s=a(n,"prefix"),c=a(n,"useTabName"),f=a(n,"sendZeroValues"),t=[],l=function(n){e?e(r,"params",n):t.push(n)};return!e&&function n(){(e=window.ym)?(t.forEach(l),t.length=0):setTimeout(n,500)}(),function(n){if(null!==(e=n).start&&null!==e.end){for(var e,r=[],t={},a=n;r.unshift(a.name),a=a.parent;);c&&r.push("__page__",c(location));for(var u=t,i=0,o=r.length-1;i<o;i++)u=u[(0===i&&s?s:"")+r[i]]={};u[r[o]]=Math.round(n.end-n.start),(u[r[o]]||f)&&l(t)}}},n}({});
 
 			analytics.push(perfKeeperAnalyticsYandex.yandexAnalytics({id: "51955373"}));
-		
+
 perfKeeper.system.setAnalytics(analytics)
 </script>
 
@@ -457,7 +457,7 @@ perfKeeper.system.setAnalytics(analytics)
 			<li>Open DevTools and see Console</li>
 			<li>Click on the document or header</li>
 			<li>Scroll this page</li>
-			<li>npm i --save @perf-tools/keeper 🚀</li>
+			<li>npm i --save @perf-tools/keeper &nbsp; 🚀</li>
 		</ol>
 	</div>
 
