@@ -190,6 +190,7 @@ group.stop(); // starting 'render' timer
     - **groupEnd**(name?: `string`, end?: `number`): `void`
   - **Entry**
     - **id**: `string` — unique identifier
+    - **unit**: `'ms' | 'KiB' | 'fps' | 'raw'` — metric unit
     - **name**: `string` — name of measure
     - **start**: `number` — start mark
     - **end**: `number` — end mark
@@ -197,11 +198,11 @@ group.stop(); // starting 'render' timer
     - **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
   - **GroupEntry** (extends `Entry`)
     - **entries**: `Entry[]` — nested metrics
-    - **add**(name: `string`, start: `number`, end: `number`): `Entry`
+    - **add**(name: `string`, start: `number`, end: `number`, unit?: `string`): `Entry`
     - **time**(name: `string`, start?: `number`): `Entry`
     - **timeEnd**(name: `string`, end?: `number`): `void`
     - **mark**(name: `string`): `void` — start the timer with stopping a previous one in the group.
-    - **group**(name: `string`): `GroupEntry`
+    - **group**(name: `string`, unit?: `string`): `GroupEntry`
     - **stop**(end?: `number`): `void` — complete the measurement of group (set `end` prop)
 
 ---
