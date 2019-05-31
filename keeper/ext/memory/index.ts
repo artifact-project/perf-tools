@@ -38,7 +38,7 @@ export function memoryStats(keeper: PerfKeeper, options: MemoryStatsOptions = {}
 			setStats('total', 0, total);
 			setStats('used', 0, memory.usedJSHeapSize);
 			setStats('js', 0, memory.jsHeapSizeLimit);
-			sendStats(rootName, 0, total);
+			sendStats(rootName, 0, total, true);
 
 			if (next) {
 				rootName = next[0];
