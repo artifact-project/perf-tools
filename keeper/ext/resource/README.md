@@ -1,6 +1,14 @@
 Resources
 ---------
-- Page size (KiB)
+- https://developer.mozilla.org/en-US/docs/Web/API/Resource_Timing_API
+
+---
+
+Start|15sec|1min
+---|---|---
+![Start](https://cdn-images-1.medium.com/max/1600/1*GOQYCUHVU8fhu0cQv3JzDw.png)|
+![15sec](https://cdn-images-1.medium.com/max/1600/1*B3YrsKIqAhVl9J2E83qN4g.png)|
+![1min](https://cdn-images-1.medium.com/max/1600/1*flmBRrsX2q0a1fc7IgY0zg.png)
 
 ---
 

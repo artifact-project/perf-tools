@@ -4,6 +4,10 @@ Paint Timings
 
 ---
 
+![Paint](https://cdn-images-1.medium.com/max/1600/1*73IwrL_crOMlls4Ve7AHBg.png)
+
+---
+
 ### Usage
 
 #### Inline

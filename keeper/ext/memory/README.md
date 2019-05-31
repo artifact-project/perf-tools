@@ -4,6 +4,12 @@ Memory
 
 ---
 
+Start | 15sec | 1min
+---|---|---
+![Start](https://habrastorage.org/webt/4n/dm/s6/4ndms6ru3t56unt5bread7fzuf0.png)|![15sec](https://habrastorage.org/webt/ev/h0/fj/evh0fjpoqeadv5p4yn8r4kyyui0.png)|![1min](https://habrastorage.org/webt/jq/if/mh/jqifmhh5pz9yukce1fduq0j4ivu.png)
+
+---
+
 ### Usage
 
 #### Inline
