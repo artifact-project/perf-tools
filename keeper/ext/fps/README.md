@@ -48,11 +48,12 @@ const meter = fpsMeter(system, {
 	scrollableElement: null,
 });
 
-// Where in the code we call the scroll handling method and pass the element that we scroll.
-meter.handleEvent({
-	target: myScroll.containerElement,
-});
+// Where in the code on scrollStart
+meter.start();
 
-// Ending
+// and after on scrollEnd
+meter.stop();
+
+// Finally:
 meter.destory();
 ```

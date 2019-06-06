@@ -51,8 +51,7 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 
 		if (checkScrollRev === scrollRev) {
 			interactive = false;
-			stopMeasure();
-			sendStats();
+			stop();
 		} else {
 			checkEndScroll();
 		}
@@ -62,7 +61,7 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 		const name = scrollableName ? scrollableName(element) : null;
 		const [set, send] = createTimingsGroup(`pk-fps${name ? `-${name}` : ''}`, keeper, 'fps');
 		const length = fpsHistory.length;
-		const middle = Math.floor(length / 2)
+		const middle = Math.floor(length / 2);
 		let avg = 0;
 		let min = 60;
 		let max = 0;
@@ -96,11 +95,20 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 		latency = now() - startScroll;
 	}
 
+	function start() {
+		startScroll = now();
+		startMeasure(onFPS, rate);
+	}
+
+	function stop() {
+		stopMeasure();
+		sendStats();
+	}
+
 	function handleScroll({target}: LikeScrollEvent) {
 		if (!interactive) {
-			startScroll = now();
 			interactive = true;
-			startMeasure(onFPS, rate);
+			start();
 			requestAnimationFrame(calcLatency);
 		} else if (element !== target) {
 			sendStats();
@@ -116,7 +124,11 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 	scrollableElement && scrollableElement.addEventListener('scroll', handleScroll, true);
 
 	return {
+		start,
+		stop,
+
 		handleScroll,
+
 		destory() {
 			scrollableElement && scrollableElement.removeEventListener('scroll', handleScroll, true);
 		},

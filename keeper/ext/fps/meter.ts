@@ -8,6 +8,7 @@ let startPaintCount: number;
 let paintCount: number;
 let prevHelperLeft: number;
 let enabled = false;
+let attached = false;
 let rate = 300;
 let handle: (fps: number) => void;
 
@@ -22,7 +23,8 @@ export function stopMeasure() {
 	if (enabled) {
 		enabled = false;
 		cancelAnimationFrame(rafId);
-		helper && document.body.removeChild(helper);
+		attached && document.body.removeChild(helper);
+		attached = false;
 	}
 }
 
@@ -83,6 +85,7 @@ function init() {
 function run() {
 	if (enabled) {
 		init();
+		attached = true;
 		document.body.appendChild(helper);
 		setTimeout(measure, 0);
 	}
