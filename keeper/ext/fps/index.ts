@@ -2,17 +2,29 @@ import { PerfKeeper } from '../../src/keeper/keeper';
 import { createTimingsGroup, globalThis, now } from '../utils';
 import { startMeasure, stopMeasure } from './meter';
 
+export type LikeScrollEvent = {
+	target: EventTarget | null;
+}
+
 export type FPSMeterOptions = {
 	rate: number;
 	scrollableName?: (scrollRef: HTMLElement | Document) => string | null | undefined;
+	scrollableElement?: Window | HTMLElement | null;
 }
 
 export const defaultFPSMeterOptions: FPSMeterOptions = {
 	rate: 300,
 	scrollableName: (scrollRef: HTMLElement | Document) => scrollRef === document ? 'page' : null,
+	scrollableElement: globalThis,
 };
 
 export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultFPSMeterOptions) {
+	const {
+		rate,
+		scrollableName,
+		scrollableElement,
+	} = options;
+
 	let element: HTMLElement;
 	let interactive = false;
 	let scrollRev = 0;
@@ -30,7 +42,7 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 		if (!checkEndLock) {
 			checkEndLock = true;
 			checkScrollRev = scrollRev;
-			setTimeout(endScroll, options.rate);
+			setTimeout(endScroll, rate);
 		}
 	}
 
@@ -47,7 +59,7 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 	}
 
 	function sendStats() {
-		const name = options.scrollableName ? options.scrollableName(element) : null;
+		const name = scrollableName ? scrollableName(element) : null;
 		const [set, send] = createTimingsGroup(`pk-fps${name ? `-${name}` : ''}`, keeper, 'fps');
 		const length = fpsHistory.length;
 		const middle = Math.floor(length / 2)
@@ -84,11 +96,11 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 		latency = now() - startScroll;
 	}
 
-	globalThis.addEventListener('scroll', ({target}) => {
+	function handleScroll({target}: LikeScrollEvent) {
 		if (!interactive) {
 			startScroll = now();
 			interactive = true;
-			startMeasure(onFPS, options.rate);
+			startMeasure(onFPS, rate);
 			requestAnimationFrame(calcLatency);
 		} else if (element !== target) {
 			sendStats();
@@ -99,5 +111,14 @@ export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultF
 		element = target as HTMLElement;
 		scrollRev++;
 		checkEndScroll();
-	}, true);
+	}
+
+	scrollableElement && scrollableElement.addEventListener('scroll', handleScroll, true);
+
+	return {
+		handleScroll,
+		destory() {
+			scrollableElement && scrollableElement.removeEventListener('scroll', handleScroll, true);
+		},
+	};
 }

@@ -34,3 +34,25 @@ import { fpsMeter } from '@perf-tools/keeper/ext/fps';
 
 fpsMeter(system);
 ```
+
+---
+
+#### Manual manipulation
+
+```ts
+import { system } from '@perf-tools/keeper';
+import { fpsMeter } from '@perf-tools/keeper/ext/fps';
+
+const meter = fpsMeter(system, {
+	scrollableName: (el: HTMLElement) => el ? el.dataset.scrollName : null,
+	scrollableElement: null,
+});
+
+// Where in the code we call the scroll handling method and pass the element that we scroll.
+meter.handleEvent({
+	target: myScroll.containerElement,
+});
+
+// Ending
+meter.destory();
+```
