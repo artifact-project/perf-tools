@@ -20,17 +20,15 @@ export type TaskOptions = {
 }
 
 let perf: {now(): number};
-let requestFrame;
-let cancelNextFrame;
-let requestIdle;
+let requestFrame: (fn: () => void) => number;
+let cancelNextFrame: (pid: number) => void;
+let requestIdle: (fn: () => void) => void;
 
 if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
 	perf = performance;
 } else {
 	perf = {
-		now() {
-			return Date.now();
-		},
+		now: Date.now,
 	};
 }
 
@@ -38,20 +36,20 @@ if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame =
 	requestFrame = requestAnimationFrame;
 	cancelNextFrame = cancelAnimationFrame;
 } else {
-	requestFrame = function (fn) {
+	requestFrame = function requestFramePolyfill(fn) {
 		return setTimeout(fn, 16);
 	};
 	cancelNextFrame = clearTimeout;
 }
 
 if (typeof requestIdleCallback === 'function') {
-	requestIdle = function (fn) {
+	requestIdle = function requestIdlePolyfill(fn) {
 		requestIdleCallback(fn, {
 			timeout: 60,
 		});
 	};
 } else {
-	requestIdle = function (fn) {
+	requestIdle = function requestIdlePolyfill(fn) {
 		setTimeout(fn, 60);
 	};
 }
@@ -301,10 +299,21 @@ function idleNext() {
 	idleStack.length = 0;
 }
 
+type SetupOptions = Partial<{
+	maxFrameSize: number;
+}>;
+
+function setup(options: SetupOptions) {
+	MAX_FRAME_SIZE = options.maxFrameSize || MAX_FRAME_SIZE;
+}
+
 // API
 export {
 	F_NO_ARGS,
 	F_IMPORTANT,
+
+	setup,
+	SetupOptions,
 
 	perf,
 	call,
