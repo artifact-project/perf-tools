@@ -299,9 +299,9 @@ function idleNext() {
 	idleStack.length = 0;
 }
 
-type SetupOptions = Partial<{
+export type SetupOptions = Partial<{
 	maxFrameSize: number;
-}>;
+}>
 
 function setup(options: SetupOptions) {
 	MAX_FRAME_SIZE = options.maxFrameSize || MAX_FRAME_SIZE;
@@ -313,7 +313,6 @@ export {
 	F_IMPORTANT,
 
 	setup,
-	SetupOptions,
 
 	perf,
 	call,
