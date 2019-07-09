@@ -15,9 +15,11 @@ export const defaultPerformanceOptions = {
 };
 
 type Batch = {
-	start: 0,
-	end: 0,
-	nested: Array<[string, number, number]>;
+	[group:string]: {
+		start: number,
+		end: number,
+		values: Array<[string, number, number]>;
+	};
 };
 
 export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptions = {}) {
