@@ -23,10 +23,10 @@ function containsValueMetric({ entries }) {
 	let result = false;
 
 	if (entries) {
-		let len = entries.length;
+		let idx = entries.length;
 
-		while(len--) {
-			if (entries[len].name === 'value') {
+		while (idx--) {
+			if (entries[idx].name === 'value') {
 				result = true;
 
 				break;
