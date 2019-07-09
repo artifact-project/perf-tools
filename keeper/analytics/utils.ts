@@ -19,8 +19,31 @@ const baseAnalyticsOptions: AnalyticsOptions = {
 	,
 };
 
+function containsValueMetric({ entries }) {
+	let result = false;
+
+	if (entries) {
+		let idx = entries.length;
+
+		while (idx--) {
+			if (entries[idx].name === 'value') {
+				result = true;
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
 export function isBadTiming(entry: PerfEntry): boolean {
-	return entry.start === null || entry.end === null;
+	return (
+		entry.start === null ||
+		entry.end === null ||
+		// Находим такую корневую entry, у которой entry.entries[..., { name: 'value' }, ...]
+		// такие метрики дают дубли при формировании финального имени
+		(entry.parent === null && containsValueMetric(entry))
+	);
 }
 
 export function getOption<
