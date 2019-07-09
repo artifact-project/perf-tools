@@ -35,7 +35,7 @@
 
 	<script id="perf-keeper">
 //
-// @perf-tools/keeper v1.5.0 | MIT
+// @perf-tools/keeper v1.5.1 | MIT
 // https://github.com/artifact-project/perf-tools/tree/master/keeper
 //
 var perfKeeper = (function (exports) {
@@ -371,13 +371,13 @@ perfKeeperExtMemory.memoryStats(perfKeeper.system);
 const analytics = [];
 
 			// Analytics: google
-			var perfKeeperAnalyticsGoogle=function(e){"use strict";var m=Function("return this")(),t={prefix:"",normalize:function(e){return e},sendZeroValues:!1,useTabName:function(e){var n=e.pathname;return("/"===n?"index":n).replace(/[\/\.]+/g,"-").replace(/^-|-$/g,"")}};function a(e,n){return e&&n in e?e[n]:t[n]}return e.googleAnalytics=function(e,n){var u=a(e,"prefix")||"",o=a(e,"useTabName"),g=a(e,"sendZeroValues"),t=[],l=function(e){n?n("send",e):t.push(e)};return n||function e(){(n=m.gtag?function(e,n){m.gtag("event","timing_complete",{name:n.timingVar,value:n.timingValue,event_category:n.timingCategory,event_label:n.timingLabel})}:m.ga)?(t.forEach(l),t.length=0):setTimeout(e,500)}(),function(e){if(null!==(n=e).start&&null!==n.end){var n,t=e.name,a="value",i=e.parent;if(i)for(a=e.name;;){if(!i.parent){t=i.name;break}a=i.name+"_"+a,i=i.parent}var r=Math.round(e.end-e.start);(r||g)&&l({hitType:"timing",timingCategory:""+u+t,timingVar:a,timingValue:r,timingLabel:o?o(m.location):void 0})}}},e}({});
+			var perfKeeperAnalyticsGoogle=function(e){"use strict";var m=Function("return this")(),t={prefix:"",normalize:function(e){return e},sendZeroValues:!1,useTabName:function(e){var n=e.pathname;return("/"===n?"index":n).replace(/[\/\.]+/g,"-").replace(/^-|-$/g,"")}};function a(e,n){return e&&n in e?e[n]:t[n]}return e.googleAnalytics=function(e,n){var u=a(e,"prefix")||"",o=a(e,"useTabName"),l=a(e,"sendZeroValues"),t=[],g=function(e){n?n("send",e):t.push(e)};return n||function e(){(n=m.gtag?function(e,n){m.gtag("event","timing_complete",{name:n.timingVar,value:n.timingValue,event_category:n.timingCategory,event_label:n.timingLabel})}:m.ga)?(t.forEach(g),t.length=0):setTimeout(e,500)}(),function(e){if(!(null===(n=e).start||null===n.end||null===n.parent&&function(e){var n=e.entries,t=!1;if(n)for(var a=n.length;a--;)if("value"===n[a].name){t=!0;break}return t}(n))){var n,t=e.name,a="value",i=e.parent;if(i)for(a=e.name;;){if(!i.parent){t=i.name;break}a=i.name+"_"+a,i=i.parent}var r=Math.round(e.end-e.start);(r||l)&&g({hitType:"timing",timingCategory:""+u+t,timingVar:a,timingValue:r,timingLabel:o?o(m.location):void 0})}}},e}({});
 
 			analytics.push(perfKeeperAnalyticsGoogle.googleAnalytics());
 		
 
 			// Analytics: yandex
-			var perfKeeperAnalyticsYandex=function(n){"use strict";Function("return this")();var r={prefix:"",normalize:function(n){return n},sendZeroValues:!1,useTabName:function(n){var e=n.pathname;return("/"===e?"index":e).replace(/[\/\.]+/g,"-").replace(/^-|-$/g,"")}};function a(n,e){return n&&e in n?n[e]:r[e]}return n.yandexAnalytics=function(n,e){var r=a(n,"id"),s=a(n,"prefix"),c=a(n,"useTabName"),f=a(n,"sendZeroValues"),t=[],l=function(n){e?e(r,"params",n):t.push(n)};return!e&&function n(){(e=window.ym)?(t.forEach(l),t.length=0):setTimeout(n,500)}(),function(n){if(null!==(e=n).start&&null!==e.end){for(var e,r=[],t={},a=n;r.unshift(a.name),a=a.parent;);c&&r.push("__page__",c(location));for(var u=t,i=0,o=r.length-1;i<o;i++)u=u[(0===i&&s?s:"")+r[i]]={};u[r[o]]=Math.round(n.end-n.start),(u[r[o]]||f)&&l(t)}}},n}({});
+			var perfKeeperAnalyticsYandex=function(n){"use strict";Function("return this")();var r={prefix:"",normalize:function(n){return n},sendZeroValues:!1,useTabName:function(n){var e=n.pathname;return("/"===e?"index":e).replace(/[\/\.]+/g,"-").replace(/^-|-$/g,"")}};function a(n,e){return n&&e in n?n[e]:r[e]}return n.yandexAnalytics=function(n,e){var r=a(n,"id"),f=a(n,"prefix"),s=a(n,"useTabName"),l=a(n,"sendZeroValues"),t=[],c=function(n){e?e(r,"params",n):t.push(n)};return!e&&function n(){(e=window.ym)?(t.forEach(c),t.length=0):setTimeout(n,500)}(),function(n){if(!(null===(e=n).start||null===e.end||null===e.parent&&function(n){var e=n.entries,r=!1;if(e)for(var t=e.length;t--;)if("value"===e[t].name){r=!0;break}return r}(e))){for(var e,r=[],t={},a=n;r.unshift(a.name),a=a.parent;);s&&r.push("__page__",s(location));for(var u=t,i=0,o=r.length-1;i<o;i++)u=u[(0===i&&f?f:"")+r[i]]={};u[r[o]]=Math.round(n.end-n.start),(u[r[o]]||l)&&c(t)}}},n}({});
 
 			analytics.push(perfKeeperAnalyticsYandex.yandexAnalytics({id: "51955373"}));
 		
