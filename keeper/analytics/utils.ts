@@ -28,7 +28,6 @@ function containsValueMetric({ entries }) {
 		while (idx--) {
 			if (entries[idx].name === 'value') {
 				result = true;
-
 				break;
 			}
 		}
