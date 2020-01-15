@@ -7,7 +7,7 @@ Navigator Connection
 
 Initial|Changed
 ---|---|---
-![Initial]()|![Changed]()
+![Initial](https://cdn-images-1.medium.com/max/1600/1*FDs0-X-t-REdZUCRLq9Aew.png)|![Changed](https://cdn-images-1.medium.com/max/2400/1*THcu6G9ST884gugAQXWF6w.png)
 
 ---
 
@@ -36,7 +36,6 @@ networkInformation(system);
 
 // or with options
 networkInformation(system, {
-	// Fox example: effectiveType -> old -> new
-	sendChanged: true,
+	sendChanged: false,
 });
 ```

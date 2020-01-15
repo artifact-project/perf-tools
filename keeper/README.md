@@ -18,7 +18,7 @@ npm i --save @perf-tools/keeper
  - Out of box ⚡️
    - Monitorings ⏱
 	 - [FPS](./ext/fps) 🌀
-     - [Navigation Connection](./ext/connectopn) 🎛
+     - [Navigation Connection](./ext/connection) 🎛
      - [Navigation Timings](./ext/navigation) 🚏
      - [Paint Timings](./ext/paint) 🏞
 	 - [Performance](./ext/performance) 🚀
