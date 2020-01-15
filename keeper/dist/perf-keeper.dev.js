@@ -116,7 +116,7 @@ var perfKeeper = (function (exports) {
 	                        ? s_groupCollapsed
 	                        : s_group](logMsg, color(duration, unit));
 	                    selfDuration = duration - __print__(nextEntries);
-	                    if (selfDuration > 3) {
+	                    if (selfDuration > 3 && unit !== 'none') {
 	                        emit(createEntry('[[unknown]]', entry, false, start, start + selfDuration));
 	                        console.log(prefix + "[[unknown]]: %c" + selfDuration.toFixed(3) + "ms", "" + BOLD + color(selfDuration, unit));
 	                    }
@@ -293,7 +293,7 @@ var perfKeeper = (function (exports) {
 	var system = globalThis.perfKeeper ? globalThis.perfKeeper.system : create({
 	    print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(globalThis.location + ''),
 	    timeline: true,
-	    prefix: '⚡️',
+	    prefix: '🔅',
 	});
 
 	exports.color = color;

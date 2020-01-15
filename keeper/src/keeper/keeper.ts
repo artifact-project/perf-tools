@@ -211,7 +211,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 					);
 					selfDuration = duration - __print__(nextEntries);
 
-					if (selfDuration > 3) {
+					if (selfDuration > 3 && unit !== 'none') {
 						emit(createEntry(
 							'[[unknown]]',
 							entry as PerfGroupEntry,
@@ -439,5 +439,5 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 export const system = globalThis.perfKeeper ? globalThis.perfKeeper.system : create({
 	print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(globalThis.location + ''),
 	timeline: true,
-	prefix: '⚡️',
+	prefix: '🔅',
 });
