@@ -10,41 +10,44 @@ export const defaultNavTimingsOptions: NavTimingsOptions = {
 export function navigationTimings(keeper: PerfKeeper, _: NavTimingsOptions = defaultNavTimingsOptions) {
 	const [set, send] = createTimingsGroup('pk-nav', keeper, 'ms', false);
 
-	try {
-		const {
-			navigationStart,
-			redirectStart,
-			redirectEnd,
-			fetchStart,
-			domainLookupStart,
-			domainLookupEnd,
-			requestStart,
-			responseStart,
-			responseEnd,
-		} = performance.timing;
-		const connection = (navigator as any).connection;
+	(function net() {
+		try {
+			const {
+				navigationStart,
+				redirectStart,
+				redirectEnd,
+				fetchStart,
+				domainLookupStart,
+				domainLookupEnd,
+				requestStart,
+				responseStart,
+				responseEnd,
+			} = performance.timing;
 
-		if (connection && connection.effectiveType) {
-			set('conn-' + connection.effectiveType, 0, 1, 'raw');
-		}
+			if (!responseEnd) {
+				// Safari fix
+				setTimeout(net, 0);
+				return;
+			}
 
-		if (redirectStart) {
-			set('init', navigationStart, redirectStart);
-			set('redirect', redirectStart, redirectEnd);
-			set('app-cache', redirectEnd, domainLookupStart);
-		} else if (fetchStart) {
-			set('init', navigationStart, fetchStart);
-			set('app-cache', fetchStart, domainLookupStart);
-		} else {
-			set('init', navigationStart, domainLookupStart);
-		}
+			if (redirectStart) {
+				set('init', navigationStart, redirectStart);
+				set('redirect', redirectStart, redirectEnd);
+				set('app-cache', redirectEnd, domainLookupStart);
+			} else if (fetchStart) {
+				set('init', navigationStart, fetchStart);
+				set('app-cache', fetchStart, domainLookupStart);
+			} else {
+				set('init', navigationStart, domainLookupStart);
+			}
 
-		set('dns', domainLookupStart, domainLookupEnd);
-		set('tcp', domainLookupEnd, requestStart);
-		set('request', requestStart, responseStart);
-		set('response', responseStart, responseEnd);
-		send('net', navigationStart, responseEnd, true);
-	} catch (_) {}
+			set('dns', domainLookupStart, domainLookupEnd);
+			set('tcp', domainLookupEnd, requestStart);
+			set('request', requestStart, responseStart);
+			set('response', responseStart, responseEnd);
+			send('net', navigationStart, responseEnd, true);
+		} catch (_) {}
+	})();
 
 	domReady(function checkDomComplete() {
 		try {

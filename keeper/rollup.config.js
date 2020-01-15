@@ -57,6 +57,7 @@ export default [].concat(
 
 	// Extensions
 	[
+		'connection',
 		'fps',
 		'navigation',
 		'paint',

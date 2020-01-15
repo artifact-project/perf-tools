@@ -1,6 +1,7 @@
 import { PerfKeeper } from './src/keeper/keeper';
 
 import { fpsMeter, defaultFPSMeterOptions, FPSMeterOptions } from './ext/fps';
+import { networkInformation, NetworkInformationOptions } from './ext/connection';
 import { navigationTimings, defaultNavTimingsOptions, NavTimingsOptions } from './ext/navigation';
 import { paintTimings, defaultPaintTimingsOptions, PaintTimingsOptions } from './ext/paint';
 import { performanceTimings, defaultPerformanceOptions, PerformanceOptions } from './ext/performance';
@@ -10,6 +11,7 @@ import { memoryStats, MemoryStatsOptions } from './ext/memory';
 export type Extensions = Partial<{
 	fps: FPSMeterOptions;
 	navigation: NavTimingsOptions;
+	networkInformation: NetworkInformationOptions;
 	paint: PaintTimingsOptions;
 	performance: PerformanceOptions;
 	resource: ResourceStatsOptions;
@@ -28,6 +30,7 @@ export function set(keeper: PerfKeeper, options: Extensions) {
 		});
 	}
 
+	apply(networkInformation, options.networkInformation);
 	apply(fpsMeter, options.fps, defaultFPSMeterOptions);
 	apply(navigationTimings, options.navigation, defaultNavTimingsOptions);
 	apply(paintTimings, options.paint, defaultPaintTimingsOptions);

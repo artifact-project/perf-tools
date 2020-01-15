@@ -24,6 +24,7 @@ writeFileSync(
 		'// Extensions',
 		Object.entries({
 			fps: 'perfKeeperExtFps.fpsMeter',
+			connection: 'perfKeeperExtConnection.networkInformation',
 			navigation: 'perfKeeperExtNavigation.navigationTimings',
 			paint: 'perfKeeperExtPaint.paintTimings',
 			performance: 'perfKeeperExtPerformance.performanceTimings',
