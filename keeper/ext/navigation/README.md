@@ -1,6 +1,5 @@
 Navigation Timings
 ------------------
-- https://i.stack.imgur.com/qBvJL.png
 - https://developer.mozilla.org/en-US/docs/Web/API/Navigation_timing_API
 - https://developer.mozilla.org/en-US/docs/Web/API/PerformanceTiming
 
@@ -35,3 +34,7 @@ import { navigationTimings } from '@perf-tools/keeper/ext/navigation';
 
 navigationTimings(system);
 ```
+
+---
+
+![Navigation Timings](https://i.stack.imgur.com/qBvJL.png)
