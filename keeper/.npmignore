@@ -1,0 +1,8 @@
+node_modules
+
+# Ignore the .tsx? files
+**/*.ts
+**/*.tsx
+
+# Revert the .d.ts files
+!**/*.d.ts

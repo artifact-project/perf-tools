@@ -25,25 +25,10 @@
     "post-build": "node ./post-build.js && npm run clean-dist",
     "clean-dist": "rm -f ./dist/*.d.ts && rm -rf ./dist/*/",
     "git-clean": "git clean -f",
-    "prepublish": "npm run test && npm run ts-build && npm run build",
+    "prepublishOnly": "npm run test && npm run ts-build && npm run build",
     "postpublish": "npm run git-clean",
     "postversion": "git push && git push --tags"
   },
-  "files": [
-    "*.js",
-    "*.d.ts",
-    "dist/*.js",
-    "src/*/*.js",
-    "src/*/*.d.ts",
-    "ext/*.ts",
-    "ext/*.d.ts",
-    "ext/*/*.ts",
-    "ext/*/*.d.ts",
-    "analytics/*.ts",
-    "analytics/*.d.ts",
-    "analytics/*/*.ts",
-    "analytics/*/*.d.ts"
-  ],
   "devDependencies": {
     "@types/jest": "^19.2.3",
     "jest": "^20.0.3",
