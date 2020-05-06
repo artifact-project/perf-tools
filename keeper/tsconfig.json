@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "strictNullChecks": true,
-    "esModuleInterop": true,
     "lib": [
       "dom",
       "es5",

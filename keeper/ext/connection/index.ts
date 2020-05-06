@@ -14,7 +14,7 @@ export function networkInformation(keeper: PerfKeeper, options: NetworkInformati
 	}
 
 	const [set, send] = createTimingsGroup('pk-conn', keeper, 'none', false);
-	const keys: (keyof NetworkInformationEventTarget)[] = [
+	const keys: (keyof NetworkInformation)[] = [
 		'downlink',
 		// 'downlinkMax',
 		'effectiveType',
@@ -22,8 +22,8 @@ export function networkInformation(keeper: PerfKeeper, options: NetworkInformati
 		'saveData',
 		'type',
 	];
-	const prevInfo = {} as NetworkInformationEventTarget;
-	const setValue = <K extends keyof NetworkInformationEventTarget>(key: K) => {
+	const prevInfo = {} as NetworkInformation;
+	const setValue = <K extends keyof NetworkInformation>(key: K) => {
 		const val = connection[key];
 		const prev = prevInfo[key];
 

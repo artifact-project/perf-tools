@@ -48,9 +48,7 @@
     "testEnvironment": "node",
     "testRegex": "\\.tests\\.ts$",
     "transformIgnorePatterns": [],
-    "setupFilesAfterEnv": [
-      "<rootDir>/__jest__/extensions.ts"
-    ],
+    "setupFilesAfterEnv": [],
     "moduleFileExtensions": [
       "ts",
       "tsx",

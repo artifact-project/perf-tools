@@ -1,4 +1,7 @@
 node_modules
+vendors-for-demo
+__docs__
+index.html
 
 # Ignore the .tsx? files
 **/*.ts
