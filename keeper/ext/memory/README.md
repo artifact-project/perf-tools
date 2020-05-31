@@ -1,6 +1,10 @@
 Memory
 ------
-- https://webplatform.github.io/docs/apis/timing/properties/memory/
+- **measureMemory**
+  - 🔬https://www.chromestatus.com/feature/5685965186138112
+  - https://github.com/WICG/performance-measure-memory
+- **memory**
+  - https://webplatform.github.io/docs/apis/timing/properties/memory/
 
 ---
 
@@ -19,7 +23,15 @@ Start | 15sec | 1min
 /* Paste code from ./dist/perf-keeper.js */
 /* Paste code from ./dist/perf-keeper.ext.memory.js */
 
-perfKeeperExtMemory.memoryStats(perfKeeper.system);
+/** @desc Experimental */
+perfKeeperExtMemory.measureMemory(perfKeeper.system, {
+	groupName: 'pk-memory-measure', // default: 'pk-memory'
+});
+
+/** @desc Only Chrome */
+perfKeeperExtMemory.memoryStats(perfKeeper.system, {
+	groupName: 'pk-memory-stats', // default: 'pk-memory'
+});
 </script>
 ```
 

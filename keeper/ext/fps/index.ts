@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { createTimingsGroup, globalThis, now } from '../utils';
+import { createTimingsGroup, nativeGlobalThis, now } from '../utils';
 import { startMeasure, stopMeasure } from './meter';
 
 export type LikeScrollEvent = {
@@ -15,7 +15,7 @@ export type FPSMeterOptions = {
 export const defaultFPSMeterOptions: FPSMeterOptions = {
 	rate: 300,
 	scrollableName: (scrollRef: HTMLElement | Document) => scrollRef === document ? 'page' : null,
-	scrollableElement: globalThis,
+	scrollableElement: nativeGlobalThis,
 };
 
 export function fpsMeter(keeper: PerfKeeper, options: FPSMeterOptions = defaultFPSMeterOptions) {

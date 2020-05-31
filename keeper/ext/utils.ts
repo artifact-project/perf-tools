@@ -1,11 +1,16 @@
 import { PerfKeeper, PerfEntry, PerfGroupEntry } from '../src/keeper/keeper';
 
-export const globalThis = Function('return this')() as Window & {
-	mozPaintCount: number;
+export const nativeGlobalThis = (0
+	|| typeof globalThis === 'object' && globalThis 
+	|| typeof window === 'object' && window
+	|| typeof global === 'object' && global
+	|| {}
+) as Window & {
+	mozPaintCount?: number;
 };
 
-export const document = globalThis.document;
-export const performance = globalThis.performance;
+export const document = nativeGlobalThis.document;
+export const performance = nativeGlobalThis.performance;
 export const now = performance && performance.now
 	? () => performance.now()
 	: Date.now
@@ -15,7 +20,7 @@ export function domReady(fn: () => void) {
 	if (document.readyState === 'complete') {
 		fn();
 	} else {
-		globalThis.addEventListener('DOMContentLoaded', fn);
+		nativeGlobalThis.addEventListener('DOMContentLoaded', fn);
 	}
 }
 
@@ -66,7 +71,7 @@ export function createTimingsGroup(name: string, keeper: PerfKeeper, unit?: Perf
 			const nestedKeys = nested ? Object.keys(nested) : EMPTY_ARRAY;
 
 			if (nestedKeys.length) {
-				const nestedGroup = (group || keeper).group(timing.name, timing.start);
+				const nestedGroup = (group || keeper).group(timing.name, timing.start, true);
 
 				nestedGroup._ = true;
 				nestedGroup.unit = unit || 'ms';

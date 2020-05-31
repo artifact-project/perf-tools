@@ -1,4 +1,4 @@
-import { PerfEntry } from "../src/keeper/keeper";
+import { PerfEntry } from '../src/keeper/keeper';
 
 export const globalThis = Function('return this')() as Window;
 

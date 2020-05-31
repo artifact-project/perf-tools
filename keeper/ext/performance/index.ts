@@ -1,5 +1,5 @@
 import { PerfKeeper } from '../../src/keeper/keeper';
-import { domReady, globalThis, createTimingsGroup, now } from '../utils';
+import { domReady, nativeGlobalThis, createTimingsGroup, now } from '../utils';
 
 export type PerformanceOptions = Partial<{
 	minLatency: number;
@@ -120,7 +120,7 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 		'resize',
 		'scroll',
 	].forEach((eventType) => {
-		globalThis.addEventListener(eventType, ({target}) => {
+		nativeGlobalThis.addEventListener(eventType, ({target}) => {
 			const start = now();
 
 			requestAnimationFrame(() => {
@@ -191,10 +191,10 @@ export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptio
 function once(events: string[], fn: (eventType: string, evt: Event) => void, ctx?: Document | Window) {
 	events.forEach(type => {
 		const handle = (evt: Event) => {
-			globalThis.removeEventListener(type, handle, true);
+			nativeGlobalThis.removeEventListener(type, handle, true);
 			fn(type, evt);
 		};
 
-		(ctx = ctx || globalThis).addEventListener(type, handle, true);
+		(ctx = ctx || nativeGlobalThis).addEventListener(type, handle, true);
 	});
 }

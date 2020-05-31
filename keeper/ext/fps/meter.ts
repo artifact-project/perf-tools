@@ -1,4 +1,4 @@
-import { domReady, globalThis, now, document } from '../utils';
+import { domReady, nativeGlobalThis, now, document } from '../utils';
 
 let helper: HTMLElement;
 let helperStyle: HTMLElement['style'];
@@ -32,7 +32,7 @@ const ZERO_PX = '0px';
 
 function measure() {
 	startTime = now();
-	startPaintCount = globalThis.mozPaintCount || 0;
+	startPaintCount = nativeGlobalThis.mozPaintCount || 0;
 	paintCount = 0;
 	prevHelperLeft = -1;
 	helperStyle.left = helperStyle.left === ZERO_PX ? `${window.innerWidth/2}px` : ZERO_PX;
@@ -41,7 +41,7 @@ function measure() {
 }
 
 function saveValue() {
-	const style = globalThis.getComputedStyle(helper, null);
+	const style = nativeGlobalThis.getComputedStyle(helper, null);
 	const left = style && style.left ? +style.left.slice(0, -2) : 0;
 
 	if (prevHelperLeft !== left) {
@@ -54,7 +54,7 @@ function saveValue() {
 
 function onTransitionEnd() {
 	const duration = now() - startTime;
-	const frames = (globalThis.mozPaintCount || paintCount) - startPaintCount;
+	const frames = (nativeGlobalThis.mozPaintCount || paintCount) - startPaintCount;
 
 	cancelAnimationFrame(rafId);
 
