@@ -2,18 +2,21 @@ import { PerfKeeper } from '../../src/keeper/keeper';
 import { createTimingsGroup } from '../utils';
 
 export type NetworkInformationOptions = {
-	sendChanged?: false;
+	sendChanged?: boolean;
 }
 
 export function networkInformation(keeper: PerfKeeper, options: NetworkInformationOptions = {}) {
 	const {sendChanged = true} = options;
 	const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+	const [set, send] = createTimingsGroup('pk-conn', keeper, 'none', false);
+
+	set(['supported', `${!!connection}`], 0, 1, 'none');
 
 	if (!connection) {
+		send(null, 0, 1);
 		return;
 	}
 
-	const [set, send] = createTimingsGroup('pk-conn', keeper, 'none', false);
 	const keys: (keyof NetworkInformation)[] = [
 		'downlink',
 		// 'downlinkMax',

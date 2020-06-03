@@ -29,7 +29,7 @@ writeFileSync(
 			paint: 'perfKeeperExtPaint.paintTimings',
 			performance: 'perfKeeperExtPerformance.performanceTimings',
 			resource: 'perfKeeperExtResource.resourceStats',
-			memory: 'perfKeeperExtMemory.memoryStats',
+			memory: 'perfKeeperExtMemory.memory',
 		}).map(([name, method]) => {
 			const content = [
 				`// Ext: ${name}`,

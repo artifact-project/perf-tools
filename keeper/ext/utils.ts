@@ -71,7 +71,7 @@ export function createTimingsGroup(name: string, keeper: PerfKeeper, unit?: Perf
 			const nestedKeys = nested ? Object.keys(nested) : EMPTY_ARRAY;
 
 			if (nestedKeys.length) {
-				const nestedGroup = (group || keeper).group(timing.name, timing.start, true);
+				const nestedGroup = (group || keeper).group(timing.name, timing.start, !group);
 
 				nestedGroup._ = true;
 				nestedGroup.unit = unit || 'ms';

@@ -20,18 +20,30 @@ const userAgentSpecificTypesToKey: {
 	Window: 'window',
 };
 
-const MIN = 60 * 1e3;
 const { isArray } = Array;
 
 export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions = {}) {
-	const [setStats, sendStats] = createTimingsGroup(options.groupName || 'pk-memory', keeper, 'KiB');
+	const name = options.groupName || 'pk-memory';
+	const [setStats, sendStats] = createTimingsGroup(name, keeper, 'KiB');
 	const resourceName = options.resourceName || defaultResourceName;
 
 	function supported(state: boolean, err?: any) {
-		err && setStats('failed', 0, 1, 'none');
-		(err && err.name) && setStats(`error_${err.name}`, 0, 1, 'none');
-		setStats('' + state, 0, 1, 'none');
-		sendStats('supported', 0, 1)
+		const group = keeper.group(`${name}-supported`, 0, true);
+
+		group._ = true;
+		group.unit = 'none';
+
+		if (err) {
+			const fg = group.group('error', 0);
+			fg._ = true;
+			fg.unit = 'none';
+			fg.add('true', 0, 1);
+			err.name && fg.add(err.name, 0, 1);
+			fg.stop(1)
+		}
+		
+		group.add(`${state}`, 0, 1);
+		group.stop(1);
 	}
 
 	if (!performance.measureMemory) {
@@ -41,9 +53,11 @@ export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions 
 
 	domReady(() => {
 		createInterval('ready', options.intervals, (group) => performance.measureMemory!().then((info) => {
-			if (!info || !checkInformationInterface(info)) {
-				throw interfaceNotSupported(`PerformanceMeasureMemoryInformation`);
+			if (!checkInformationInterface(info)) {
+				throw interfaceNotSupported(`PerformanceMeasureMemoryInformation`, info);
 			}
+
+			supported(true);
 
 			const {
 				bytes,
@@ -53,8 +67,8 @@ export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions 
 			const resources = createValuesMap(setStats);
 
 			for (let item of breakdown) {
-				if (checkBreakdownInterface(item)) {
-					interfaceNotSupported(`PerformanceMeasureMemoryBreakdown`);
+				if (!checkBreakdownInterface(item)) {
+					interfaceNotSupported(`PerformanceMeasureMemoryBreakdown`, item);
 					break;
 				}
 
@@ -73,14 +87,15 @@ export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions 
 			setStats('bytes', 0, bytes, 'KiB');
 			sendStats(group, 0, bytes);
 		}))
-			.then(() => { supported(true); })
-			.catch((reason) => { supported(false, reason); })
+			.catch((reason) => {
+				supported(false, reason);
+			})
 	});
 }
 
 function defaultResourceName(url: string): string {
 	return url
-		.replace(/(^https?:\/*|\/*$)/, '')
+		.replace(/(^https?:\/*|\/*$)/ig, '')
 		.replace(/[^a-z0-9-]/ig, '_')
 	;
 }
@@ -102,21 +117,23 @@ function createValuesMap(setStats: (name: string[], start: number, end: number) 
 	};
 }
 
-function checkInformationInterface(info: PerformanceMeasureMemoryInformation) {
+function checkInformationInterface(info?: PerformanceMeasureMemoryInformation) {
 	return (1
+		&& info
 		&& (info.bytes >= 0)
 		&& isArray(info.breakdown)
 	);
 }
 
-function checkBreakdownInterface(breakdown: PerformanceMeasureMemoryBreakdown) {
+function checkBreakdownInterface(breakdown?: PerformanceMeasureMemoryBreakdown) {
 	return (1
-		&& (breakdown.bytes > 0)
+		&& breakdown
+		&& (breakdown.bytes >= 0)
 		&& isArray(breakdown.attribution)
 		&& isArray(breakdown.userAgentSpecificTypes)
 	);
 }
 
-function interfaceNotSupported(name: string) {
-	console.warn(`Interface '${name}' not supported, please report this.`);
+function interfaceNotSupported(name: string, val: any) {
+	console.warn(`[@perf-tools/keeper] Interface '${name}' not supported, please report this.`, val);
 }

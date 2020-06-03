@@ -18,6 +18,7 @@
   "homepage": "https://github.com/artifact-project/perf-tools/tree/master/keeper",
   "main": "index.js",
   "scripts": {
+    "start": "npm run build; echo 'http://localhost:2312/'; python -m SimpleHTTPServer 2312;",
     "test": "jest",
     "ts-build": "tsc",
     "size": "echo 'FileSize:' `ls -lh ./dist/perf-keeper.js | awk -F ' ' {'print $5'}` && echo ''",

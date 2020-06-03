@@ -261,7 +261,7 @@ var perfKeeper = (function (exports) {
 	        this.time(name);
 	    }
 	    function group(name, start, isolate) {
-	        if (start === true) {
+	        if (start === true || start === false) {
 	            isolate = start;
 	            start = nil;
 	        }

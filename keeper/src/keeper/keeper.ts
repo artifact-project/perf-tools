@@ -63,7 +63,7 @@ export type PerfEntry = {
 }
 
 export type PerfGroupEntry = PerfEntry & {
-	_?: true; // collapsed
+	_?: boolean; // collapsed
 	add: PerfKeeper['add'];
 	time: PerfKeeper['time'];
 	timeEnd: PerfKeeper['timeEnd'];
@@ -95,9 +95,9 @@ export type PerfKeeper = {
 	time(name: string, executer: () => void): void;
 	timeEnd(name: string): void;
 
-	group(name: string, isolate: true): PerfGroupEntry;
+	group(name: string, isolate: boolean): PerfGroupEntry;
 	group(name: string, start?: number): PerfGroupEntry;
-	group(name: string, start: number, isolate: true): PerfGroupEntry;
+	group(name: string, start: number, isolate: boolean): PerfGroupEntry;
 	groupEnd(name?: string, end?: number): void;
 }
 
@@ -394,8 +394,8 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 		this.time(name);
 	}
 
-	function group(this: PerfGroupEntry, name: string, start?: number | true | null, isolate?: boolean): PerfGroupEntry {
-		if (start === true) {
+	function group(this: PerfGroupEntry, name: string, start?: number | boolean | null, isolate?: boolean): PerfGroupEntry {
+		if (start === true || start === false) {
 			isolate = start;
 			start = nil;
 		}

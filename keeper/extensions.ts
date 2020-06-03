@@ -6,7 +6,7 @@ import { navigationTimings, defaultNavTimingsOptions, NavTimingsOptions } from '
 import { paintTimings, defaultPaintTimingsOptions, PaintTimingsOptions } from './ext/paint';
 import { performanceTimings, defaultPerformanceOptions, PerformanceOptions } from './ext/performance';
 import { resourceStats, defaultResourceStatsOptions, ResourceStatsOptions } from './ext/resource';
-import { memoryStats, MemoryStatsOptions } from './ext/memory';
+import { measureMemory, memoryStats, MeasureMemoryOptions, MemoryStatsOptions } from './ext/memory';
 
 export type Extensions = Partial<{
 	fps: FPSMeterOptions;
@@ -15,7 +15,8 @@ export type Extensions = Partial<{
 	paint: PaintTimingsOptions;
 	performance: PerformanceOptions;
 	resource: ResourceStatsOptions;
-	memory: MemoryStatsOptions;
+	measureMemory: MeasureMemoryOptions;
+	memoryStats: MemoryStatsOptions;
 }>
 
 export function set(keeper: PerfKeeper, options: Extensions) {
@@ -36,5 +37,10 @@ export function set(keeper: PerfKeeper, options: Extensions) {
 	apply(paintTimings, options.paint, defaultPaintTimingsOptions);
 	apply(performanceTimings, options.performance, defaultPerformanceOptions);
 	apply(resourceStats, options.resource, defaultResourceStatsOptions);
-	apply(memoryStats, options.memory, {});
+	apply(measureMemory, options.measureMemory, {
+		groupName: 'pk-measure-memory',
+	});
+	apply(memoryStats, options.memoryStats, {
+		groupName: 'pk-memory-stats',
+	});
 }
