@@ -41,7 +41,7 @@ export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions 
 			err.name && fg.add(err.name, 0, 1);
 			fg.stop(1)
 		}
-		
+
 		group.add(`${state}`, 0, 1);
 		group.stop(1);
 	}
@@ -56,8 +56,6 @@ export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions 
 			if (!checkInformationInterface(info)) {
 				throw interfaceNotSupported(`PerformanceMeasureMemoryInformation`, info);
 			}
-
-			supported(true);
 
 			const {
 				bytes,
@@ -87,6 +85,9 @@ export function measureMemory(keeper: PerfKeeper, options: MeasureMemoryOptions 
 			setStats('bytes', 0, bytes, 'KiB');
 			sendStats(group, 0, bytes);
 		}))
+			.then(() => {
+				supported(true);
+			})
 			.catch((reason) => {
 				supported(false, reason);
 			})
