@@ -8,9 +8,19 @@ Memory
 
 ---
 
-Start | 15sec | 1min
+### Measure Memory
+
+Ready | 15sec | 1min
 ---|---|---
-![Start](https://habrastorage.org/webt/4n/dm/s6/4ndms6ru3t56unt5bread7fzuf0.png)|![15sec](https://habrastorage.org/webt/ev/h0/fj/evh0fjpoqeadv5p4yn8r4kyyui0.png)|![1min](https://habrastorage.org/webt/jq/if/mh/jqifmhh5pz9yukce1fduq0j4ivu.png)
+![Ready](https://habrastorage.org/webt/fs/6y/mq/fs6ymqgy-qvu0qdnlatohfyzkms.png)|![15sec](https://habrastorage.org/webt/xz/kg/ba/xzkgba7dhnlbyusuinbpyurtcpu.png)|![1min](https://habrastorage.org/webt/2s/8m/lg/2s8mlgkqy6g9pcn3kvkay7syj1k.png)
+
+---
+
+### Memory Stats
+
+Ready | 15sec | 1min
+---|---|---
+![Ready](https://habrastorage.org/webt/4n/dm/s6/4ndms6ru3t56unt5bread7fzuf0.png)|![15sec](https://habrastorage.org/webt/ev/h0/fj/evh0fjpoqeadv5p4yn8r4kyyui0.png)|![1min](https://habrastorage.org/webt/jq/if/mh/jqifmhh5pz9yukce1fduq0j4ivu.png)
 
 ---
 
@@ -26,6 +36,7 @@ Start | 15sec | 1min
 /** @desc Experimental */
 perfKeeperExtMemory.measureMemory(perfKeeper.system, {
 	groupName: 'pk-memory-measure', // default: 'pk-memory'
+	resourceName: (url) => new URL(url).hostname, // optional
 });
 
 /** @desc Only Chrome */
