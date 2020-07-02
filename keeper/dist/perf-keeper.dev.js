@@ -3,12 +3,15 @@ var perfKeeper = (function (exports) {
 
 	var nil = null;
 	var BOLD = 'font-weight: bold;';
-	var globalThis = Function('return this')();
+	var nativeGlobalThis = ( typeof globalThis === 'object' && globalThis
+	    || typeof window === 'object' && window
+	    || typeof global === 'object' && global
+	    || {});
 	var Date = globalThis.Date;
 	var dateNow = Date.now;
 	var startOffset = dateNow();
-	var nativeConsole = globalThis.console;
-	var nativePerf = (globalThis.performance || {});
+	var nativeConsole = nativeGlobalThis.console;
+	var nativePerf = (nativeGlobalThis.performance || {});
 	var s_group = 'group';
 	var s_groupCollapsed = 'groupCollapsed';
 	var s_mark = 'mark';

@@ -9,7 +9,7 @@ type MailRuAnalyticsParams = {
 
 type MailRuAnalytics = (packet: string) => void;
 
-type MaulRuContext = Window & {
+type MaulRuContext = typeof globalThis & {
 	require: (module: string) => MailRuAnalytics;
 	xray: MailRuAnalytics;
 };

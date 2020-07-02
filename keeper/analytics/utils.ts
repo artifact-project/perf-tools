@@ -1,6 +1,15 @@
 import { PerfEntry } from '../src/keeper/keeper';
 
-export const globalThis = Function('return this')() as Window;
+const nativeGlobalThis = (0
+	|| typeof globalThis === 'object' && globalThis
+	|| typeof window === 'object' && window
+	|| typeof global === 'object' && global
+	|| {}
+) as (typeof globalThis);
+
+export {
+	nativeGlobalThis as globalThis,
+}
 
 export type AnalyticsOptions = {
 	prefix?: string;
