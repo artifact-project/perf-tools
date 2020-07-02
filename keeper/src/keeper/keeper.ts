@@ -1,7 +1,11 @@
 const nil = null;
 const BOLD = 'font-weight: bold;';
-const globalThis = Function('return this')() as Window & {
-	Date: DateConstructor;
+const nativeGlobalThis = (0
+		|| typeof globalThis === 'object' && globalThis
+		|| typeof window === 'object' && window
+		|| typeof global === 'object' && global
+		|| {}
+) as (typeof globalThis) & {
 	perfKeeper?: {
 		system: PerfKeeper;
 	};
@@ -11,8 +15,8 @@ const Date = globalThis.Date;
 const dateNow = Date.now;
 const startOffset = dateNow();
 
-const nativeConsole = globalThis.console;
-const nativePerf = (globalThis.performance || {}) as Performance & {
+const nativeConsole = nativeGlobalThis.console;
+const nativePerf = (nativeGlobalThis.performance || {}) as Performance & {
 	webkitNow(): number;
 	mozNow(): number;
 	msNow(): number;

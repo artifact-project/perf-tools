@@ -20,23 +20,23 @@ class Entry implements EntryProps {
 }
 
 type VendorPerf = Performance & {
-	webkitNow(): number;
-	mozNow(): number;
-	msNow(): number;
+	webkitNow?(): number;
+	mozNow?(): number;
+	msNow?(): number;
 
-	webkitMark(name: string): void;
-	webkitMeasure(name: string, startMark: string, endMark: string): void;
+	webkitMark?(name: string): void;
+	webkitMeasure?(name: string, startMark: string, endMark: string): void;
 
-	webkitGetEntries(filter?: Pick<Entry, 'name' | 'entryType'>): Entry[];
-	webkitGetEntriesByType(type: Entry['entryType']): Entry[];
-	webkitGetEntriesByName(name: string): Entry[];
+	webkitGetEntries?(filter?: Pick<Entry, 'name' | 'entryType'>): Entry[];
+	webkitGetEntriesByType?(type: Entry['entryType']): Entry[];
+	webkitGetEntriesByName?(name: string): Entry[];
 
-	webkitClearMarks(name: string): void;
-	webkitClearMeasures(name: string): void;
+	webkitClearMarks?(name: string): void;
+	webkitClearMeasures?(name: string): void;
 }
 
 type PerformanceAPI = Pick<Performance,
-	'now'
+	| 'now'
 	| 'mark'
 	| 'measure'
 	| 'clearMarks'
@@ -48,17 +48,12 @@ type PerformanceAPI = Pick<Performance,
 	getEntriesByName(name: string): Entry[];
 };
 
-const dateNow = Date.now || function () {
-	return new Date().getTime();
-}
-
+const dateNow = Date.now || (() => Date.now());
 const startOffset = dateNow();
 const Exception = typeof DOMException !== 'undefined' ? DOMException : Error;
 
-
 export function polyfill<T extends object>(global: T) {
 	const performance = (global['performance'] || {}) as PerformanceAPI;
-
 	const _entries: Entry[] = [];
 	const _marksIndex: {[name:string]: Entry} = {};
 
@@ -73,7 +68,7 @@ export function polyfill<T extends object>(global: T) {
 			}
 		}
 
-		return	result;
+		return result;
 	}
 
 	function _clearEntries(type: Entry['entryType'], name: string) {
@@ -188,13 +183,18 @@ export function polyfill<T extends object>(global: T) {
 	};
 }
 
-const globalThis = polyfill(new Function('return this'));
+export const nativeGlobalThis = polyfill(0
+	|| typeof globalThis === 'object' && globalThis 
+	|| typeof window === 'object' && window
+	|| typeof global === 'object' && global
+	|| {}
+);
 
-if (typeof self !== 'undefined' && (self as any) !== globalThis) {
+if (typeof self !== 'undefined' && self !== nativeGlobalThis) {
 	polyfill(self);
 }
 
-export const performance = globalThis.performance;
+export const performance = nativeGlobalThis.performance;
 export const now = function () {
 	return performance.now();
 };
