@@ -15,7 +15,7 @@
     "test": "jest --coverage",
     "ts-build": "tsc",
     "git-clean": "git clean -f",
-    "prepublish": "npm run test && npm run ts-build",
+    "prepublishOnly": "npm run test && npm run ts-build",
     "postpublish": "npm run git-clean",
     "postversion": "git push && git push --tags"
   },

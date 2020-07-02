@@ -190,7 +190,7 @@ export const nativeGlobalThis = polyfill(0
 	|| {}
 );
 
-if (typeof self !== 'undefined' && self !== nativeGlobalThis) {
+if (typeof self !== 'undefined' && (self as any) !== nativeGlobalThis) {
 	polyfill(self);
 }
 
