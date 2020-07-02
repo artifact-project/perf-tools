@@ -63,3 +63,6 @@ typings/
 # Distributive
 compiled
 *.d.ts
+
+# Except these
+!/__types__/*.d.ts

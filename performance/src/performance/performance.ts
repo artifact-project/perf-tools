@@ -188,7 +188,8 @@ export function polyfill<T extends object>(global: T) {
 	};
 }
 
-const globalThis = polyfill(new Function('return this'));
+const globalObject = typeof window === 'undefined' ? typeof global === 'undefined' ? this : global : window;
+const globalThis = polyfill(globalObject);
 
 if (typeof self !== 'undefined' && (self as any) !== globalThis) {
 	polyfill(self);

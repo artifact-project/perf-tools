@@ -1,11 +1,12 @@
 const nil = null;
 const BOLD = 'font-weight: bold;';
-const globalThis = Function('return this')() as Window & {
+type GlobalThis = Window & {
 	Date: DateConstructor;
 	perfKeeper?: {
 		system: PerfKeeper;
 	};
 };
+const globalThis = typeof window === 'undefined' ? typeof global === 'undefined' ? this : global : window as GlobalThis;
 const Date = globalThis.Date;
 
 const dateNow = Date.now;
