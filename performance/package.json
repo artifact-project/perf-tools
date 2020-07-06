@@ -29,7 +29,7 @@
     "@types/jest": "^19.2.3",
     "jest": "^20.0.3",
     "ts-jest": "^20.0.4",
-    "typescript": "^3.1.1"
+    "typescript": "^3.9.6"
   },
   "jest": {
     "transform": {
