@@ -7,7 +7,7 @@ var perfKeeper = (function (exports) {
 	    || typeof window === 'object' && window
 	    || typeof global === 'object' && global
 	    || {});
-	var Date = globalThis.Date;
+	var Date = nativeGlobalThis.Date;
 	var dateNow = Date.now;
 	var startOffset = dateNow();
 	var nativeConsole = nativeGlobalThis.console;
@@ -145,7 +145,7 @@ var perfKeeper = (function (exports) {
 	        }
 	        else if (lock === false) {
 	            lock = true;
-	            (globalThis.requestAnimationFrame || setTimeout)(printDefered);
+	            (nativeGlobalThis.requestAnimationFrame || setTimeout)(printDefered);
 	        }
 	    }
 	    function createEntry(name, parent, isGroup, start, end, isolate, unit) {
@@ -293,8 +293,8 @@ var perfKeeper = (function (exports) {
 	        groupEnd: groupEnd,
 	    });
 	}
-	var system = globalThis.perfKeeper ? globalThis.perfKeeper.system : create({
-	    print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(globalThis.location + ''),
+	var system = nativeGlobalThis.perfKeeper ? nativeGlobalThis.perfKeeper.system : create({
+	    print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(nativeGlobalThis.location + ''),
 	    timeline: true,
 	    prefix: '🔅',
 	});

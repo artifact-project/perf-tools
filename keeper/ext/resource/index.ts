@@ -8,10 +8,6 @@ export type ResourceStatsOptions = {
 	intervals?: ResourceStatsIntervals;
 }
 
-const R_RESOURCE = /^https?:\/\/(?:www\.)?(.*?)\.[a-z]+\//;
-
-const MIN = 60 * 1e3;
-
 type ResourceStats = {
 	[key:string]: number;
 }
@@ -20,6 +16,9 @@ export const defaultResourceStatsOptions: ResourceStatsOptions = {
 };
 
 export function resourceStats(keeper: PerfKeeper, options: ResourceStatsOptions = defaultResourceStatsOptions) {
+	const R_RESOURCE = /^https?:\/\/(?:www\.)?(.*?)\.[a-z]+\//;
+	const MIN = 60 * 1e3;
+	
 	const [setBytes, sendBytes] = createTimingsGroup('pk-resource-traffic', keeper, 'KiB');
 	const [setCachedBytes, sendCachedBytes] = createTimingsGroup('pk-resource-traffic-cached', keeper, 'KiB');
 	const [setStats, sendStats] = createTimingsGroup('pk-resource-stats', keeper, 'KiB');

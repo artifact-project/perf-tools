@@ -10,7 +10,7 @@ const nativeGlobalThis = (0
 		system: PerfKeeper;
 	};
 };
-const Date = globalThis.Date;
+const Date = nativeGlobalThis.Date;
 
 const dateNow = Date.now;
 const startOffset = dateNow();
@@ -254,7 +254,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 			state && print();
 		} else if (lock === false) {
 			lock = true;
-			(globalThis.requestAnimationFrame || setTimeout)(printDefered);
+			(nativeGlobalThis.requestAnimationFrame || setTimeout)(printDefered);
 		}
 	}
 
@@ -440,8 +440,8 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 	});
 };
 
-export const system = globalThis.perfKeeper ? globalThis.perfKeeper.system : create({
-	print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(globalThis.location + ''),
+export const system: PerfKeeper = nativeGlobalThis.perfKeeper ? nativeGlobalThis.perfKeeper.system : create({
+	print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(nativeGlobalThis.location + ''),
 	timeline: true,
 	prefix: '🔅',
 });

@@ -22,6 +22,7 @@ type NetworkInformationEffectiveConnectionType = (
 	| '3g'
 	| '2g'
 	| 'slow-2g'
+	| 'unk'
 )
 
 interface NetworkInformation extends EventTarget {

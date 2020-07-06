@@ -2,11 +2,15 @@ import { PerfKeeper } from '../../src/keeper/keeper';
 import { domReady, createTimingsGroup, performance } from '../utils';
 
 export type PaintTimingsOptions = {
-	filter: (duration: number, entry: PerformanceEntry) => boolean | string;
+	filter: (duration: number, entry: PerformanceEntry) => false | string;
 }
 
 export const defaultPaintTimingsOptions: PaintTimingsOptions = {
-	filter: (duration, entry) => duration > 60 * 1000 ? `${entry.name}_slow` : duration > 0,
+	filter: (duration) => (
+		duration < 2e3 ? `%-fast` :
+		duration < 4e3 ? `%-moderate` :
+		duration > 6e4 ? `%-very-slow` : `%-slow`
+	),
 };
 
 export function paintTimings(
@@ -34,9 +38,11 @@ export function paintTimings(
 						startTime = entry.startTime;
 						name = entry.name;
 						f = filter(startTime, entry);
-						if (f) {
+						
+						if (f && startTime > 0) {
 							duration = Math.max(duration, startTime);
-							set(f === true ? name : f, 0, startTime);
+							set(name, 0, startTime);
+							set(f.replace('%', name), 0, startTime);
 						}
 					})
 				;
