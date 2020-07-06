@@ -45,7 +45,7 @@ export function networkInformation(keeper: PerfKeeper, options: NetworkInformati
 				}
 
 			} else {
-				set([key], 0, val as number);
+				set([key], 0, val as number, 'raw');
 			}
 
 			return true;
