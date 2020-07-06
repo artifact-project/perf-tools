@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/keeper",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "PerfKeeper — It's a tool for performance monitoring and profiling your application (also best replacement for `console.time`).",
   "keywords": [
     "perf-tools",
@@ -58,6 +58,6 @@
     ]
   },
   "dependencies": {
-    "@perf-tools/performance": "^1.1.0"
+    "@perf-tools/performance": "^1.1.1"
   }
 }

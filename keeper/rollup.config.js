@@ -10,6 +10,7 @@ const plugins = [].concat(
 	// 	banner: `${pkg.name} v${pkg.version} | ${pkg.license} | ${pkg.homepage}`,
 	// }),
 	typescript({
+		tsconfig: './tsconfig.rollup.json',
 		declaration: false,
 		typescript: ts,
 	}),
