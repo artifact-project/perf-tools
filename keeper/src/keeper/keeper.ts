@@ -6,6 +6,7 @@ const nativeGlobalThis = (0
 		|| typeof global === 'object' && global
 		|| {}
 ) as (typeof globalThis) & {
+	__pkPrint__?: boolean;
 	perfKeeper?: {
 		system: PerfKeeper;
 	};
@@ -441,7 +442,7 @@ export function create(options: Partial<KeeperOptions>): PerfKeeper {
 };
 
 export const system: PerfKeeper = nativeGlobalThis.perfKeeper ? nativeGlobalThis.perfKeeper.system : create({
-	print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(nativeGlobalThis.location + ''),
+	print: /pk-print/.test(nativeGlobalThis.location + '') || nativeGlobalThis.__pkPrint__,
 	timeline: true,
 	prefix: '🔅',
 });

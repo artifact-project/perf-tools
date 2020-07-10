@@ -294,7 +294,7 @@ var perfKeeper = (function (exports) {
 	    });
 	}
 	var system = nativeGlobalThis.perfKeeper ? nativeGlobalThis.perfKeeper.system : create({
-	    print: /^(file:|https?:\/\/(localhost|artifact-project))/.test(nativeGlobalThis.location + ''),
+	    print: /pk-print/.test(nativeGlobalThis.location + '') || nativeGlobalThis.__pkPrint__,
 	    timeline: true,
 	    prefix: '🔅',
 	});

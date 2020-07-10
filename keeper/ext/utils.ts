@@ -20,7 +20,7 @@ export function domReady(fn: () => void) {
 	if (document.readyState === 'complete') {
 		fn();
 	} else {
-		nativeGlobalThis.addEventListener('DOMContentLoaded', fn);
+		document.addEventListener('DOMContentLoaded', fn);
 	}
 }
 
