@@ -39,10 +39,10 @@ export function paintTimings(
 						name = entry.name;
 						f = filter(startTime, entry);
 						
-						if (f && startTime > 0) {
+						if (startTime > 0) {
 							duration = Math.max(duration, startTime);
 							set(name, 0, startTime);
-							set(f.replace('%', name), 0, startTime);
+							f && set(f.replace('%', name), 0, startTime);
 						}
 					})
 				;
