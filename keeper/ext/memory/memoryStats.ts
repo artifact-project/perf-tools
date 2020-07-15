@@ -9,13 +9,16 @@ export function memoryStats(keeper: PerfKeeper, options: MemoryStatsOptions = {}
 
 	domReady(() => {
 		createInterval('ready', options.intervals, (group) => {
-			const memory = performance.memory!;
-			const total = memory.totalJSHeapSize;
+			const memory = performance.memory;
 
-			setStats('total', 0, total);
-			setStats('used', 0, memory.usedJSHeapSize);
-			setStats('js', 0, memory.jsHeapSizeLimit);
-			sendStats(group, 0, total, true);
+			if (memory) {
+				const total = memory.totalJSHeapSize;
+
+				setStats('total', 0, total);
+				setStats('used', 0, memory.usedJSHeapSize);
+				setStats('js', 0, memory.jsHeapSizeLimit);
+				sendStats(group, 0, total, true);
+			}
 		});
 	});
 }
