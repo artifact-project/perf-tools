@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/keeper",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.2",
   "description": "PerfKeeper — It's a tool for performance monitoring and profiling your application (also best replacement for `console.time`).",
   "keywords": [
     "perf-tools",
@@ -29,7 +29,7 @@
     "post-build": "node ./post-build.js && npm run clean-dist",
     "clean-dist": "rm -f ./dist/*.d.ts && rm -rf ./dist/*/",
     "git-clean": "git clean -f",
-    "prepublishOnly": "npm run test && npm run ts-build && npm run build",
+    "prepublishOnly": "npm run test && npm run build && npm run ts-build",
     "postpublish": "npm run git-clean",
     "postversion": "git push && git push --tags"
   },

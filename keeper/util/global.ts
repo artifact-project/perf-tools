@@ -11,6 +11,8 @@ export const document = nativeGlobalThis.document;
 export const location = nativeGlobalThis.location;
 export const navigator = nativeGlobalThis.navigator;
 export const performance = nativeGlobalThis.performance;
+
 export const setTimeout = nativeGlobalThis.setTimeout;
 export const addEventListener = nativeGlobalThis.addEventListener;
 export const noop = () => {};
+export const perfNow = () => performance.now();

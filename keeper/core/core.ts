@@ -1,5 +1,6 @@
 import { isType, STRING_TYPE, BOOLEAN_TYPE } from '../util/isType';
-import { hidden } from '../util/hidden';
+import { hiddenProperty } from '../util/hiddenProperty';
+import { perfNow } from '../util/global';
 
 export type Keeper = {
 	// add(name: string, start: number, end: number, unit?: EntryUnit): void;
@@ -58,7 +59,7 @@ export function create(opts?: Options) {
 
 	const activeGroups = [] as GroupEntry[];
 
-	const now = opts.now || (() => performance.now());
+	const now = opts.now || perfNow;
 	const warn = opts.warn;
 	const addons = opts.addons || [];
 
@@ -66,7 +67,7 @@ export function create(opts?: Options) {
 	let cid = 0;
 	let tmpEntry: Entry | GroupEntry | undefined | null;
 
-	const api = createEntry(nil as any, nil, {}, DEFAULT_UNIT, 1) as GroupEntry & {addons: Addon[]};
+	const api = createEntry(0 as any, nil, {}, DEFAULT_UNIT, 1) as GroupEntry & {addons: Addon[]};
 	api.addons = addons;
 
 	function notify(hook: keyof Addon, entry: Entry, autoMeasurable: boolean) {
@@ -90,6 +91,10 @@ export function create(opts?: Options) {
 			parent = !isolate && activeGroups[0] || nil;
 		}
 
+		if (timers[name]) {
+			warn && warn(`Timer '${name}' exists`);
+		}
+
 		const autoMeasurable = start == nil;
 		const entry = timers[name] = <Entry | GroupEntry>{
 			id: ++cid,
@@ -99,13 +104,8 @@ export function create(opts?: Options) {
 			start: autoMeasurable ? now() : start,
 			end: end != nil ? end : nil,
 		};
-		const msgPrefix = `Timer '${name}' `;
 
-		if (timers[name]) {
-			warn && warn(`${msgPrefix}exists`);
-		}
-		
-		hidden(entry, {
+		hiddenProperty(entry, {
 			stop(time?: number) {
 				entry.end = time == nil ? now() : time;
 				timers[name] = nil;
@@ -125,7 +125,7 @@ export function create(opts?: Options) {
 
 		if (parent) {
 			if (parent.end !== nil && end == nil) {
-				warn && warn(`${msgPrefix}stopped`);
+				warn && warn(`Timer '${name}' stopped`);
 			} else {
 				entry.unit = parent.unit;
 				// (parent as GroupEntry).active++;
@@ -138,7 +138,7 @@ export function create(opts?: Options) {
 			if (tmpEntry) {
 				tmpEntry.stop();
 			} else {
-				warn && warn(`${msgPrefix}not exists`);
+				warn && warn(`Timer '${name}' not exists`);
 			}
 		}
 
@@ -146,7 +146,7 @@ export function create(opts?: Options) {
 			// (entry as GroupEntry).active = 0;
 			(entry as GroupEntry).entries = [];
 
-			hidden(entry, {
+			hiddenProperty(entry, {
 				add(name: string, start: number, end: number, unit?: EntryUnit) {
 					createEntry(
 						name,
