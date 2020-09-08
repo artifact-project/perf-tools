@@ -1,22 +1,25 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
-    "declaration": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "sourceMap": true,
-    "lib": [
-      "dom",
-      "es5",
-      "es2015",
-      "es2016",
-      "es2017"
-    ]
-  },
-  "exclude": [
-    "dist",
-    "node_modules"
-  ]
+	"compilerOptions": {
+	  "target": "ES5",
+	  "module": "commonjs",
+	  "jsx": "react",
+	  "lib": [
+      	"dom"
+	  ],  
+	  "declaration": true,
+	  "isolatedModules": true,
+	  "importsNotUsedAsValues": "error",
+	  "strict": true,
+	  "noUnusedParameters": true,
+	  "noImplicitReturns": false,
+	  "noFallthroughCasesInSwitch": true,
+	  "moduleResolution": "node",
+	  "esModuleInterop": false,
+	  "resolveJsonModule": true,
+	  "sourceMap": true,
+	  "skipLibCheck": true
+	},
+	"exclude": [
+	  "node_modules"
+	]
 }

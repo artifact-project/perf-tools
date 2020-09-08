@@ -20,13 +20,13 @@ npm i --save @perf-tools/keeper
 	 - [FPS](./ext/fps) 🌀
      - [Navigation Connection](./ext/connection) 🎛
      - [Navigation Timings](./ext/navigation) 🚏
-     - [Paint Timings](./ext/paint) 🏞
-	 - [Performance](./ext/performance) 🚀
+     - [Paint Timings](./ext/paint): [FCP](https://web.dev/first-contentful-paint/) / [LCP](https://web.dev/lcp/) / [CLS](https://web.dev/cls/) 🏞
+	 - [Performance](./ext/performance): [FID](https://web.dev/fid/) / [TBT](https://web.dev/tbt/) / [TTI](https://web.dev/tti/) 🚀
 	 - [Resource/Traffic](./ext/resource) ⚖️
 	 - [Memory](./ext/memory) 🤖
-   - Analytics 📈
-     - [Google](./analytics/google)
-     - [Yandex](./analytics/yandex)
+   - Addons ✨
+     - [console](./addon/console)
+     - [timeline](./addon/timeline)
 
 ---
 
@@ -163,62 +163,6 @@ group.stop(); // starting 'render' timer
 </body>
 </html>
 ```
-
----
-
-### API
-
-- **create**(options: `KeeperOptions`): `PerfKeeper`
-  - **options**
-    - **disabled**: `boolean` — turn off the work PerfKeeper (optional)
-    - **print**: `boolean` — on/off output to console (optional)
-	- **perf**: `Partial<Performance>` — custom object like `performance` (optional)
-	- **console**: `Partial<Console>` — custom object like `console` (optional)
-	- **timeline**: `boolean` — on/off usage DevTools -> User Timings (optional)
-	- **analytics**: `Array<(entry: PerfEntry) => void>`
-	- **warn**: `(msg: string) => void` — callback for catching internal warnings (optional)
-  - **PerfKeeper**, instance methods:
-    - **print**: `(enable?: boolean) => void`
-    - **disable**: `(state: boolean) => void`
-    - **setAnalytics**: `(list: Array<(entry: PerfEntry) => void>) => void`
-    - **add**(name: `string`, start: `number`, end: `number`, unit?: `string`): `Entry`
-    - **time**(name: `string`, callback: `() => void`): `Entry` — measure execution time of callback
-    - **time**(name: `string`, start?: `number`): `Entry` — start timer
-    - **timeEnd**(name: `string`, end?: `number`): `void` - stop timer by label
-    - **group**(name: `string`): `GroupEntry`
-    - **group**(name: `string`, isolate: `true`): `GroupEntry`
-    - **group**(name: `string`, start: `number`, isolate?: `true`): `GroupEntry`
-    - **groupEnd**(name?: `string`, end?: `number`): `void`
-  - **Entry**
-    - **id**: `string` — unique identifier
-    - **unit**: `'ms' | 'KiB' | 'fps' | 'raw'` — metric unit
-    - **name**: `string` — name of measure
-    - **start**: `number` — start mark
-    - **end**: `number` — end mark
-    - **parent**: `PerfGroupEntry | null` — reference on parent
-    - **stop**(end?: `number`): `void` — complete the measurement (set `end` prop)
-  - **GroupEntry** (extends `Entry`)
-    - **entries**: `Entry[]` — nested metrics
-    - **add**(name: `string`, start: `number`, end: `number`, unit?: `string`): `Entry`
-    - **time**(name: `string`, start?: `number`): `Entry`
-    - **timeEnd**(name: `string`, end?: `number`): `void`
-    - **mark**(name: `string`): `void` — start the timer with stopping a previous one in the group.
-    - **group**(name: `string`, unit?: `string`): `GroupEntry`
-    - **stop**(end?: `number`): `void` — complete the measurement of group (set `end` prop)
-
----
-
-### Examples
-
-#### Console
-
-![DevTools / Console](./__docs__/console.png)
-
----
-
-#### User Timing aka Timeline
-
-![DevTools / Timelime](./__docs__/timeline.png)
 
 ---
 

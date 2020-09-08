@@ -1,14 +1,16 @@
-import typescript from 'rollup-plugin-typescript2';
-import replace from 'rollup-plugin-replace';
-// import license from 'rollup-plugin-license';
+import typescript from '@rollup/plugin-typescript'
+import replace from '@rollup/plugin-replace';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { uglify } from 'rollup-plugin-uglify';
-// import pkg from './package.json';
 import ts from 'typescript';
 
 const plugins = [].concat(
 	// license({
 	// 	banner: `${pkg.name} v${pkg.version} | ${pkg.license} | ${pkg.homepage}`,
 	// }),
+	nodeResolve({
+	}),
+
 	typescript({
 		tsconfig: './tsconfig.rollup.json',
 		declaration: false,
@@ -20,6 +22,7 @@ const plugins = [].concat(
 	}),
 
 	uglify(),
+	// terser(),
 );
 
 export default [].concat(
@@ -34,61 +37,27 @@ export default [].concat(
 		plugins,
 	},
 
-	// All extenstions
+	// Addon: console
 	{
-		input: 'extensions.ts',
+		input: './addon/console/index.ts',
 		output: {
-			file: './dist/perf-keeper.extensions.js',
+			file: './dist/perf-keeper.addon.console.js',
 			format: 'iife',
-			name: 'perfKeeperExtensions',
+			name: 'perfKeeperConsoleAddon',
 		},
 		plugins,
 	},
 
-	// Dev
+	// Addon: timeline
 	{
-		input: 'index.ts',
+		input: './addon/timeline/index.ts',
 		output: {
-			file: './dist/perf-keeper.dev.js',
+			file: './dist/perf-keeper.addon.timeline.js',
 			format: 'iife',
-			name: 'perfKeeper',
+			name: 'perfKeeperTimelineAddon',
 		},
-		plugins: plugins.slice(0, -1),
+		plugins,
 	},
-
-	// Extensions
-	[
-		'connection',
-		'fps',
-		'navigation',
-		'paint',
-		'performance',
-		'resource',
-		'memory',
-	].map(name => ({
-		input: `./ext/${name}/index.ts`,
-		output: {
-			file: `./dist/perf-keeper.ext.${name}.js`,
-			format: 'iife',
-			name: toCamelCase(`perf-keeper-ext-${name}`),
-		},
-		plugins,
-	})),
-
-	// Analytics
-	[
-		'google',
-		'yandex',
-		'mailru',
-	].map(name => ({
-		input: `./analytics/${name}/index.ts`,
-		output: {
-			file: `./dist/perf-keeper.analytics.${name}.js`,
-			format: 'iife',
-			name: toCamelCase(`perf-keeper-analytics-${name}`),
-		},
-		plugins,
-	})),
 );
 
 function toCamelCase(s) {

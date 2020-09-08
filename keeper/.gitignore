@@ -59,3 +59,6 @@ jspm_packages/
 
 # Distributive
 compiled
+
+*.js
+*.d.ts

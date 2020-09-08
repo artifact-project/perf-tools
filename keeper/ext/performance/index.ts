@@ -1,200 +1,76 @@
-import { PerfKeeper } from '../../src/keeper/keeper';
-import { domReady, nativeGlobalThis, createTimingsGroup, now } from '../utils';
+import { observe, disconnect, takeRecords } from '../../util/observe';
+import { getVitalsScore } from '../../util/vitals';
+import { send } from '../../util/system';
+import { firstHidden, hidden } from '../../util/visibility';
 
-export type PerformanceOptions = Partial<{
-	minLatency: number;
-	ttiDelay: number;
-	prefIdProp: string;
-	getPerfId: (target: HTMLElement | null, prefIdProp: string) => string | null | undefined;
-}>
+// https://wicg.github.io/event-timing/#sec-performance-event-timing
+type PerformanceEntryFirstInput = PerformanceEntry & {
+	target?: Element;
+	cancelable?: boolean;
+	processingStart?: DOMHighResTimeStamp;
+}
 
-export const defaultPerformanceOptions = {
-	minLatency: 100,
-	ttiDelay: 2000,
-	prefIdProp: 'data-perf-id',
+let ttb = 0;
+let tti = 0;
+let perf: PerformanceObserver | undefined;
+
+const handler = (entry: PerformanceEntryFirstInput) => {
+	const startTime = entry.startTime;
+	const value = entry.processingStart! - startTime;
+
+	if (startTime < firstHidden()) {
+		// https://web.dev/fid/
+		// 0-100     Green (good)
+		// 100-300   Orange (needs improvement)
+		// Over 300  Red (poor)
+		value && send('pk-fid', 0, value, {
+			value: [0, value],
+			[`score_${getVitalsScore(value, 100, 300)}`]: [0, value],
+		});
+		
+		// https://web.dev/lighthouse-total-blocking-time/
+		// https://nitropack.io/blog/post/what-is-total-blocking-time-tbt
+		// 0-300     Green (good)
+		// 300-600   Orange (needs improvement)
+		// Over 600  Red (poor)
+		ttb && send('pk-tbt', 0, ttb, {
+			value: [0, ttb],
+			[`score_${getVitalsScore(ttb, 300, 600)}`]: [0, ttb],
+		});
+
+		// https://web.dev/interactive/
+		// 0-3800     Green (good)
+		// 3800-7300  Orange (needs improvement)
+		// Over 7300  Red (poor)
+		tti && send('pk-tti', 0, tti, {
+			value: [0, tti],
+			[`score_${getVitalsScore(tti, 3800, 7300)}`]: [0, ttb],
+		});
+
+		disconnect(perf);
+		disconnect(fid);
+	}
 };
+const fid = observe('first-input', handler);
 
-type Batch = {
-	[group:string]: {
-		start: number,
-		end: number,
-		values: Array<[string, number, number]>;
-	};
-};
+hidden(() => {
+	takeRecords(fid, handler);
+}, true);
 
-export function performanceTimings(keeper: PerfKeeper, options: PerformanceOptions = {}) {
-	let batch = {} as Batch;
-	let lock = false;
-	let ready = false;
+export const initPerf = (fcpTime: number) => {
+	perf = observe('longtask', (entry) => {
+		const startTime = entry.startTime;
+		const duration = entry.duration;
 
-	const [set, flush] = createTimingsGroup('pk-perf', keeper);
-	const firstWinEvents = [
-		'click',
-		'touchup',
-		'submit',
-
-		'abort',
-		'blur',
-		'contextmenu',
-		'deviceorientation',
-		'offline',
-		'online',
-		'paint',
-		'popstate',
-		'resize',
-		'wheel',
-		'scroll',
-	];
-	const {
-		minLatency = defaultPerformanceOptions.minLatency,
-		ttiDelay = defaultPerformanceOptions.ttiDelay,
-		getPerfId = (target: HTMLElement | null, prefIdProp: string) => {
-			let id: string | null | undefined;
-			while (target && !id && target.nodeType === 1) {
-				id = target.getAttribute(prefIdProp);
-				target = target.parentNode as HTMLElement;
+		if (startTime > fcpTime && entry.name === 'self') {
+			// The main thread is considered "blocked" any time there's a Long Task—a task
+			// that runs on the main thread for more than 50 milliseconds (ms).
+			const blocked = duration - 50;
+			
+			if (duration > 0) {
+				ttb += blocked;
+				tti = startTime + duration;
 			}
-			return id;
-		},
-	} = options;
-
-	function getId(target: EventTarget | null) {
-		return getPerfId(
-			target && (target as HTMLElement).nodeType === 1 ? target as HTMLElement : null,
-			options.prefIdProp || defaultPerformanceOptions.prefIdProp,
-		);
-	}
-
-	function sendTimings() {
-		Object.keys(batch).forEach(key => {
-			const item = batch[key];
-
-			item.values.forEach(t => {
-				set(t[0], t[1], t[2]);
-			});
-
-			flush(key, item.start, item.end, true);
-		});
-
-		batch = {} as Batch;
-		lock = false;
-	}
-
-	function send(groupName: string, label: string,  start: number = 0, end: number = now()) {
-		const item = (batch[groupName] = batch[groupName] || {
-			start: 0,
-			end: 0,
-			values: [],
-		});
-
-		item.start = Math.min(item.start, start);
-		item.end = Math.max(item.end, end);
-		item.values.push([label, start, end]);
-
-		!lock && setTimeout(sendTimings);
-		lock = true;
-	}
-
-	function handleClick(eventType: string, {target}: Event) {
-		const id = getId(target);
-		const label = `first-${eventType}${ready ? '-ready' : ''}`
-
-		send(label, 'value');
-		id && send(label, id);
-	}
-
-	// Window
-	once(firstWinEvents, handleClick);
-
-	// Tab unload
-	once(['beforeunload'], () => {
-		send(`tab-unload`, 'value');
-	});
-
-	// Latency
-	[
-		'click',
-		'touchup',
-		'input',
-		'submit',
-		'resize',
-		'scroll',
-	].forEach((eventType) => {
-		nativeGlobalThis.addEventListener(eventType, ({target}) => {
-			const start = now();
-
-			requestAnimationFrame(() => {
-				const end = now();
-
-				if (end - start >= minLatency) {
-					const id = getId(target);
-					set('value', start, end);
-					id && set(id, start, end);
-					flush(`latency-${eventType}`, start, end, true);
-				}
-			});
-		}, true);
-	});
-
-	// TTI
-	let ttiLastEntry: PerformanceEntry | undefined;
-	let ttiPerfObserver: PerformanceObserver;
-
-	try {
-		ttiPerfObserver = new PerformanceObserver((list) => {
-			ttiLastEntry = list.getEntries().pop();
-		});
-
-		ttiPerfObserver.observe({
-			entryTypes: ['longtask'],
-		});
-	} catch (_) {}
-
-	// After DOM Ready
-	domReady(() => {
-		ready = true;
-
-		// TTI Check
-		if (ttiPerfObserver) {
-			let tti: number;
-			const check = () => {
-				if (ttiLastEntry) {
-					tti = ttiLastEntry.startTime + ttiLastEntry.duration;
-
-					if (now() - tti >= ttiDelay) {
-						// Последний logntask был давно, будем считать,
-						// что эра интерактивности настала ;]
-						send('tti', 'value', 0, tti);
-						ttiPerfObserver.disconnect();
-					} else {
-						setTimeout(check, options.ttiDelay);
-					}
-				} else if (tti) {
-					send('tti', 'value', 0, tti);
-					ttiPerfObserver.disconnect();
-				} else {
-					// Не было logntask, поэтому делаем паузу и если их опять не будет,
-					// то считает, что приложение уже готово на момент DOMReady!
-					tti = now();
-					setTimeout(check, 500);
-				}
-			}
-
-			check();
 		}
-
-		// Events
-		once(firstWinEvents, handleClick);
 	});
-}
-
-function once(events: string[], fn: (eventType: string, evt: Event) => void, ctx?: Document | Window) {
-	events.forEach(type => {
-		const handle = (evt: Event) => {
-			nativeGlobalThis.removeEventListener(type, handle, true);
-			fn(type, evt);
-		};
-
-		(ctx = ctx || nativeGlobalThis).addEventListener(type, handle, true);
-	});
-}
+};
