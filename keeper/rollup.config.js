@@ -1,65 +1,62 @@
 import typescript from '@rollup/plugin-typescript'
 import replace from '@rollup/plugin-replace';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { uglify } from 'rollup-plugin-uglify';
+import { terser } from 'rollup-plugin-terser';
 import ts from 'typescript';
+import pkg from './package.json';
 
-const plugins = [].concat(
-	// license({
-	// 	banner: `${pkg.name} v${pkg.version} | ${pkg.license} | ${pkg.homepage}`,
-	// }),
-	nodeResolve({
-	}),
-
-	typescript({
-		tsconfig: './tsconfig.rollup.json',
-		declaration: false,
-		typescript: ts,
-	}),
-
-	replace({
-		'process.env.NODE_ENV': JSON.stringify('production'),
-	}),
-
-	uglify(),
-	// terser(),
-);
 
 export default [].concat(
-	// Prod
-	{
-		input: 'index.ts',
-		output: {
-			file: './dist/perf-keeper.js',
-			format: 'iife',
-			name: 'perfKeeper',
-		},
-		plugins,
-	},
-
+	createBundle('inline.ts', {file: pkg.iife, format: 'iife', name: 'perfKeeper'}, true),
+	createBundle('index.ts', {file: pkg.module, format: 'es'}, false),
+	createBundle('index.ts', {file: pkg.main, format: 'cjs'}, false),
+	
 	// Addon: console
-	{
-		input: './addon/console/index.ts',
-		output: {
-			file: './dist/perf-keeper.addon.console.js',
+	createBundle(
+		'./addon/console/index.ts',
+		{
+			file: './dist/keeper.addon.console.js',
 			format: 'iife',
 			name: 'perfKeeperConsoleAddon',
 		},
-		plugins,
-	},
+		true,
+	),
 
 	// Addon: timeline
-	{
-		input: './addon/timeline/index.ts',
-		output: {
-			file: './dist/perf-keeper.addon.timeline.js',
+	createBundle(
+		'./addon/timeline/index.ts',
+		{
+			file: './dist/keeper.addon.timeline.js',
 			format: 'iife',
 			name: 'perfKeeperTimelineAddon',
 		},
-		plugins,
-	},
+		true
+	),
 );
 
-function toCamelCase(s) {
-	return s.replace(/-(.)/g, (_, chr) => chr.toUpperCase());
+function createBundle(input, output, min) {
+	const plugins = [
+		nodeResolve({}),
+
+		typescript({
+			tsconfig: './tsconfig.rollup.json',
+			declaration: false,
+			typescript: ts,
+		}),
+
+		replace({
+			'process.env.NODE_ENV': JSON.stringify('production'),
+			'process.env.PKG_VERSION': JSON.stringify(pkg.version),
+		}),
+	];
+
+	if (min) {
+		plugins.push(terser());
+	}
+
+	return {
+		input,
+		output: output,
+		plugins,
+	};
 }

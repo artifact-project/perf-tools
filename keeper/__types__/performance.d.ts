@@ -1,5 +1,6 @@
 
 interface Performance {
+	hardwareConcurrency?: number;
 	memory?: PerformanceMemoryInformation;
 	measureMemory?: () => Promise<PerformanceMeasureMemoryInformation>;
 }

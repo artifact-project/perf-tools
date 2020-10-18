@@ -1,6 +1,10 @@
 import { create, EntryUnit } from '../core/core';
+import { nextFrame, location } from './global';
+import { create as consoleOutput } from '../addon/console';
 
-export const system = create();
+export const system = create({
+	addons: /pk-print/.test(location as any) ? [consoleOutput({badge: '🔅'})] : [],
+});
 
 export type NestedMetrics = Record<string, [number, number] | [number, number, EntryUnit]>;
 
@@ -11,7 +15,7 @@ export const send = (
 	nested: NestedMetrics,
 	unit?: EntryUnit,
 ) => {
-	requestAnimationFrame(() => {
+	nextFrame(() => {
 		const group = system.group(groupName, start, unit);
 		
 		for (const key in nested) {

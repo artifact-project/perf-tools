@@ -1,8 +1,7 @@
 {
 	"compilerOptions": {
-	  "target": "ES5",
+	  "target": "es2015",
 	  "module": "commonjs",
-	  "jsx": "react",
 	  "lib": [
       	"dom"
 	  ],  
@@ -14,7 +13,7 @@
 	  "noImplicitReturns": false,
 	  "noFallthroughCasesInSwitch": true,
 	  "moduleResolution": "node",
-	  "esModuleInterop": false,
+	  "esModuleInterop": true,
 	  "resolveJsonModule": true,
 	  "sourceMap": true,
 	  "skipLibCheck": true

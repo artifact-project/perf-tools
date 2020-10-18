@@ -7,7 +7,7 @@ describe('time', () => {
 		expect(entry).toEqual({
 			id: 2,
 			name: 'timer-name-1',
-			start: 2,
+			start: 1,
 			end: null,
 			unit: 'ms',
 			parent: null,
@@ -20,7 +20,7 @@ describe('time', () => {
 		expect(entry).toEqual({
 			id: 2,
 			name: 'timer-name-1',
-			start: 2,
+			start: 1,
 			end: null,
 			unit: 'fps',
 			parent: null,
@@ -36,8 +36,8 @@ describe('time', () => {
 		expect(entry).toEqual({
 			id: 2,
 			name: 'timer-name-2',
-			start: 2,
-			end: 3,
+			start: 1,
+			end: 2,
 			unit: 'ms',
 			parent: null,
 		});
@@ -52,8 +52,8 @@ describe('time', () => {
 		expect(entry).toEqual({
 			id: 2,
 			name: 'timer-name-3',
-			start: 2,
-			end: 3,
+			start: 1,
+			end: 2,
 			parent: null,
 			unit: 'ms',
 		});
@@ -70,8 +70,8 @@ describe('time', () => {
 		keeper.time('timer-addon-1', 'ms').stop();
 		
 		expect(logs).toEqual([
-			{id: 2, name: 'timer-addon-1', start: 2, end: null, parent: null, unit: 'ms'},
-			{id: 2, name: 'timer-addon-1', start: 2, end: 3, parent: null, unit: 'ms'},
+			{id: 2, name: 'timer-addon-1', start: 1, end: null, parent: null, unit: 'ms'},
+			{id: 2, name: 'timer-addon-1', start: 1, end: 2, parent: null, unit: 'ms'},
 		]);
 	});
 
@@ -122,7 +122,7 @@ describe('group', () => {
 			name: 'group-1',
 			parent: null,
 			entries: [],
-			start: 2,
+			start: 1,
 			end: null,
 			// active: 0,
 			unit: 'ms',
@@ -157,8 +157,8 @@ describe('group', () => {
 			name: 'group-start-end',
 			parent: null,
 			entries: [],
-			start: 2,
-			end: 3,
+			start: 1,
+			end: 2,
 			// active: 0,
 			unit: 'ms',
 		});
@@ -177,8 +177,8 @@ describe('group', () => {
 			name: 'group-start-stop',
 			parent: null,
 			entries: [],
-			start: 2,
-			end: 3,
+			start: 1,
+			end: 2,
 			// active: 0,
 			unit: 'ms',
 		});

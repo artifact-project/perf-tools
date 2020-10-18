@@ -5,12 +5,10 @@ export type ConsoleAddon = {
 	badge: string;
 }
 
-const BOLD = 'font-weight:bold;';
-
 export const create = (options: ConsoleAddon): Addon => ({
 	start: noop,
 	end(entry) {
-		if (entry.parent == null && 'entries' in entry) {
+		if (!entry.parent && 'entries' in entry) {
 			print.call(options, entry);
 		}
 	},
@@ -26,11 +24,11 @@ function color(v: number, unit: EntryUnit): string {
 	);
 
 	return 'color:#' + (
-		v < 2 ? 'ccc' :
-		v < 5 ? '666' :
-		v < 10 ? '333' :
-		v < 30 ? 'f90' :
-		v < 60 ? 'f60' :
+		v < 5 ? 'ccc' :
+		v < 10 ? '666' :
+		v < 25 ? '333' :
+		v < 50 ? 'f90' :
+		v < 100 ? 'f60' :
 		'f00'
 	);
 }
@@ -44,7 +42,7 @@ function print(this: ConsoleAddon, entry: GroupEntry | Entry) {
 		? '%c'
 		: `: %c${!unit || unit === 'raw' ? dur : dur.toFixed(3) + unit}`
 	);
-	const formatArgs = BOLD + color(dur, unit);
+	const formatArgs = `font-weight:bold;${color(dur, unit)}`;
 	
 	if ('entries' in entry) {
 		(console.groupCollapsed || console.group)(format, formatArgs);

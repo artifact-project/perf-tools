@@ -1,4 +1,5 @@
 interface Navigator {
+	deviceMemory?: number;
 	connection?: NetworkInformation;
 	mozConnection?: NetworkInformation;
 	webkitConnection?: NetworkInformation;

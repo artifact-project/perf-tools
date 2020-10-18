@@ -1,6 +1,6 @@
 {
   "name": "@perf-tools/keeper",
-  "version": "2.0.0-rc.2",
+  "version": "2.0.0-rc.15",
   "description": "PerfKeeper — It's a tool for performance monitoring and profiling your application (also best replacement for `console.time`).",
   "keywords": [
     "perf-tools",
@@ -16,7 +16,9 @@
   "license": "MIT",
   "repository": "git@github.com:artifact-project/perf-tools.git",
   "homepage": "https://github.com/artifact-project/perf-tools/tree/master/keeper",
-  "main": "index.js",
+  "iife": "dist/keeper.iife.min.js",
+  "module": "dist/keeper.es.js",
+  "main": "dist/keeper.cjs.js",
   "scripts": {
     "start": "npm run build; echo 'http://localhost:2312/'; python -m SimpleHTTPServer 2312;",
     "test": "jest",
@@ -42,16 +44,17 @@
     "@types/jest": "^25.2.3",
     "jest": "^25.5.4",
     "rollup": "^2.26.10",
+    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-uglify": "^6.0.0",
     "size-limit": "^4.6.0",
     "ts-jest": "^25.5.1",
-    "typescript": "^4.0.2",
+    "typescript": "^3.9.7",
     "uglify-js": "^3.10.4"
   },
   "size-limit": [
     {
-      "limit": "2.5 KB",
-      "path": "dist/*.js"
+      "limit": "2.53 KB",
+      "path": "dist/keeper.iife.min.js"
     }
   ],
   "jest": {

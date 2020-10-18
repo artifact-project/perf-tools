@@ -27,5 +27,7 @@ export const takeRecords = (
 	po: PerformanceObserver | undefined,
 	handler: (entry: PerformanceEntry) => void,
 ) => {
-	po && po.takeRecords().map(handler);
+	try {
+		po && po.takeRecords().map(handler);
+	} catch {}
 };

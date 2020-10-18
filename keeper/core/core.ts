@@ -2,16 +2,6 @@ import { isType, STRING_TYPE, BOOLEAN_TYPE } from '../util/isType';
 import { hiddenProperty } from '../util/hiddenProperty';
 import { perfNow } from '../util/global';
 
-export type Keeper = {
-	// add(name: string, start: number, end: number, unit?: EntryUnit): void;
-	
-	// group(name: string, unit?: EntryUnit): GroupEntry;
-	// group(name: string, isolate: boolean, unit?: EntryUnit): GroupEntry;
-	// group(name: string, start?: number, unit?: EntryUnit): GroupEntry;
-	// group(name: string, start: number, isolate: boolean, unit?: EntryUnit): GroupEntry;
-	// groupEnd(name: string, end?: number): void;
-}
-
 export type EntryUnit = 'ms' | 'KB' | 'fps' | 'raw' | 'none';
 
 export type Entry = {
@@ -56,28 +46,28 @@ export type Addon = {
 
 export function create(opts?: Options) {
 	opts = opts || {};
-
-	const activeGroups = [] as GroupEntry[];
+		
+	let idx: number;
+	let cid = 0;
+	let tmpEntry: Entry | GroupEntry | undefined | null;
+	let api:GroupEntry & {
+		v: string;
+		addons: Addon[];
+	};
 
 	const now = opts.now || perfNow;
 	const warn = opts.warn;
 	const addons = opts.addons || [];
+	const activeGroups = [] as GroupEntry[];
 
-	let idx: number;
-	let cid = 0;
-	let tmpEntry: Entry | GroupEntry | undefined | null;
-
-	const api = createEntry(0 as any, nil, {}, DEFAULT_UNIT, 1) as GroupEntry & {addons: Addon[]};
-	api.addons = addons;
-
-	function notify(hook: keyof Addon, entry: Entry, autoMeasurable: boolean) {
+	const notify = (hook: keyof Addon, entry: Entry, autoMeasurable: boolean) => {
 		idx = addons.length;
 		while (idx--) {
 			addons[idx][hook](entry, autoMeasurable);
 		}
-	}
+	};
 
-	function createEntry(
+	const createEntry = (
 		name: string,
 		parent: GroupEntry | Entry | null,
 		timers: Record<string, Entry | GroupEntry | null | undefined>,
@@ -85,8 +75,8 @@ export function create(opts?: Options) {
 		isGroup?: 1 | 0,
 		start?: number | null,
 		end?: number | null,
-		isolate?: boolean,
-	): Entry | GroupEntry {
+		isolate?: 1 | boolean,
+	): Entry | GroupEntry => {
 		if (parent === api || isolate) {
 			parent = !isolate && activeGroups[0] || nil;
 		}
@@ -140,7 +130,7 @@ export function create(opts?: Options) {
 			} else {
 				warn && warn(`Timer '${name}' not exists`);
 			}
-		}
+		};
 
 		if (isGroup) {
 			// (entry as GroupEntry).active = 0;
@@ -212,8 +202,11 @@ export function create(opts?: Options) {
 		notify('start', entry, autoMeasurable);
 
 		return entry;
-	}
+	};
 
+	api = createEntry(0 as any, nil, {}, DEFAULT_UNIT, 1, 0, 0, 1) as typeof api;
+	api.v = process.env.PKG_VERSION!;
+	api.addons = addons;
 
 	return api;
 }
