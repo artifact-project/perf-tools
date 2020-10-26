@@ -22,7 +22,7 @@ First Event|Latency|TTI
 /* Paste code from ./dist/perf-keeper.js */
 /* Paste code from ./dist/perf-keeper.ext.performance.js */
 
-perfKeperExtPerformance.performanceTimings(perfKeper.system);
+perfKeeperExtPerformance.performanceTimings(perfKeeper.system);
 </script>
 ```
 
