@@ -1,4 +1,4 @@
-import { OBJECT_TYPE } from './isType';
+import { isType, OBJECT_TYPE, FUNCTION_TYPE } from './isType';
 
 const nativeGlobalThis = (0
 	|| typeof globalThis === OBJECT_TYPE && globalThis 
@@ -15,7 +15,10 @@ export const connection = navigator.connection;
 export const performance = nativeGlobalThis.performance;
 
 export const noop = () => {};
-export const perfNow = () => performance.now();
+export const perfNow = isType(performance && performance.now, FUNCTION_TYPE)
+	? () => performance.now()
+	: Date.now
+;
 export const setTimeout = nativeGlobalThis.setTimeout;
 export const nextFrame = (nativeGlobalThis.requestAnimationFrame || setTimeout).bind(nativeGlobalThis);
 export const addEventListener = nativeGlobalThis.addEventListener || noop;
