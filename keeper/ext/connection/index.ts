@@ -13,9 +13,11 @@ const check = () => {
 	}, 'raw');
 };
 
-if (conn) {
-	check();
-	conn.addEventListener('change', check);
-} else {
-	send('pk-conn', 0, 1, {effective_type_unk: [0, 1]}, 'raw');
-}
+try {
+	if (conn) {
+		check();
+		conn.addEventListener('change', check);
+	} else {
+		send('pk-conn', 0, 1, {effective_type_unk: [0, 1]}, 'raw');
+	}
+} catch {}
