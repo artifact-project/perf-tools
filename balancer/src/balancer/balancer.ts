@@ -37,7 +37,7 @@ if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame =
 	cancelNextFrame = cancelAnimationFrame;
 } else {
 	requestFrame = function requestFramePolyfill(fn) {
-		return setTimeout(fn, 16);
+		return window.setTimeout(fn, 16);
 	};
 	cancelNextFrame = clearTimeout;
 }

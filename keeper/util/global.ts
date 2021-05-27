@@ -19,7 +19,7 @@ export const perfNow = isType(performance && performance.now, FUNCTION_TYPE)
 	? () => performance.now()
 	: Date.now
 ;
-export const setTimeout = nativeGlobalThis.setTimeout;
+export const setTimeout = nativeGlobalThis.setTimeout.bind(nativeGlobalThis);
 export const nextFrame = (nativeGlobalThis.requestAnimationFrame || setTimeout).bind(nativeGlobalThis);
-export const addEventListener = nativeGlobalThis.addEventListener || noop;
+export const addEventListener = (nativeGlobalThis.addEventListener || noop).bind(nativeGlobalThis);
 
