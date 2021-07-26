@@ -4,33 +4,35 @@ import { perfNow } from '../util/global';
 
 export type EntryUnit = 'ms' | 'KB' | 'fps' | 'raw' | 'none';
 
-export type Entry = {
+export interface Entry {
 	id: number;
 	name: string;
 	parent: GroupEntry | null;
 	start: number | null;
 	end: number | null;
 	unit: EntryUnit;
-	stop: (time?: number) => void;
+	meta?: any;
+	stop: (time?: number, meta?: any) => this;
 }
 
 export type GroupEntry = Entry & {
 	entries: Array<GroupEntry | Entry>;
 	// active: number;
 
-	add(name: string, start: number, end: number, unit?: EntryUnit): Entry;
+	add(name: string, start: number, end: number, unit?: EntryUnit, meta?: any): Entry;
 	time(name: string, unit?: EntryUnit): Entry;
 	time(name: string, start: number, unit?: EntryUnit): Entry;
-	timeEnd(name: string): void;
+	timeEnd(name: string, end?: number, meta?: any): void;
 
 	group(name: string, unit?: EntryUnit): GroupEntry;
 	group(name: string, isolate: boolean, unit?: EntryUnit): GroupEntry;
 	group(name: string, start?: number, unit?: EntryUnit): GroupEntry;
 	group(name: string, start: number, isolate: boolean, unit?: EntryUnit): GroupEntry;
-	groupEnd(name: string, end?: number): void;
+	groupEnd(name: string, end?: number, meta?: any): void;
 }
 
 const nil = null;
+const undef = undefined;
 const DEFAULT_UNIT: EntryUnit = 'ms';
 
 export type Options = {
@@ -75,7 +77,8 @@ export function create(opts?: Options) {
 		isGroup?: 1 | 0,
 		start?: number | null,
 		end?: number | null,
-		isolate?: 1 | boolean,
+		isolate?: 0 | 1 | boolean,
+		meta?: any,
 	): Entry | GroupEntry => {
 		if (parent === api || isolate) {
 			parent = !isolate && activeGroups[0] || nil;
@@ -93,10 +96,12 @@ export function create(opts?: Options) {
 			unit: unit || DEFAULT_UNIT as Entry['unit'],
 			start: autoMeasurable ? now() : start,
 			end: end != nil ? end : nil,
+			meta,
 		};
 
 		hiddenProperty(entry, {
-			stop(time?: number) {
+			stop(time?: number, meta?: any) {
+				entry.meta = entry.meta || meta;
 				entry.end = time == nil ? now() : time;
 				timers[name] = nil;
 				
@@ -110,6 +115,8 @@ export function create(opts?: Options) {
 				}
 
 				notify('end', entry, autoMeasurable);
+
+				return entry;
 			},
 		});
 
@@ -123,10 +130,11 @@ export function create(opts?: Options) {
 			}
 		}
 
-		function entryEnd(name: string) {
+		function entryEnd(name: string, end?: number, meta?: any) {
 			tmpEntry = timers[name];
+
 			if (tmpEntry) {
-				tmpEntry.stop();
+				tmpEntry.stop(end, meta);
 			} else {
 				warn && warn(`Timer '${name}' not exists`);
 			}
@@ -137,8 +145,8 @@ export function create(opts?: Options) {
 			(entry as GroupEntry).entries = [];
 
 			hiddenProperty(entry, {
-				add(name: string, start: number, end: number, unit?: EntryUnit) {
-					createEntry(
+				add(name: string, start: number, end: number, unit?: EntryUnit, meta?: any) {
+					return createEntry(
 						name,
 						entry,
 						timers,
@@ -146,7 +154,7 @@ export function create(opts?: Options) {
 						0,
 						start,
 						end,
-					).stop(end);
+					).stop(end, meta);
 				},
 
 				time(name: string, unit?: EntryUnit): Entry {

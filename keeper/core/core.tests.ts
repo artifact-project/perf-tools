@@ -59,6 +59,34 @@ describe('time', () => {
 		});
 	});
 
+	describe('meta', () => {
+		it('add', () => {
+			const keeper = createKeeper();
+			const entry = keeper.add('meta-add-1', 0, 1, undefined, {method: 'add'});
+			expect(entry.meta).toEqual({method: 'add'});
+		});
+
+		it('time', () => {
+			const keeper = createKeeper();
+			const entry = keeper.time('meta-time-1');
+			keeper.timeEnd('meta-time-1', undefined, {method: 'time'});
+			expect(entry.meta).toEqual({method: 'time'});
+		});
+
+		it('stop', () => {
+			const keeper = createKeeper();
+			const entry = keeper.time('meta-stop-1');
+			expect(entry.stop(undefined, {method: 'stop'}).meta).toEqual({method: 'stop'});
+		});
+
+		it('group', () => {
+			const keeper = createKeeper();
+			const entry = keeper.group('meta-group-1');
+			keeper.groupEnd('meta-group-1', undefined, {method: 'group'});
+			expect(entry.meta).toEqual({method: 'group'});
+		});
+	});
+
 	it('addons', () => {
 		const logs = [] as Entry[];
 		const keeper = createKeeper();
