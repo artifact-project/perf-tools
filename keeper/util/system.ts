@@ -1,4 +1,4 @@
-import { create, EntryUnit } from '../core/core';
+import { create, EntryMeta, EntryUnit } from '../core/core';
 import { nextFrame, location } from './global';
 import { create as consoleOutput } from '../addon/console';
 
@@ -14,7 +14,7 @@ export const send = (
 	end: number,
 	nested: NestedMetrics,
 	unit?: EntryUnit,
-	meta?: any,
+	meta?: EntryMeta,
 ) => {
 	nextFrame(() => {
 		const group = system.group(groupName, start, unit);

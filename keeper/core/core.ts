@@ -11,24 +11,32 @@ export interface Entry {
 	start: number | null;
 	end: number | null;
 	unit: EntryUnit;
-	meta?: any;
-	stop: (time?: number, meta?: any) => this;
+	meta?: EntryMeta;
+	
+	stop(meta?: EntryMeta): this;
+	stop(time?: number, meta?: EntryMeta): this;
 }
 
-export type GroupEntry = Entry & {
+export type EntryMeta = Record<string, any>;
+
+export interface GroupEntry extends Entry {
 	entries: Array<GroupEntry | Entry>;
 	// active: number;
 
-	add(name: string, start: number, end: number, unit?: EntryUnit, meta?: any): Entry;
+	add(name: string, start: number, end: number, unit?: EntryUnit, meta?: EntryMeta): Entry;
 	time(name: string, unit?: EntryUnit): Entry;
 	time(name: string, start: number, unit?: EntryUnit): Entry;
-	timeEnd(name: string, end?: number, meta?: any): void;
+	
+	timeEnd(name: string, meta?: EntryMeta): void;
+	timeEnd(name: string, end?: number, meta?: EntryMeta): void;
 
 	group(name: string, unit?: EntryUnit): GroupEntry;
 	group(name: string, isolate: boolean, unit?: EntryUnit): GroupEntry;
 	group(name: string, start?: number, unit?: EntryUnit): GroupEntry;
 	group(name: string, start: number, isolate: boolean, unit?: EntryUnit): GroupEntry;
-	groupEnd(name: string, end?: number, meta?: any): void;
+	
+	groupEnd(name: string, meta?: EntryMeta): void;
+	groupEnd(name: string, end?: number, meta?: EntryMeta): void;
 }
 
 const nil = null;
@@ -78,7 +86,7 @@ export function create(opts?: Options) {
 		start?: number | null,
 		end?: number | null,
 		isolate?: 0 | 1 | boolean,
-		meta?: any,
+		meta?: EntryMeta,
 	): Entry | GroupEntry => {
 		if (parent === api || isolate) {
 			parent = !isolate && activeGroups[0] || nil;
@@ -100,9 +108,15 @@ export function create(opts?: Options) {
 		};
 
 		hiddenProperty(entry, {
-			stop(time?: number, meta?: any) {
+			stop(time?: number, meta?: EntryMeta) {
+				if (time != nil && !(time >= 0)) {
+					meta = time as any;
+					time = undef;
+				}
+
 				entry.meta = entry.meta || meta;
 				entry.end = time == nil ? now() : time;
+
 				timers[name] = nil;
 				
 				if (isGroup) {
@@ -130,7 +144,7 @@ export function create(opts?: Options) {
 			}
 		}
 
-		function entryEnd(name: string, end?: number, meta?: any) {
+		function entryEnd(name: string, end?: number, meta?: EntryMeta) {
 			tmpEntry = timers[name];
 
 			if (tmpEntry) {
@@ -145,7 +159,7 @@ export function create(opts?: Options) {
 			(entry as GroupEntry).entries = [];
 
 			hiddenProperty(entry, {
-				add(name: string, start: number, end: number, unit?: EntryUnit, meta?: any) {
+				add(name: string, start: number, end: number, unit?: EntryUnit, meta?: EntryMeta) {
 					return createEntry(
 						name,
 						entry,
