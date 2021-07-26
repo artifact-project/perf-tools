@@ -46,6 +46,7 @@ const DEFAULT_UNIT: EntryUnit = 'ms';
 export type Options = {
 	now?: () => number;
 	warn?: (msg: string) => void
+	prefix?: string;
 	addons?: Addon[];
 };
 
@@ -67,6 +68,7 @@ export function create(opts?: Options) {
 
 	const now = opts.now || perfNow;
 	const warn = opts.warn;
+	const prefix = opts.prefix || '';
 	const addons = opts.addons || [];
 	const activeGroups = [] as GroupEntry[];
 
@@ -88,6 +90,8 @@ export function create(opts?: Options) {
 		isolate?: 0 | 1 | boolean,
 		meta?: EntryMeta,
 	): Entry | GroupEntry => {
+		name = prefix + name;
+
 		if (parent === api || isolate) {
 			parent = !isolate && activeGroups[0] || nil;
 		}
@@ -145,6 +149,7 @@ export function create(opts?: Options) {
 		}
 
 		function entryEnd(name: string, end?: number, meta?: EntryMeta) {
+			name = prefix + name;
 			tmpEntry = timers[name];
 
 			if (tmpEntry) {
