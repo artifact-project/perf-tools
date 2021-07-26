@@ -14,6 +14,7 @@ export const send = (
 	end: number,
 	nested: NestedMetrics,
 	unit?: EntryUnit,
+	meta?: any,
 ) => {
 	nextFrame(() => {
 		const group = system.group(groupName, start, unit);
@@ -25,6 +26,6 @@ export const send = (
 			}
 		}
 
-		group.stop(end);
+		group.stop(end, meta);
 	});
 }
