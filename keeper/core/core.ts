@@ -176,12 +176,19 @@ export function create(opts?: Options) {
 					).stop(end, meta);
 				},
 
-				time(name: string, unit?: EntryUnit): Entry {
+				time(name: string, start?: number | EntryUnit, unit?: EntryUnit): Entry {
+					if (!(start as number >= 0)) {
+						unit = start as EntryUnit;
+						start = undef;
+					}
+
 					return createEntry(
 						name,
 						entry,
 						timers,
 						unit,
+						undef,
+						start as undefined,
 					);
 				},
 
