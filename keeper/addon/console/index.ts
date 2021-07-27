@@ -8,7 +8,7 @@ export type ConsoleAddon = {
 export const create = (options: ConsoleAddon): Addon => ({
 	start: noop,
 	end(entry) {
-		if (!entry.parent && 'entries' in entry) {
+		if (!entry.parent) {
 			print.call(options, entry);
 		}
 	},
