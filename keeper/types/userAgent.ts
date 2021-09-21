@@ -1,4 +1,4 @@
-type UserAgentSpecificTypes = (
+export type UserAgentSpecificTypes = (
 	| 'Window'
 	| 'JS'
 	| 'Detached'

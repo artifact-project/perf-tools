@@ -1,22 +1,23 @@
+import type { UserAgentSpecificTypes } from './userAgent';
 
-interface Performance {
+export interface Performance {
 	hardwareConcurrency?: number;
 	memory?: PerformanceMemoryInformation;
 	measureMemory?: () => Promise<PerformanceMeasureMemoryInformation>;
 }
 
-interface PerformanceMemoryInformation {
+export interface PerformanceMemoryInformation {
 	jsHeapSizeLimit: number;
 	totalJSHeapSize: number;
 	usedJSHeapSize: number;
 }
 
-interface PerformanceMeasureMemoryInformation {
+export interface PerformanceMeasureMemoryInformation {
 	breakdown: PerformanceMeasureMemoryBreakdown[];
 	bytes: number;
 }
 
-interface PerformanceMeasureMemoryBreakdown {
+export interface PerformanceMeasureMemoryBreakdown {
 	attribution: string[];
 	bytes: number;
 	userAgentSpecificTypes: UserAgentSpecificTypes[];
