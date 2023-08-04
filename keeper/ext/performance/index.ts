@@ -19,23 +19,14 @@ const handler = (entry: PerformanceEntryFirstInput) => {
 	const value = entry.processingStart! - startTime;
 
 	if (startTime < firstHidden()) {
-		// https://web.dev/fid/
-		// 0-100     Green (good)
-		// 100-300   Orange (needs improvement)
-		// Over 300  Red (poor)
-		value && send('pk-fid', 0, value, {
-			value: [0, value],
-			[`score_${getVitalsScore(value, 100, 300)}`]: [0, value],
-		});
-		
 		// https://web.dev/lighthouse-total-blocking-time/
 		// https://nitropack.io/blog/post/what-is-total-blocking-time-tbt
-		// 0-300     Green (good)
-		// 300-600   Orange (needs improvement)
+		// 0-200     Green (good)
+		// 600-600   Orange (needs improvement)
 		// Over 600  Red (poor)
 		ttb && send('pk-tbt', 0, ttb, {
 			value: [0, ttb],
-			[`score_${getVitalsScore(ttb, 300, 600)}`]: [0, ttb],
+			[`score_${getVitalsScore(ttb, 200, 600)}`]: [0, ttb],
 		});
 
 		// https://web.dev/interactive/

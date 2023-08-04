@@ -1,5 +1,9 @@
 import './device';
 import './navigation';
-import './paint';
-import './performance';
 import './connection';
+import './device';
+import './navigation';
+import './performance';
+import {useWebVitals} from './web-vitals';
+
+useWebVitals();
