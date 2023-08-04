@@ -13,8 +13,8 @@ export const useWebVitals = () => {
 		});
 	};
 
+	use('paint', onFCP);
 	use('cls', onCLS);
-	use('fcp', onFCP);
 	use('lcp', onLCP);
 	use('fid', onFID);
 	use('inp', onINP);
