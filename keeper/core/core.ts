@@ -1,4 +1,4 @@
-import { isType, STRING_TYPE, BOOLEAN_TYPE } from '../util/isType';
+import { isType, STRING_TYPE, BOOLEAN_TYPE, FUNCTION_TYPE } from '../util/isType';
 import { hiddenProperty } from '../util/hiddenProperty';
 import { perfNow } from '../util/global';
 
@@ -45,7 +45,7 @@ const DEFAULT_UNIT: EntryUnit = 'ms';
 
 export type Options = {
 	now?: () => number;
-	warn?: (msg: string) => void
+	warn?: (msg: string, detail?: unknown) => void;
 	prefix?: string;
 	addons?: Addon[];
 };
@@ -149,11 +149,14 @@ export function create(opts?: Options) {
 		}
 
 		function entryEnd(name: string, end?: number, meta?: EntryMeta) {
-			name = prefix + name;
+			name = prefix + name; // mutation
 			tmpEntry = timers[name];
 
 			if (tmpEntry) {
-				tmpEntry.stop(end, meta);
+				isType(tmpEntry.stop, FUNCTION_TYPE)
+					? tmpEntry.stop(end, meta)
+					: warn && warn(`Timer '${name}'.stop is not a func`, {entry: tmpEntry})
+				;
 			} else {
 				warn && warn(`Timer '${name}' not exists`);
 			}
@@ -238,7 +241,7 @@ export function create(opts?: Options) {
 		return entry;
 	};
 
-	api = createEntry(0 as any, nil, {}, DEFAULT_UNIT, 1, 0, 0, 1) as typeof api;
+	api = createEntry(0 as any, nil, Object.create(null), DEFAULT_UNIT, 1, 0, 0, 1) as typeof api;
 	api.v = process.env.PKG_VERSION!;
 	api.addons = addons;
 

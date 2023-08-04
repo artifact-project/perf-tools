@@ -1,6 +1,6 @@
 import type { UserAgentSpecificTypes } from './userAgent';
 
-export interface Performance {
+export interface PerformanceExtended extends Performance {
 	hardwareConcurrency?: number;
 	memory?: PerformanceMemoryInformation;
 	measureMemory?: () => Promise<PerformanceMeasureMemoryInformation>;

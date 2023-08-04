@@ -14,8 +14,18 @@ export type NetworkInformationEffectiveConnectionType = (
 	| 'unk'
 )
 
-export interface NetworkInformationExtended extends NetworkInformation {
-	// type: NetworkInformationConnectionType;
+export type NetworkInformationConnectionType =
+	| 'bluetooth'
+	| 'cellular'
+	| 'ethernet'
+	| 'mixed'
+	| 'none'
+	| 'other'
+	| 'unknown'
+	| 'wifi'
+
+export interface NetworkInformationExtended extends EventTarget {
+	type: NetworkInformationConnectionType;
 	effectiveType: NetworkInformationEffectiveConnectionType;
 	downlinkMax: number
 	downlink: number;

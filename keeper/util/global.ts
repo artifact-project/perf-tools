@@ -1,4 +1,5 @@
 import type { NavigatorExtended } from '../types/navigator';
+import type { PerformanceExtended } from '../types/performance';
 import { isType, OBJECT_TYPE, FUNCTION_TYPE } from './isType';
 
 const nativeGlobalThis = (0
@@ -13,7 +14,7 @@ export const document = nativeGlobalThis.document || {};
 export const location = nativeGlobalThis.location || {};
 export const navigator = (nativeGlobalThis.navigator || {}) as NavigatorExtended;
 export const connection = navigator.connection;
-export const performance = nativeGlobalThis.performance;
+export const performance = nativeGlobalThis.performance as PerformanceExtended;
 
 export const noop = () => {};
 export const perfNow = isType(performance && performance.now, FUNCTION_TYPE)
